@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,11 +25,14 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +67,9 @@ import java.text.Collator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private val sortNames = listOf("最近阅读", "导入时间", "书名")
 
@@ -71,6 +81,7 @@ fun ShelfScreen() {
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<String?>(null) }
     var deleting by remember { mutableStateOf<String?>(null) }
+    var editing by remember { mutableStateOf<String?>(null) }
     val shown = remember(books, settings.shelfSort, query) {
         val q = query.trim()
         val list = if (q.isEmpty()) books else books.filter { it.title.contains(q, true) || it.author.contains(q, true) }
@@ -126,10 +137,14 @@ fun ShelfScreen() {
                 }
             }
         }
-        BookSheet(selected, onDismiss = { selected = null }, onDelete = {
+        BookSheet(selected, onDismiss = { selected = null }, onEdit = {
+            editing = it
+            selected = null
+        }, onDelete = {
             deleting = it
             selected = null
         })
+        BookInfoSheet(editing) { editing = null }
         val del = deleting?.let { Library.get(it) }
         ConfirmDialog(
             visible = deleting != null,
@@ -209,7 +224,7 @@ private fun EmptyShelf(modifier: Modifier) {
 }
 
 @Composable
-private fun BookSheet(id: String?, onDismiss: () -> Unit, onDelete: (String) -> Unit) {
+private fun BookSheet(id: String?, onDismiss: () -> Unit, onEdit: (String) -> Unit, onDelete: (String) -> Unit) {
     val c = K.c
     val books by Library.books.collectAsState()
     val last = remember { arrayOfNulls<Book>(1) }
@@ -230,6 +245,16 @@ private fun BookSheet(id: String?, onDismiss: () -> Unit, onDelete: (String) -> 
                 T("已读 ${Fmt.cn(b.readMillis)} · $added 加入", 12.sp, c.text2)
             }
         }
+        if (b.tags.isNotEmpty()) {
+            Spacer(Modifier.height(14.dp))
+            Tags(b.tags)
+        }
+        if (b.intro.isNotEmpty()) {
+            // 简介默认露三行，点一下展开
+            var open by remember(b.id) { mutableStateOf(false) }
+            Spacer(Modifier.height(if (b.tags.isEmpty()) 14.dp else 10.dp))
+            T(b.intro, 13.sp, c.text2, modifier = Modifier.press(scaleTo = 1f) { open = !open }, maxLines = if (open) 14 else 3, lineHeight = 20.sp)
+        }
         Spacer(Modifier.height(22.dp))
         InkButton(if (b.progress > 0f) "继续阅读" else "开始阅读", Modifier.fillMaxWidth(), height = 54.dp) {
             onDismiss()
@@ -246,7 +271,107 @@ private fun BookSheet(id: String?, onDismiss: () -> Unit, onDelete: (String) -> 
                 onDismiss()
                 Toast.show("进度已清零")
             }
+            GhostButton("编辑", Ico.EDIT) { onEdit(b.id) }
             GhostButton("删除", Ico.TRASH, color = c.accent) { onDelete(b.id) }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Tags(tags: List<String>) {
+    val c = K.c
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        for (t in tags) {
+            T(t, 12.sp, c.ink, modifier = Modifier.background(c.chip, SmoothShape(8.dp)).padding(horizontal = 9.dp, vertical = 3.dp), maxLines = 1)
+        }
+    }
+}
+
+/** 改书名、作者、简介、标签；TXT 还可以按新规则重新分章 */
+@Composable
+private fun BookInfoSheet(id: String?, onDismiss: () -> Unit) {
+    val c = K.c
+    val scope = rememberCoroutineScope()
+    val last = remember { arrayOfNulls<Book>(1) }
+    id?.let { Library.get(it) }?.let { last[0] = it }
+    var redetecting by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    Sheet(visible = id != null, onDismiss = onDismiss) {
+        val b = last[0] ?: return@Sheet
+        val title = remember(b.id) { TextFieldState(b.title) }
+        val author = remember(b.id) { TextFieldState(b.author) }
+        val tags = remember(b.id) { TextFieldState(b.tags.joinToString(" ")) }
+        val intro = remember(b.id) { TextFieldState(b.intro) }
+        Column(Modifier.imePadding()) {
+            T("编辑书籍信息", 18.sp, c.ink, FontWeight.Bold)
+            Spacer(Modifier.height(16.dp))
+            InfoField("书名", title)
+            Spacer(Modifier.height(10.dp))
+            InfoField("作者", author)
+            Spacer(Modifier.height(10.dp))
+            InfoField("标签", tags, hint = "用空格分开，比如：都市 日常")
+            Spacer(Modifier.height(10.dp))
+            InfoField("简介", intro, single = false)
+            Spacer(Modifier.height(20.dp))
+            InkButton("保存", Modifier.fillMaxWidth(), height = 52.dp) {
+                Library.updateInfo(
+                    b.id, title.text.toString(), author.text.toString(), intro.text.toString(),
+                    tags.text.split(Regex("[\\s,，、]+")).filter { it.isNotEmpty() },
+                )
+                onDismiss()
+                Toast.show("已保存")
+            }
+            if (b.format == "txt") {
+                Spacer(Modifier.height(4.dp))
+                GhostButton(if (busy) "正在识别…" else "重新识别章节", Ico.TOC, Modifier.align(Alignment.CenterHorizontally)) {
+                    if (!busy) redetecting = true
+                }
+            }
+        }
+    }
+    val book = last[0]
+    ConfirmDialog(
+        visible = redetecting,
+        title = "重新识别章节？",
+        message = "按新的规则把《${book?.title.orEmpty()}》重新分章，读到的位置和书签会尽量保留",
+        confirm = "重新识别",
+        ico = Ico.TOC,
+        onConfirm = {
+            redetecting = false
+            val bid = book?.id ?: return@ConfirmDialog
+            busy = true
+            scope.launch {
+                val n = withContext(Dispatchers.IO) { Library.redetect(bid) }
+                busy = false
+                Toast.show(if (n < 0) "识别失败" else "识别出 $n 章")
+            }
+        },
+        onDismiss = { redetecting = false },
+    )
+}
+
+@Composable
+private fun InfoField(label: String, state: TextFieldState, hint: String = "", single: Boolean = true) {
+    val c = K.c
+    Row(verticalAlignment = if (single) Alignment.CenterVertically else Alignment.Top) {
+        T(label, 13.sp, c.text2, modifier = Modifier.width(40.dp).padding(top = if (single) 0.dp else 11.dp))
+        Box(
+            Modifier
+                .weight(1f)
+                .heightIn(min = 44.dp)
+                .background(c.chip, SmoothShape(14.dp))
+                .padding(horizontal = 14.dp, vertical = 11.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            if (state.text.isEmpty() && hint.isNotEmpty()) T(hint, 15.sp, c.text3, maxLines = 1)
+            BasicTextField(
+                state,
+                Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = c.ink, fontSize = 15.sp, lineHeight = 22.sp),
+                lineLimits = if (single) TextFieldLineLimits.SingleLine else TextFieldLineLimits.MultiLine(minHeightInLines = 3, maxHeightInLines = 6),
+                cursorBrush = SolidColor(c.ink),
+            )
         }
     }
 }

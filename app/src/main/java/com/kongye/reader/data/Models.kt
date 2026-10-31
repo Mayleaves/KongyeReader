@@ -22,6 +22,11 @@ data class Book(
     val hasCover: Boolean = false,
     val fingerprint: String = "",
     val bookmarks: List<Bookmark> = emptyList(),
+    /** 简介和标签：EPUB 取自书里的元数据，TXT 取自开头的“简介：”“标签：” */
+    val intro: String = "",
+    val tags: List<String> = emptyList(),
+    /** 1.2.0 之前导入的书没有简介，启动时从正文开头补一次，补过就不再找 */
+    val metaScanned: Boolean = false,
 )
 
 @Serializable

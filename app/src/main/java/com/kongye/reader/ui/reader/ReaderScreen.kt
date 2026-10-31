@@ -130,6 +130,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.max
@@ -148,6 +149,8 @@ fun ReaderScreen(bookId: String) {
     var failed by remember { mutableStateOf(false) }
     // 编辑保存后加一，重新读正文
     var version by remember { mutableIntStateOf(0) }
+    // 标题和正文互换后章节变了，重新读正文后接着编辑
+    var reopenEdit by remember { mutableStateOf(false) }
     LaunchedEffect(bookId, version) {
         val c = withContext(Dispatchers.IO) { Library.loadContent(bookId) }
         if (c == null) failed = true else content = c
@@ -162,7 +165,12 @@ fun ReaderScreen(bookId: String) {
             when {
                 failed -> MissingBook(book)
                 ct == null -> Opening()
-                else -> key(ct) { Reader(book, ct, paper, night, base.dark, settings) { version++ } }
+                else -> key(ct) {
+                    Reader(book, ct, paper, night, base.dark, settings, reopenEdit) { reopen ->
+                        reopenEdit = reopen
+                        version++
+                    }
+                }
             }
         }
     }
@@ -313,7 +321,16 @@ private fun windowBrightness(window: android.view.Window, value: Float) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Reader(book: Book, content: BookContent, paper: Paper, night: Boolean, appDark: Boolean, settings: AppSettings, onEdited: () -> Unit) {
+private fun Reader(
+    book: Book,
+    content: BookContent,
+    paper: Paper,
+    night: Boolean,
+    appDark: Boolean,
+    settings: AppSettings,
+    reopenEdit: Boolean,
+    onEdited: (reopen: Boolean) -> Unit,
+) {
     val state = remember {
         val b = Library.get(book.id) ?: book
         ReaderState(content, b.chapter, b.offset)
@@ -328,6 +345,14 @@ private fun Reader(book: Book, content: BookContent, paper: Paper, night: Boolea
     var panel by remember { mutableIntStateOf(0) }
     var toc by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(false) }
+    // 重新打开编辑页时光标放在这里（章节刚拆开或合并，阅读页这时还没排好版）
+    var editAt by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(reopenEdit) {
+        if (!reopenEdit) return@LaunchedEffect
+        editAt = Library.get(book.id)?.offset
+        snapshotFlow { state.currentRef() }.first { it != null }
+        editing = true
+    }
     var saving by remember { mutableStateOf(false) }
     var finishedShown by remember { mutableStateOf(false) }
     var sel by remember { mutableStateOf<Sel?>(null) }
@@ -807,7 +832,20 @@ private fun Reader(book: Book, content: BookContent, paper: Paper, night: Boolea
         // 编辑页和阅读页版式一样，淡入淡出就好，不滑动，免得看着像换了一页
         AnimatedVisibility(editing, enter = fadeIn(tween(160)), exit = fadeOut(tween(160))) {
             val ch = state.chapter
-            val at = state.anchor ?: state.currentRef()?.start ?: 0
+            val at = editAt ?: state.anchor ?: state.currentRef()?.start ?: 0
+            fun restructure(done: String, work: () -> Boolean) {
+                saving = true
+                scope.launch {
+                    val ok = withContext(Dispatchers.IO) { work() }
+                    saving = false
+                    if (ok) {
+                        Toast.show(done)
+                        onEdited(true)
+                    } else {
+                        Toast.show("没有改成")
+                    }
+                }
+            }
             EditPage(
                 spec = spec,
                 textColor = paper.text,
@@ -818,7 +856,10 @@ private fun Reader(book: Book, content: BookContent, paper: Paper, night: Boolea
                 cursor = at,
                 alignTitle = at == 0,
                 saving = saving,
-                onClose = { editing = false },
+                onClose = {
+                    editing = false
+                    editAt = null
+                },
                 onSave = { t, b, cur ->
                     saving = true
                     scope.launch {
@@ -827,11 +868,17 @@ private fun Reader(book: Book, content: BookContent, paper: Paper, night: Boolea
                         if (ok) {
                             Toast.show("已保存")
                             editing = false
-                            onEdited()
+                            onEdited(false)
                         } else {
                             Toast.show("保存失败")
                         }
                     }
+                },
+                onPromote = { t, b, ps, pe ->
+                    restructure("这一段成了新一章的标题") { Library.splitChapter(book.id, ch, t, b, ps, pe) }
+                },
+                onDemote = { t, b ->
+                    restructure(if (ch == 0) "标题放回了正文" else "这一章并进了上一章") { Library.demoteTitle(book.id, ch, t, b) }
                 },
             )
         }

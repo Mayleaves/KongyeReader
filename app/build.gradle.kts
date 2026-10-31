@@ -9,12 +9,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        // 手机上已有一个签名不同的旧版 com.kongye.reader，换个包名才能并存安装
-        applicationId = "com.kongye.yuedu"
+        applicationId = "com.kongye.reader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
 
     buildTypes {

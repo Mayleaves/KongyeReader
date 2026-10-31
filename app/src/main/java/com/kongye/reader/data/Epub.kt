@@ -7,7 +7,14 @@ import java.util.zip.ZipFile
 
 /** 只取文字的 EPUB 解析：按书脊顺序读 XHTML，用目录切章，顺带取出封面图 */
 object Epub {
-    class Parsed(val title: String, val author: String, val chapters: List<Pair<String, String>>, val cover: ByteArray?)
+    class Parsed(
+        val title: String,
+        val author: String,
+        val chapters: List<Pair<String, String>>,
+        val cover: ByteArray?,
+        val intro: String = "",
+        val tags: List<String> = emptyList(),
+    )
 
     private class Item(val id: String, val href: String, val type: String, val props: String)
 
@@ -26,6 +33,10 @@ object Epub {
 
         val title = Html.decodeText(tagText(opf, "title"))
         val author = Html.decodeText(tagText(opf, "creator"))
+        val intro = introOf(opf)
+        val tags = Regex("<(?:\\w+:)?subject\\b[^>]*>(.*?)</(?:\\w+:)?subject>", RegexOption.DOT_MATCHES_ALL).findAll(opf)
+            .flatMap { Html.decodeText(it.groupValues[1].replace(Regex("<[^>]+>"), "")).split(Regex("[,，、;；/|]+")) }
+            .map { it.trim() }.filter { it.length in 1..12 }.distinct().take(12).toList()
 
         val items = Regex("<(?:\\w+:)?item\\b[^>]*>").findAll(opf).mapNotNull { m ->
             val tag = m.value
@@ -109,7 +120,7 @@ object Epub {
             ?: items.firstOrNull { it.type.startsWith("image/") && (it.id.contains("cover", true) || it.href.contains("cover", true)) }
         val cover = coverItem?.let { read(resolve(opfDir, it.href)) }
 
-        Parsed(title, author, result, cover)
+        Parsed(title, author, result, cover, intro, tags)
     }
 
     /** 正文第一段如果就是章节标题，去掉，阅读页会单独排版标题 */
@@ -118,6 +129,16 @@ object Epub {
         val a = first.replace(Regex("\\s"), "")
         val b = title.replace(Regex("\\s"), "")
         return if (a.isNotEmpty() && a.length <= 40 && (a == b || b.contains(a) || a.contains(b))) body.substringAfter('\n', "") else body
+    }
+
+    /** dc:description 常常是转义过的 HTML：解开、按段落换行、去掉标签 */
+    private fun introOf(opf: String): String {
+        val raw = Regex("<(?:\\w+:)?description\\b[^>]*>(.*?)</(?:\\w+:)?description>", RegexOption.DOT_MATCHES_ALL).find(opf)?.groupValues?.get(1)
+            ?: return ""
+        val html = Html.decodeText(raw.replace(Regex("<!\\[CDATA\\[|]]>"), ""))
+        return Html.decodeText(
+            html.replace(Regex("(?i)<br\\s*/?>|</p>|</div>"), "\n").replace(Regex("<[^>]+>"), ""),
+        ).split('\n').map { it.trim() }.filter { it.isNotEmpty() }.joinToString("\n").take(2000)
     }
 
     private fun tagText(xml: String, local: String): String =

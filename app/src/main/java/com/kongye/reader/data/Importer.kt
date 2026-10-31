@@ -123,11 +123,13 @@ object Importer {
         val parsed = TxtParser.parse(text)
         if (parsed.content.isBlank()) throw ImportError("文件里没有文字")
         val (title, author) = TxtParser.guessTitle(name, text)
+        val meta = TxtParser.meta(text)
         writeContent(dir, parsed.content, parsed.chapters)
         return Book(
-            id = id, title = title, author = author, format = "txt",
+            id = id, title = title, author = author.ifEmpty { meta.author }, format = "txt",
             chars = parsed.content.length.toLong(), chapterCount = parsed.chapters.size,
             addedAt = System.currentTimeMillis(), fingerprint = fp,
+            intro = meta.intro, tags = meta.tags, metaScanned = true,
         )
     }
 
@@ -163,6 +165,7 @@ object Importer {
             id = id, title = ep.title.ifBlank { fallback }.ifBlank { "未命名" }, author = ep.author, format = "epub",
             chars = sb.length.toLong(), chapterCount = toc.size,
             addedAt = System.currentTimeMillis(), hasCover = hasCover, fingerprint = fp,
+            intro = ep.intro, tags = ep.tags, metaScanned = true,
         )
     }
 

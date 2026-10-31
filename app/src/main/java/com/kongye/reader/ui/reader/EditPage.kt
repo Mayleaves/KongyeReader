@@ -1,9 +1,10 @@
 package com.kongye.reader.ui.reader
 
+import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -23,36 +24,42 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -60,10 +67,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kongye.reader.ui.components.ConfirmDialog
@@ -77,16 +85,21 @@ import com.kongye.reader.ui.components.blockTouches
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.max
 import kotlin.math.roundToInt
+
+/** 第二段起输入框开头放一个看不见的字：在段首退格会删掉它，借此知道要和上一段合并 */
+private const val SENT = '⁠'
 
 /**
  * 编辑本章。布局参考 Notepad++：顶上是标签页和撤销、重做、查找，左边距里是段号，当前段铺一层浅色，底下是状态栏。
  * 正文的字体、字号、行距、段距、缩进、版心宽度都和阅读页一样，打开时正在读的那一行停在原来的高度，改到哪一眼就能看到。
+ *
+ * 整章放进一个输入框时，每打一个字整章都要重新排版，几千字的章节就会卡。所以只有光标所在的一段是输入框，
+ * 其余各段照阅读页的样子画好不动；点哪段就编辑哪段，回车拆段、在段首退格并段都在输入框里处理。
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditPage(
     spec: PageSpec,
@@ -100,17 +113,22 @@ fun EditPage(
     saving: Boolean,
     onClose: () -> Unit,
     onSave: (title: String, body: String, cursor: Int) -> Unit,
+    onPromote: (title: String, body: String, paraStart: Int, paraEnd: Int) -> Unit,
+    onDemote: (title: String, body: String) -> Unit,
 ) {
     val c = K.c
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
-    val titleState = rememberTextFieldState(title)
-    val bodyState = rememberTextFieldState(body, TextRange(cursor.coerceIn(0, body.length)))
+    val doc = remember { EditDoc(title, body, cursor) }
     val query = rememberTextFieldState()
     val replacement = rememberTextFieldState()
     var confirm by remember { mutableStateOf(false) }
     var finding by remember { mutableStateOf(false) }
-    val changed by remember { derivedStateOf { titleState.text.toString() != title || bodyState.text.toString() != body } }
+    // 设为标题的那一段太长时先问一句
+    var longPara by remember { mutableStateOf(false) }
+    val titleInteraction = remember { MutableInteractionSource() }
+    val titleFocused by titleInteraction.collectIsFocusedAsState()
+    val changed by remember { derivedStateOf { doc.changed() } }
     fun close() {
         if (changed) confirm = true else onClose()
     }
@@ -122,14 +140,10 @@ fun EditPage(
     val titleStyle = remember(spec, textColor) { titleTextStyle(spec).copy(color = textColor) }
     val textW = with(density) { spec.width.toDp() }
     val leftDp = with(density) { textLeft.toDp() }
+    val lineH = with(density) { (spec.fontSize * spec.lineHeight).sp.toDp() }
+    val gapH = with(density) { (spec.fontSize * spec.paraSpacing).sp.toDp() }
 
-    // —— 查找 ——
-    val q = query.text.toString()
-    val matches by remember { derivedStateOf { allMatches(bodyState.text, query.text.toString()) } }
-    val sel = bodyState.selection
-    val current = if (q.isNotEmpty() && sel.length == q.length && sel.start in matches) sel.start else -1
-
-    // 两端对齐：逐段按阅读页同样的办法算字间距，按段落内容缓存，打字时只重算正在改的那一段
+    // 两端对齐：逐段按阅读页同样的办法算字间距，按段落内容缓存
     val measurer = rememberTextMeasurer(cacheSize = 0)
     val emPx = with(density) { spec.fontSize.sp.toPx() }
     val toSp = spec.density * spec.fontScale
@@ -147,125 +161,139 @@ fun EditPage(
         }
     }
 
-    // 显示时：每行补字间距、段落之间的换行换成段距占位（都和阅读页同一个办法），查找结果铺底色
-    val gap = remember(spec) { gapParagraphStyle(spec) }
-    val spaced = spec.paraSpacing > 0.01f
-    val hl = c.accent.copy(alpha = 0.18f)
-    val hlCur = c.accent.copy(alpha = 0.42f)
-    val output = remember(spec, spaced, gap, q, current, hl) {
-        OutputTransformation {
-            val raw = asCharSequence().toString()
-            var start = 0
-            while (true) {
-                val nl = raw.indexOf('\n', start)
-                val end = if (nl < 0) raw.length else nl
-                for ((s, e, ls) in spacingOf(raw.substring(start, end))) addStyle(SpanStyle(letterSpacing = (ls / toSp).sp), start + s, start + e)
-                if (nl < 0) break
-                start = nl + 1
-            }
-            if (spaced) {
-                val cs = asCharSequence()
-                val at = ArrayList<Int>()
-                for (k in 0 until length) if (cs[k] == '\n') at += k
-                for (k in at) {
-                    replace(k, k + 1, PARA_GAP.toString())
-                    addStyle(gap, k, k + 1)
-                    addStyle(SpanStyle(fontSize = 1.sp), k, k + 1)
-                }
-            }
-            if (q.isNotEmpty()) {
-                val s = asCharSequence().toString()
-                var i = s.indexOf(q)
-                var n = 0
-                while (i >= 0 && n < 2000) {
-                    addStyle(SpanStyle(background = if (i == current) hlCur else hl), i, i + q.length)
-                    i = s.indexOf(q, i + q.length)
-                    n++
-                }
-            }
+    val spacingFn: (String) -> List<Triple<Int, Int, Float>> = remember(spacing) { { p -> spacingOf(p) } }
+
+    // —— 查找 ——（光标位置只在用到的地方读：每打一个字不让整页、两百多段跟着重组）
+    val q = query.text.toString()
+    val matches by remember { derivedStateOf { doc.find(query.text.toString()) } }
+    val current by remember {
+        derivedStateOf {
+            val t = query.text
+            val s = doc.field.selection
+            if (t.isEmpty() || s.length != t.length) -1
+            else matches.indexOfFirst { it.first == doc.active && it.second == s.start - doc.prefix }
         }
     }
+    val hl = c.accent.copy(alpha = 0.18f)
+    val hlCur = c.accent.copy(alpha = 0.42f)
 
     val scroll = rememberScrollState()
-    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
-    var bodyTop by remember { mutableFloatStateOf(-1f) }
+    var fieldLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var fieldTop by remember { mutableFloatStateOf(-1f) }
     var viewportTop by remember { mutableFloatStateOf(-1f) }
     var viewportH by remember { mutableFloatStateOf(0f) }
+    // 要把输入框里这个位置滚到眼前（查找跳转用）
+    var reveal by remember { mutableStateOf<Int?>(null) }
     val focus = remember { FocusRequester() }
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
 
-    fun reveal(offset: Int) {
-        val lay = layout ?: return
-        val o = offset.coerceIn(0, lay.layoutInput.text.length)
-        val y = bodyTop + lay.getLineTop(lay.getLineForOffset(o))
-        scope.launch { scroll.animateScrollTo((y - viewportH / 3).roundToInt().coerceAtLeast(0)) }
-    }
-
-    fun select(m: Int) {
-        bodyState.edit { selection = TextRange(m, m + q.length) }
-        reveal(m)
+    fun select(m: Pair<Int, Int>) {
+        doc.load(m.first, m.second, q.length)
+        reveal = doc.prefix + m.second
+        focus.requestFocus()
     }
 
     fun findNext() {
         if (matches.isEmpty()) return Toast.show("没有找到")
-        select(matches.firstOrNull { it >= bodyState.selection.end } ?: matches.first())
+        val at = doc.active to (doc.field.selection.end - doc.prefix)
+        select(matches.firstOrNull { compareValues(it.first, at.first).let { d -> d > 0 || d == 0 && it.second >= at.second } } ?: matches.first())
     }
 
     fun findPrev() {
         if (matches.isEmpty()) return Toast.show("没有找到")
-        select(matches.lastOrNull { it < bodyState.selection.start } ?: matches.last())
+        val at = doc.active to (doc.field.selection.start - doc.prefix)
+        select(matches.lastOrNull { compareValues(it.first, at.first).let { d -> d < 0 || d == 0 && it.second < at.second } } ?: matches.last())
     }
 
     fun replaceOne() {
         if (q.isEmpty()) return
-        val r = replacement.text.toString()
-        val s = bodyState.selection
-        if (current >= 0) {
-            bodyState.edit {
-                replace(s.start, s.end, r)
-                selection = TextRange(s.start + r.length)
-            }
+        if (current >= 0) doc.replaceSelection(replacement.text.toString())
+        val next = doc.find(q)
+        if (next.isEmpty()) {
+            Toast.show("已全部替换")
+            return
         }
-        val next = allMatches(bodyState.text, q)
-        if (next.isEmpty()) Toast.show("已全部替换") else select(next.firstOrNull { it >= bodyState.selection.end } ?: next.first())
+        val at = doc.active to (doc.field.selection.end - doc.prefix)
+        select(next.firstOrNull { compareValues(it.first, at.first).let { d -> d > 0 || d == 0 && it.second >= at.second } } ?: next.first())
     }
 
     fun replaceAll() {
         if (q.isEmpty()) return
-        val r = replacement.text.toString()
-        val all = allMatches(bodyState.text, q)
-        if (all.isEmpty()) return Toast.show("没有找到")
-        bodyState.edit { for (i in all.asReversed()) replace(i, i + q.length, r) }
-        Toast.show("替换了 ${all.size} 处")
+        val n = doc.replaceAll(q, replacement.text.toString())
+        Toast.show(if (n == 0) "没有找到" else "替换了 $n 处")
+    }
+
+    // —— 正文和标题互换 ——
+    fun promote() {
+        val (start, end) = doc.activeRange()
+        onPromote(doc.title.text.toString(), doc.joined(), start, end)
+    }
+
+    fun promoteCurrent() {
+        val para = doc.fieldText().trim()
+        when {
+            para.isEmpty() -> Toast.show("这一段是空的")
+            para.length > 40 -> longPara = true
+            else -> promote()
+        }
     }
 
     // 打开时：正在读的那一行放回它在阅读页里的高度，然后弹出键盘
     LaunchedEffect(Unit) {
-        snapshotFlow { Triple(layout, bodyTop, viewportTop) }.first { it.first != null && it.second >= 0f && it.third >= 0f }
+        snapshotFlow { Triple(fieldLayout, fieldTop, viewportTop) }.first { it.first != null && it.second >= 0f && it.third >= 0f }
+        withFrameNanos { }
         if (!alignTitle) {
-            val lay = layout!!
-            val o = cursor.coerceIn(0, lay.layoutInput.text.length)
-            val y = bodyTop + lay.getLineTop(lay.getLineForOffset(o))
+            val lay = fieldLayout!!
+            val o = doc.field.selection.start.coerceIn(0, lay.layoutInput.text.length)
+            val y = fieldTop + lay.getLineTop(lay.getLineForOffset(o))
             // 工具栏比阅读页的页眉高时，这一行只能贴着工具栏
             scroll.scrollTo((y - (textTop - viewportTop).coerceAtLeast(0f)).roundToInt().coerceAtLeast(0))
         }
         focus.requestFocus()
     }
+    // 查找跳到别的段：等那一段变成输入框、排好版，再滚过去
+    LaunchedEffect(reveal) {
+        val o = reveal ?: return@LaunchedEffect
+        val lay = snapshotFlow { fieldLayout }.first { it != null && it.layoutInput.text.length == doc.field.text.length }!!
+        withFrameNanos { }
+        val y = fieldTop + lay.getLineTop(lay.getLineForOffset(o.coerceIn(0, lay.layoutInput.text.length)))
+        if (y < scroll.value || y > scroll.value + viewportH * 0.7f) scroll.animateScrollTo((y - viewportH / 3).roundToInt().coerceAtLeast(0))
+        reveal = null
+    }
 
-    // 光标自己画：停在段尾时系统会把它画进段距那条缝里
+    // 光标自己画：比系统光标细、短，和阅读页的字一样高
     var caretOn by remember { mutableStateOf(true) }
-    LaunchedEffect(sel, focused) {
-        caretOn = true
-        while (focused) {
-            delay(530)
-            caretOn = !caretOn
+    LaunchedEffect(focused) {
+        snapshotFlow { doc.field.selection }.collectLatest {
+            caretOn = true
+            while (focused) {
+                delay(530)
+                caretOn = !caretOn
+            }
         }
     }
-    val numbers = rememberTextMeasurer(cacheSize = 256)
     val numStyle = TextStyle(fontSize = 10.sp, color = c.text3)
     val numCur = TextStyle(fontSize = 10.sp, color = c.ink, fontWeight = FontWeight.Bold)
     val band = c.ink.copy(alpha = if (c.dark) 0.07f else 0.045f)
+
+    // 输入框里这一段：每行补字间距、查找结果铺底色。只有一段，算得很快
+    val fieldOutput = remember(spec, q, current, hl) {
+        OutputTransformation {
+            val all = asCharSequence().toString()
+            val p = if (all.isNotEmpty() && all[0] == SENT) 1 else 0
+            val raw = all.substring(p)
+            for ((s, e, ls) in spacingOf(raw)) addStyle(SpanStyle(letterSpacing = (ls / toSp).sp), p + s, p + e)
+            if (q.isNotEmpty()) {
+                val curAt = matches.getOrNull(current)?.takeIf { it.first == doc.active }?.second ?: -1
+                var i = raw.indexOf(q)
+                while (i >= 0) {
+                    addStyle(SpanStyle(background = if (i == curAt) hlCur else hl), p + i, p + i + q.length)
+                    i = raw.indexOf(q, i + q.length)
+                }
+            }
+        }
+    }
 
     Column(
         Modifier
@@ -276,7 +304,7 @@ fun EditPage(
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        // —— 工具栏：关闭 | 标签页 | 撤销 重做 查找 | 保存 ——
+        // —— 工具栏：关闭 | 标签页 | 设为标题 撤销 重做 查找 | 保存 ——
         Row(Modifier.fillMaxWidth().height(40.dp).padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             IconBtn(Ico.CLOSE, size = 20.dp) { close() }
             Row(
@@ -291,23 +319,26 @@ fun EditPage(
                         .padding(horizontal = 12.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    T(titleState.text.toString().ifBlank { "无标题" }, 13.sp, c.ink, FontWeight.Medium, Modifier.weight(1f, fill = false), maxLines = 1)
+                    T(doc.title.text.toString().ifBlank { "无标题" }, 13.sp, c.ink, FontWeight.Medium, Modifier.weight(1f, fill = false), maxLines = 1)
                     if (changed) {
                         Spacer(Modifier.width(7.dp))
                         Box(Modifier.size(7.dp).background(c.accent, CircleShape))
                     }
                 }
             }
-            val undo = bodyState.undoState
-            IconBtn(Ico.UNDO, size = 21.dp, color = if (undo.canUndo) c.ink else c.text3) { if (undo.canUndo) undo.undo() }
-            IconBtn(Ico.REDO, size = 21.dp, color = if (undo.canRedo) c.ink else c.text3) { if (undo.canRedo) undo.redo() }
+            // 光标在标题里：把标题变回正文；在正文里：把这一段提升为新一章的标题
+            SmallChip(if (titleFocused) "转为正文" else "设为标题", enabled = !saving) {
+                if (titleFocused) onDemote(doc.title.text.toString(), doc.joined()) else promoteCurrent()
+            }
+            IconBtn(Ico.UNDO, size = 21.dp, color = if (doc.canUndo) c.ink else c.text3) { doc.undo() }
+            IconBtn(Ico.REDO, size = 21.dp, color = if (doc.canRedo) c.ink else c.text3) { doc.redo() }
             IconBtn(Ico.SEARCH, size = 21.dp, color = if (finding) c.accent else c.ink) { finding = !finding }
             Spacer(Modifier.width(4.dp))
             InkButton(if (saving) "保存中" else "保存", Modifier.width(66.dp), height = 34.dp) {
-                if (!saving) onSave(titleState.text.toString(), bodyState.text.toString(), bodyState.selection.start)
+                if (!saving) onSave(doc.title.text.toString(), doc.joined(), doc.cursorInBody())
             }
         }
-        if (finding) FindBar(query, replacement, matches.size, matches.indexOf(current) + 1, ::findPrev, ::findNext, ::replaceOne, ::replaceAll) { finding = false }
+        if (finding) FindBar(query, replacement, matches.size, current + 1, ::findPrev, ::findNext, ::replaceOne, ::replaceAll) { finding = false }
 
         // —— 正文：和阅读页同一套版式 ——
         Column(
@@ -318,74 +349,79 @@ fun EditPage(
                     viewportTop = it.positionInRoot().y
                     viewportH = it.size.height.toFloat()
                 }
-                .verticalScroll(scroll)
-                .padding(start = leftDp),
+                .verticalScroll(scroll),
         ) {
             // 标题顶和阅读页第一页标题顶对齐
-            val topPad = with(density) { (textTop - max(viewportTop, 0f)).coerceAtLeast(0f).toDp() }
+            val topPad = with(density) { (textTop - viewportTop.coerceAtLeast(0f)).coerceAtLeast(0f).toDp() }
             Spacer(Modifier.height(if (viewportTop < 0f) 0.dp else topPad))
             BasicTextField(
-                titleState,
-                Modifier.width(textW),
+                doc.title,
+                Modifier.padding(start = leftDp).width(textW),
                 textStyle = titleStyle,
-                inputTransformation = NoNewline,
+                inputTransformation = doc.titleInput,
                 cursorBrush = SolidColor(c.accent),
+                interactionSource = titleInteraction,
             )
             // 标题和正文之间空一行正文行高，和阅读页一样
-            Spacer(Modifier.height(with(density) { (spec.fontSize * spec.lineHeight).sp.toDp() }))
-            Box(Modifier.onPlaced { bodyTop = it.positionInParent().y }) {
-                BasicTextField(
-                    bodyState,
-                    Modifier
-                        .width(textW)
-                        .focusRequester(focus)
-                        .drawBehind {
-                            val lay = layout ?: return@drawBehind
-                            val text = bodyState.text
-                            val len = lay.layoutInput.text.length
-                            val at = bodyState.selection.start.coerceIn(0, text.length)
-                            // 当前段铺浅色，像 Notepad++ 的当前行
-                            val ps = if (at == 0) 0 else text.lastIndexOf('\n', at - 1) + 1
-                            var pe = text.indexOf('\n', at)
-                            if (pe < 0) pe = text.length
-                            val l1 = lay.getLineForOffset(ps.coerceAtMost(len))
-                            val l2 = lay.getLineForOffset(max(ps, pe - 1).coerceAtMost(len))
-                            drawRect(band, Offset(-textLeft.toFloat(), lay.getLineTop(l1)), Size(size.width + textLeft * 2f, lay.getLineBottom(l2) - lay.getLineTop(l1)))
-                            // 段号写在左边距里
-                            val pad = 5.dp.toPx()
-                            var start = 0
-                            var n = 1
-                            while (true) {
-                                val line = lay.getLineForOffset(start.coerceAtMost(len))
-                                val r = numbers.measure("$n", if (start == ps) numCur else numStyle)
-                                val y = (lay.getLineTop(line) + lay.getLineBottom(line) - r.size.height) / 2
-                                drawText(r, topLeft = Offset(-pad - r.size.width, y))
-                                val nl = text.indexOf('\n', start)
-                                if (nl < 0) break
-                                start = nl + 1
-                                n++
+            Spacer(Modifier.height(lineH))
+            val active = doc.active
+            val hits = if (q.isEmpty()) emptyMap() else matches.groupBy({ it.first }, { it.second })
+            for (i in doc.paras.indices) {
+                // 输入框换段时整块挪过去，焦点和键盘不会丢
+                key(if (i == active) "field" else doc.ids[i]) {
+                    Column {
+                        Row(Modifier.fillMaxWidth().background(if (i == active) band else Color.Transparent)) {
+                            Box(Modifier.width(leftDp).height(lineH), contentAlignment = Alignment.CenterEnd) {
+                                T("${i + 1}", 10.sp, if (i == active) numCur.color else numStyle.color, if (i == active) FontWeight.Bold else FontWeight.Normal, Modifier.padding(end = 5.dp), maxLines = 1)
                             }
-                        },
-                    textStyle = bodyStyle,
-                    cursorBrush = SolidColor(Color.Transparent),
-                    outputTransformation = output,
-                    interactionSource = interaction,
-                    onTextLayout = { get -> layout = get() },
-                )
-                Canvas(Modifier.matchParentSize()) {
-                    val lay = layout ?: return@Canvas
-                    if (!focused || !caretOn || !bodyState.selection.collapsed) return@Canvas
-                    val r = caretRect(lay, bodyState.selection.start)
-                    val h = spec.fontSize.sp.toPx() * 1.25f
-                    val mid = (r.top + r.bottom) / 2
-                    drawRect(c.accent, Offset(r.left - 1.dp.toPx() / 2, mid - h / 2), Size(2.dp.toPx(), h))
+                            if (i == active) {
+                                Box(
+                                    Modifier.onGloballyPositioned {
+                                        fieldTop = it.positionInRoot().y - viewportTop + scroll.value
+                                    },
+                                ) {
+                                    BasicTextField(
+                                        doc.field,
+                                        Modifier
+                                            .width(textW)
+                                            .focusRequester(focus)
+                                            .graphicsLayer(),
+                                        textStyle = bodyStyle,
+                                        cursorBrush = SolidColor(Color.Transparent),
+                                        inputTransformation = doc.bodyInput,
+                                        outputTransformation = fieldOutput,
+                                        interactionSource = interaction,
+                                        onTextLayout = { get -> fieldLayout = get() },
+                                    )
+                                    Canvas(Modifier.matchParentSize().graphicsLayer()) {
+                                        val lay = fieldLayout ?: return@Canvas
+                                        val s = doc.field.selection
+                                        if (!focused || !caretOn || !s.collapsed) return@Canvas
+                                        val r = lay.getCursorRect(s.start.coerceIn(0, lay.layoutInput.text.length))
+                                        val h = spec.fontSize.sp.toPx() * 1.25f
+                                        val mid = (r.top + r.bottom) / 2
+                                        drawRect(c.accent, Offset(r.left - 1.dp.toPx() / 2, mid - h / 2), Size(2.dp.toPx(), h))
+                                    }
+                                }
+                            } else {
+                                StaticPara(
+                                    doc.paras[i], bodyStyle, textW, spacingFn, toSp,
+                                    hits[i].orEmpty(), matches.getOrNull(current)?.takeIf { it.first == i }?.second ?: -1, q.length, hl, hlCur,
+                                ) { offset ->
+                                    doc.load(i, offset)
+                                    focus.requestFocus()
+                                }
+                            }
+                        }
+                        if (i < doc.paras.lastIndex) Spacer(Modifier.height(gapH))
+                    }
                 }
             }
             Spacer(Modifier.height(160.dp))
         }
 
         // —— 状态栏 ——
-        StatusBar(bodyState, changed)
+        StatusBar(doc, changed)
     }
     ConfirmDialog(
         visible = confirm,
@@ -399,35 +435,278 @@ fun EditPage(
         },
         onDismiss = { confirm = false },
     )
+    ConfirmDialog(
+        visible = longPara,
+        title = "这一段设为标题？",
+        message = "这一段有 ${doc.fieldText().trim().length} 个字，不太像标题。设为标题后，它后面的正文会成为新的一章",
+        confirm = "设为标题",
+        ico = Ico.EDIT,
+        onConfirm = {
+            longPara = false
+            promote()
+        },
+        onDismiss = { longPara = false },
+    )
 }
 
-private val NoNewline = InputTransformation {
-    val s = asCharSequence()
-    if (s.contains('\n')) replace(0, length, s.toString().replace("\n", ""))
-}
-
-private fun allMatches(text: CharSequence, q: String): List<Int> {
-    if (q.isEmpty()) return emptyList()
-    val s = text.toString()
-    val out = ArrayList<Int>()
-    var i = s.indexOf(q)
-    while (i >= 0 && out.size < 2000) {
-        out += i
-        i = s.indexOf(q, i + q.length)
+/** 不在编辑的段落：和阅读页一样排好画出来，点一下就换成输入框，光标放在点的位置 */
+@Composable
+private fun StaticPara(
+    text: String,
+    style: TextStyle,
+    width: Dp,
+    spacingOf: (String) -> List<Triple<Int, Int, Float>>,
+    toSp: Float,
+    hits: List<Int>,
+    curHit: Int,
+    qLen: Int,
+    hl: Color,
+    hlCur: Color,
+    onTap: (Int) -> Unit,
+) {
+    val shown = remember(text, hits, curHit, qLen, hl) {
+        buildAnnotatedString {
+            append(text)
+            for ((s, e, ls) in spacingOf(text)) addStyle(SpanStyle(letterSpacing = (ls / toSp).sp), s, e)
+            for (h in hits) addStyle(SpanStyle(background = if (h == curHit) hlCur else hl), h, h + qLen)
+        }
     }
-    return out
+    val layout = remember { arrayOfNulls<TextLayoutResult>(1) }
+    // 前面插段、删段后这一段的序号会变，点击时要用最新的回调
+    val tap by rememberUpdatedState(onTap)
+    BasicText(
+        shown,
+        Modifier
+            .width(width)
+            .pointerInput(text) { detectTapGestures { p -> tap(layout[0]?.getOffsetForPosition(p) ?: text.length) } },
+        style = style,
+        onTextLayout = { layout[0] = it },
+    )
 }
 
-/** 段尾（后面紧跟段距占位）的光标画在上一行行尾，其他照常 */
-private fun caretRect(lay: TextLayoutResult, offset: Int): Rect {
-    val t = lay.layoutInput.text
-    val o = offset.coerceIn(0, t.length)
-    if (o in 1 until t.length && t[o] == PARA_GAP && t[o - 1] != PARA_GAP) {
-        val line = lay.getLineForOffset(o - 1)
-        val x = lay.getLineRight(line)
-        return Rect(x, lay.getLineTop(line), x, lay.getLineBottom(line))
+/** 正在编辑的这一章：各段文字、哪一段是输入框、撤销记录 */
+@Stable
+private class EditDoc(title0: String, body0: String, cursor0: Int) {
+    private val origTitle = title0
+    private val orig = body0.split('\n')
+    val paras = mutableStateListOf<String>().also { it.addAll(orig) }
+    /** 每段一个编号，插段删段时其余各段不用重画 */
+    val ids = ArrayList<Long>()
+    private var nextId = 0L
+    // 从 -1 开始：第一次 load 时输入框还是空的，不能把它写回某一段
+    var active by mutableIntStateOf(-1)
+        private set
+    val prefix get() = if (active > 0) 1 else 0
+    /** 输入框里是当前这一段（第二段起开头带一个 SENT）；paras[active] 只在换段时才同步 */
+    val field = TextFieldState()
+    val title = TextFieldState(title0)
+
+    private class Snap(val paras: List<String>, val title: String, val active: Int, val sel: TextRange)
+    private val undos = ArrayList<Snap>()
+    private val redos = ArrayList<Snap>()
+    var canUndo by mutableStateOf(false)
+        private set
+    var canRedo by mutableStateOf(false)
+        private set
+    private var lastAt = 0L
+    private var lastActive = -1
+
+    init {
+        repeat(orig.size) { ids += nextId++ }
+        var at = cursor0.coerceIn(0, body0.length)
+        var i = 0
+        while (i < orig.lastIndex && at > orig[i].length) {
+            at -= orig[i].length + 1
+            i++
+        }
+        load(i, at)
     }
-    return lay.getCursorRect(o)
+
+    fun fieldText(): String = field.text.toString().let { if (it.isNotEmpty() && it[0] == SENT) it.substring(1) else it }
+
+    fun text(i: Int): String = if (i == active) fieldText() else paras[i]
+
+    fun joined(): String = paras.indices.joinToString("\n") { text(it) }
+
+    /** 当前这一段在整章正文里的范围 */
+    fun activeRange(): Pair<Int, Int> {
+        var s = 0
+        for (i in 0 until active) s += paras[i].length + 1
+        return s to s + fieldText().length
+    }
+
+    fun cursorInBody(): Int = activeRange().first + (field.selection.start - prefix).coerceIn(0, fieldText().length)
+
+    fun changed(): Boolean {
+        if (title.text.toString() != origTitle || paras.size != orig.size) return true
+        for (i in paras.indices) if (text(i) != orig[i]) return true
+        return false
+    }
+
+    /** 把第 i 段换成输入框，光标放在 offset（带选区时选中 len 个字） */
+    fun load(i: Int, offset: Int, len: Int = 0) {
+        // 输入框里的字先写回原来那一段（同一段也要写：查找跳到本段时不能丢了刚打的字）
+        if (active in paras.indices) paras[active] = fieldText()
+        active = i.coerceIn(0, paras.lastIndex)
+        val t = paras[active]
+        val p = prefix
+        val o = offset.coerceIn(0, t.length)
+        field.edit {
+            replace(0, length, if (p == 1) "$SENT$t" else t)
+            selection = TextRange(p + o, p + (o + len).coerceAtMost(t.length))
+        }
+    }
+
+    fun find(q: String): List<Pair<Int, Int>> {
+        if (q.isEmpty()) return emptyList()
+        val out = ArrayList<Pair<Int, Int>>()
+        for (i in paras.indices) {
+            val t = text(i)
+            var k = t.indexOf(q)
+            while (k >= 0 && out.size < 2000) {
+                out += i to k
+                k = t.indexOf(q, k + q.length)
+            }
+        }
+        return out
+    }
+
+    fun replaceSelection(r: String) {
+        record(null, null, force = true)
+        val s = field.selection
+        field.edit {
+            replace(s.start, s.end, r)
+            selection = TextRange(s.start + r.length)
+        }
+    }
+
+    fun replaceAll(q: String, r: String): Int {
+        val n = find(q).size
+        if (n == 0) return 0
+        record(null, null, force = true)
+        val at = (field.selection.start - prefix).coerceAtLeast(0)
+        paras[active] = fieldText()
+        for (i in paras.indices) if (paras[i].contains(q)) paras[i] = paras[i].replace(q, r)
+        val keep = active
+        active = -1
+        load(keep, at)
+        return n
+    }
+
+    // —— 撤销：结构变化（拆段、并段、替换）单独记一步，连着打字一秒内的算一步 ——
+    private fun snapshot(fieldBefore: CharSequence?, selBefore: TextRange?, titleBefore: CharSequence? = null): Snap {
+        val list = ArrayList<String>(paras.size)
+        for (i in paras.indices) {
+            list += if (i == active) fieldBefore?.toString()?.removePrefix(SENT.toString()) ?: fieldText() else paras[i]
+        }
+        return Snap(list, titleBefore?.toString() ?: title.text.toString(), active, selBefore ?: field.selection)
+    }
+
+    private fun record(fieldBefore: CharSequence?, selBefore: TextRange?, force: Boolean = false, titleBefore: CharSequence? = null) {
+        val now = SystemClock.uptimeMillis()
+        if (force || now - lastAt > 1000 || lastActive != active) {
+            undos += snapshot(fieldBefore, selBefore, titleBefore)
+            if (undos.size > 200) undos.removeAt(0)
+        }
+        redos.clear()
+        lastAt = now
+        lastActive = active
+        canUndo = undos.isNotEmpty()
+        canRedo = false
+    }
+
+    fun undo() {
+        val s = undos.removeLastOrNull() ?: return
+        redos += snapshot(null, null)
+        apply(s)
+    }
+
+    fun redo() {
+        val s = redos.removeLastOrNull() ?: return
+        undos += snapshot(null, null)
+        apply(s)
+    }
+
+    private fun apply(s: Snap) {
+        paras.clear()
+        paras.addAll(s.paras)
+        ids.clear()
+        repeat(s.paras.size) { ids += nextId++ }
+        title.edit { replace(0, length, s.title) }
+        active = -1
+        val i = s.active.coerceIn(0, paras.lastIndex)
+        load(i, s.sel.start - if (i > 0) 1 else 0)
+        lastAt = 0
+        canUndo = undos.isNotEmpty()
+        canRedo = redos.isNotEmpty()
+    }
+
+    val titleInput = InputTransformation {
+        val s = asCharSequence()
+        if (s.contains('\n')) replace(0, length, s.toString().replace("\n", ""))
+        record(null, null, titleBefore = originalText)
+    }
+
+    /** 输入框里的改动：段首退格并到上一段，回车（或粘贴多段）拆成几段，其余照常 */
+    val bodyInput = InputTransformation {
+        var s = asCharSequence().toString()
+        val lost = active > 0 && s.indexOf(SENT) < 0
+        record(originalText, originalSelection, force = lost || '\n' in s)
+        if (active > 0) {
+            val k = s.indexOf(SENT)
+            if (k < 0) {
+                mergeUp(this)
+            } else if (k > 0) {
+                // 光标跑到了 SENT 前面又打了字：把 SENT 挪回开头
+                val c0 = selection.start
+                replace(k, k + 1, "")
+                replace(0, 0, SENT.toString())
+                selection = TextRange(if (c0 <= k) c0 + 1 else c0)
+            }
+            s = asCharSequence().toString()
+        }
+        if ('\n' in s) split(this)
+    }
+
+    private fun mergeUp(buf: TextFieldBuffer) {
+        val cur = buf.asCharSequence().toString()
+        val at = buf.selection.start
+        val i = active
+        val prev = paras[i - 1]
+        paras.removeAt(i)
+        ids.removeAt(i)
+        active = i - 1
+        val merged = prev + cur
+        paras[active] = merged
+        val p = prefix
+        buf.replace(0, buf.length, if (p == 1) "$SENT$merged" else merged)
+        buf.selection = TextRange(p + prev.length + at)
+    }
+
+    private fun split(buf: TextFieldBuffer) {
+        val p = prefix
+        val raw = buf.asCharSequence().toString().substring(p)
+        var off = (buf.selection.start - p).coerceIn(0, raw.length)
+        val parts = raw.split('\n')
+        var idx = parts.lastIndex
+        for (k in parts.indices) {
+            if (off <= parts[k].length) {
+                idx = k
+                break
+            }
+            off -= parts[k].length + 1
+        }
+        val i = active
+        paras[i] = parts[0]
+        for (k in 1 until parts.size) {
+            paras.add(i + k, parts[k])
+            ids.add(i + k, nextId++)
+        }
+        active = i + idx
+        val np = prefix
+        buf.replace(0, buf.length, if (np == 1) "$SENT${parts[idx]}" else parts[idx])
+        buf.selection = TextRange(np + off.coerceIn(0, parts[idx].length))
+    }
 }
 
 @Composable
@@ -501,22 +780,30 @@ private fun SmallButton(text: String, onClick: () -> Unit) {
     }
 }
 
+/** 工具栏里的文字小按钮 */
+@Composable
+private fun SmallChip(text: String, enabled: Boolean, onClick: () -> Unit) {
+    val c = K.c
+    Box(
+        Modifier
+            .padding(horizontal = 2.dp)
+            .height(30.dp)
+            .press(scaleTo = 0.94f) { if (enabled) onClick() }
+            .background(c.chip, SmoothShape(10.dp))
+            .padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        T(text, 12.sp, if (enabled) c.ink else c.text3, FontWeight.Medium, maxLines = 1)
+    }
+}
+
 /** 像 Notepad++ 底下那条：第几段第几字、选中几个字、全章多少字 */
 @Composable
-private fun StatusBar(state: TextFieldState, changed: Boolean) {
+private fun StatusBar(doc: EditDoc, changed: Boolean) {
     val c = K.c
-    val text = state.text
-    val sel = state.selection
-    val at = sel.start.coerceIn(0, text.length)
-    var para = 1
-    var paras = 1
-    var newlines = 0
-    for (i in 0 until text.length) if (text[i] == '\n') {
-        paras++
-        newlines++
-        if (i < at) para++
-    }
-    val col = at - (if (at == 0) 0 else text.lastIndexOf('\n', at - 1) + 1) + 1
+    val sel = doc.field.selection
+    val col = (sel.start - doc.prefix).coerceAtLeast(0) + 1
+    val total by remember { derivedStateOf { doc.paras.indices.sumOf { doc.text(it).length } } }
     Row(
         Modifier
             .fillMaxWidth()
@@ -524,11 +811,11 @@ private fun StatusBar(state: TextFieldState, changed: Boolean) {
             .padding(horizontal = 16.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        T("第 $para/$paras 段 · 第 $col 字", 11.sp, c.text2, maxLines = 1)
+        T("第 ${doc.active + 1}/${doc.paras.size} 段 · 第 $col 字", 11.sp, c.text2, maxLines = 1)
         Spacer(Modifier.width(14.dp))
         T("选中 ${sel.length}", 11.sp, c.text2, maxLines = 1)
         Spacer(Modifier.weight(1f))
-        T("共 ${text.length - newlines} 字", 11.sp, c.text2, maxLines = 1)
+        T("共 $total 字", 11.sp, c.text2, maxLines = 1)
         Spacer(Modifier.width(14.dp))
         T(if (changed) "已修改" else "未修改", 11.sp, if (changed) c.accent else c.text3, FontWeight.Medium, maxLines = 1)
     }
