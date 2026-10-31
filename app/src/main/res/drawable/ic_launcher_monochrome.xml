@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 主题图标：系统只取轮廓着色，眼睛用镂空表示 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:translateX="-6"
+        android:translateY="11.4">
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="M56 88C54 70 59 56 65 46L68 24C69 19 74 18 77 21L93 41C97 40 103 40 107 41L123 21C126 18 131 19 132 24L135 46C141 56 146 70 144 88C142 110 124 124 100 124C76 124 58 110 56 88ZM70 84a12 12 0 1 0 24 0a12 12 0 1 0 -24 0ZM106 84a12 12 0 1 0 24 0a12 12 0 1 0 -24 0Z" />
+        <path
+            android:fillColor="#000000"
+            android:pathData="M78.4 83a5.6 5.6 0 1 0 11.2 0a5.6 5.6 0 1 0 -11.2 0ZM114.4 83a5.6 5.6 0 1 0 11.2 0a5.6 5.6 0 1 0 -11.2 0Z" />
+    </group>
+</vector>

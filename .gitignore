@@ -1,0 +1,11 @@
+.gradle/
+.kotlin/
+build/
+app/build/
+local.properties
+dist/
+*.iml
+.idea/
+
+# 字体不进仓库，见 README 和 tools/subset_fonts.py
+app/src/main/assets/fonts/

@@ -1,0 +1,10 @@
+<resources>
+    <color name="window_bg">#101011</color>
+    <color name="widget_bg">#1C1C1E</color>
+    <color name="widget_ink">#F2F2F2</color>
+    <color name="widget_eye">#1C1C1E</color>
+    <color name="widget_detail">#9A9A9A</color>
+    <color name="widget_text">#F2F2F2</color>
+    <color name="widget_sub">#8E8E93</color>
+    <color name="widget_shadow">#2A2A2C</color>
+</resources>

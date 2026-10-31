@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 小组件里的坐猫，与应用内吉祥物同一份画稿 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <path
+        android:strokeColor="@color/widget_ink"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:pathData="M134 170C168 176 178 146 164 128" />
+    <path
+        android:fillColor="@color/widget_ink"
+        android:pathData="M62 178C55 146 66 116 100 112C134 116 145 146 138 178Z" />
+    <path
+        android:strokeColor="@color/widget_detail"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M89 150L89 177M111 150L111 177" />
+    <path
+        android:fillColor="@color/widget_ink"
+        android:pathData="M56 88C54 70 59 56 65 46L68 24C69 19 74 18 77 21L93 41C97 40 103 40 107 41L123 21C126 18 131 19 132 24L135 46C141 56 146 70 144 88C142 110 124 124 100 124C76 124 58 110 56 88Z" />
+    <path
+        android:strokeColor="@color/widget_detail"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M71 30L76 40M129 30L124 40" />
+    <path
+        android:fillColor="@color/widget_eye"
+        android:pathData="M70 84a12 12 0 1 0 24 0a12 12 0 1 0 -24 0ZM106 84a12 12 0 1 0 24 0a12 12 0 1 0 -24 0Z" />
+    <path
+        android:fillColor="@color/widget_ink"
+        android:pathData="M80.4 83a5.6 5.6 0 1 0 11.2 0a5.6 5.6 0 1 0 -11.2 0ZM116.4 83a5.6 5.6 0 1 0 11.2 0a5.6 5.6 0 1 0 -11.2 0Z" />
+    <path
+        android:strokeColor="@color/widget_detail"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:pathData="M94 103Q97 107 100 103Q103 107 106 103" />
+</vector>

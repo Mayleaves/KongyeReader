@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">空叶阅读</string>
+    <string name="widget_label">今日阅读</string>
+    <string name="widget_desc">今天读了多久，一眼就知道</string>
+</resources>
