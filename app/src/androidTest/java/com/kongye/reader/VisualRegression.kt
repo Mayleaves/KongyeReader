@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.kongye.reader.ui.components.drawImportedFocus
 import com.kongye.reader.ui.components.drawImportedHappy
 import com.kongye.reader.ui.components.drawImportedSleep
+import com.kongye.reader.ui.components.drawImportedLoaf
 import com.kongye.reader.ui.components.drawReadingCatBar
 import com.kongye.reader.ui.components.catGazeAt
 import com.kongye.reader.data.CatRest
@@ -40,17 +41,31 @@ class VisualRegression : Instrumentation() {
     private lateinit var output: File
     private var skipOnly = false
     private var gazeOnly = false
+    private var controlsOnly = false
+    private var loafOnly = false
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
         skipOnly = arguments?.getString("check") == "splash-skip"
         gazeOnly = arguments?.getString("check") == "gaze-distance"
+        controlsOnly = arguments?.getString("check") == "home-controls"
+        loafOnly = arguments?.getString("check") == "loaf"
         start()
     }
 
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (loafOnly) {
+                checkLoaf()
+                finish(0, Bundle().apply { putString("result", "PASS: supplied loaf artwork renders in both themes, full tail stays in bounds throughout breathing; empty shelf/stats/timeline captured") })
+                return
+            }
+            if (controlsOnly) {
+                checkHomeControls()
+                finish(0, Bundle().apply { putString("result", "PASS: five homepage controls do not move pupils; drag beginning on a button is excluded; blank-area tracking and navigation still work; updated cat captured in settings") })
+                return
+            }
             if (gazeOnly) {
                 checkGazeLimits()
                 checkGazeDistance()
@@ -85,6 +100,45 @@ class VisualRegression : Instrumentation() {
 
     private fun save(bitmap: Bitmap, name: String) {
         File(output, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    private fun checkLoaf() {
+        for (dark in listOf(false,true)) for (step in 0..16) {
+            val background=if (dark) android.graphics.Color.rgb(16,16,17) else android.graphics.Color.WHITE
+            // Render into a larger canvas so any tail crossing the existing
+            // 200×200 mascot slot remains visible to this bounds check.
+            val bitmap=render(720,720) {
+                drawRect(androidx.compose.ui.graphics.Color(background))
+                drawContext.transform.translate(60f,60f)
+                drawContext.transform.scale(3f,3f,Offset.Zero)
+                drawContext.transform.translate(-32f,-55f)
+                drawImportedLoaf(dark,step*.25f)
+            }
+            for (y in 0 until 720) for (x in 0 until 720) {
+                if (x<60 || y<60 || x>=660 || y>=660) {
+                    check(bitmap.getPixel(x,y)==background) { "Loaf tail or ear clips: dark=$dark phase=$step at $x,$y" }
+                }
+            }
+            if (step==0 || step==8) save(bitmap,"loaf-${if(dark) "dark" else "light"}-$step")
+            bitmap.recycle()
+        }
+        File(targetContext.filesDir,"settings.json").writeText("""{"theme":1,"resumeLast":false}""")
+        com.kongye.reader.data.Settings.load()
+        val activity=startActivitySync(Intent(targetContext,MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        })
+        SystemClock.sleep(3300)
+        for ((name,page) in listOf("shelf" to com.kongye.reader.ui.Screen.Shelf,
+            "stats" to com.kongye.reader.ui.Screen.Stats, "timeline" to com.kongye.reader.ui.Screen.Timeline)) {
+            runOnMainSync { com.kongye.reader.ui.Nav.push(page) }
+            SystemClock.sleep(420)
+            val screenshot=captureWindow(activity)
+            save(screenshot,"loaf-$name"); screenshot.recycle()
+            runOnMainSync { com.kongye.reader.ui.Nav.pop() }
+            SystemClock.sleep(350)
+        }
+        runOnMainSync { activity.finish() }
+        File(output,"loaf-result.txt").writeText("Both themes: 34 breathing frames fit mascot bounds\nEmpty shelf, stats, timeline: captured\n")
     }
 
     private fun checkPaws() {
@@ -225,6 +279,83 @@ class VisualRegression : Instrumentation() {
         before.recycle(); after.recycle()
         File(output,"skip-result.txt").writeText("Tap-to-home: ${elapsed}ms\nUnderlying button activations: $picks\n")
         runOnMainSync { activity.finish() }
+    }
+
+    private fun checkHomeControls() {
+        File(targetContext.filesDir,"settings.json").writeText("""{"theme":1,"resumeLast":false}""")
+        com.kongye.reader.data.Settings.load()
+        CatRest.wake(Stats.sessions.value.sumOf { it.millis })
+        val activity = startActivitySync(Intent(targetContext,MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        })
+        SystemClock.sleep(3200)
+        waitForIdleSync()
+        val initial = captureWindow(activity)
+        val width=initial.width.toFloat(); val height=initial.height.toFloat()
+        val neutral=pupilCenter(initial)
+        save(initial,"controls-neutral"); initial.recycle()
+        fun touch(action:Int, point:Offset, down:Long) {
+            val event=MotionEvent.obtain(down,SystemClock.uptimeMillis(),action,point.x,point.y,0)
+            // Route only through this test Activity; never inject into another app
+            // if a system overlay or the user changes the foreground window.
+            runOnMainSync { activity.dispatchTouchEvent(event) }
+            event.recycle()
+        }
+        val controls=listOf("today" to Offset(width*.5f,height*.533f),
+            "read" to Offset(width*.5f,height*.745f), "garden" to Offset(width*.15f,height*.94f),
+            "shelf" to Offset(width*.818f,height*.088f), "prefs" to Offset(width*.924f,height*.088f))
+        for ((name,point) in controls) {
+            val down=SystemClock.uptimeMillis()
+            touch(MotionEvent.ACTION_DOWN,point,down)
+            SystemClock.sleep(65)
+            var image=captureWindow(activity)
+            var center=pupilCenter(image)
+            check(abs(center.x-neutral.x)<2 && abs(center.y-neutral.y)<12) { "Button $name moved the pupils: $center vs $neutral" }
+            save(image,"control-$name"); image.recycle()
+            // This gesture must remain ignored even after dragging away from the button.
+            touch(MotionEvent.ACTION_MOVE,Offset(width*.15f,neutral.y),down)
+            SystemClock.sleep(45)
+            image=captureWindow(activity); center=pupilCenter(image); image.recycle()
+            check(abs(center.x-neutral.x)<2) { "Dragging off $name re-enabled gaze" }
+            touch(MotionEvent.ACTION_CANCEL,point,down)
+            SystemClock.sleep(40)
+        }
+        val blank=Offset(width*.15f,neutral.y)
+        val down=SystemClock.uptimeMillis()
+        touch(MotionEvent.ACTION_DOWN,blank,down)
+        SystemClock.sleep(60)
+        val tracking=captureWindow(activity)
+        check(pupilCenter(tracking).x<neutral.x-3) { "Blank-area tracking stopped working" }
+        save(tracking,"controls-blank-tracking"); tracking.recycle()
+        touch(MotionEvent.ACTION_CANCEL,blank,down)
+        for ((name,point) in controls.filter { it.first!="read" }) {
+            val time=SystemClock.uptimeMillis()
+            touch(MotionEvent.ACTION_DOWN,point,time)
+            touch(MotionEvent.ACTION_UP,point,time)
+            SystemClock.sleep(380)
+            runOnMainSync { check(com.kongye.reader.ui.Nav.top!=com.kongye.reader.ui.Screen.Home) { "$name no longer navigates" } }
+            if (name=="prefs") {
+                val scrollTime=SystemClock.uptimeMillis()
+                touch(MotionEvent.ACTION_DOWN,Offset(width*.5f,height*.82f),scrollTime)
+                for (step in 1..16) {
+                    touch(MotionEvent.ACTION_MOVE,Offset(width*.5f,height*(.82f-.038f*step)),scrollTime)
+                    SystemClock.sleep(16)
+                }
+                touch(MotionEvent.ACTION_UP,Offset(width*.5f,height*.212f),scrollTime)
+                SystemClock.sleep(450)
+                val settings=captureWindow(activity); save(settings,"settings-board-cat"); settings.recycle()
+            }
+            runOnMainSync { com.kongye.reader.ui.Nav.pop() }
+            SystemClock.sleep(380)
+        }
+        var imports=0
+        runOnMainSync { com.kongye.reader.ui.Nav.pickFiles={ imports++ } }
+        val point=controls.first { it.first=="read" }.second
+        val time=SystemClock.uptimeMillis()
+        touch(MotionEvent.ACTION_DOWN,point,time); touch(MotionEvent.ACTION_UP,point,time)
+        SystemClock.sleep(100)
+        runOnMainSync { check(imports==1) { "Import button no longer works" }; activity.finish() }
+        File(output,"controls-result.txt").writeText("Five excluded buttons + drag out: passed\nBlank tracking: passed\nButton navigation/import: passed\n")
     }
 
     private fun checkGazeLimits() {

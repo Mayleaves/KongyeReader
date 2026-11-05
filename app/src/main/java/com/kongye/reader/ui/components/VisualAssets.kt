@@ -42,7 +42,7 @@ import kotlin.math.min
 
 /** Seconds from the first displayed frame. The frame clock pauses with the window. */
 @Composable
-private fun assetTime(stopAt: Float = Float.POSITIVE_INFINITY): Float {
+internal fun assetTime(stopAt: Float = Float.POSITIVE_INFINITY): Float {
     var elapsed by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) {
         val start = withFrameNanos { it }
@@ -148,6 +148,9 @@ internal fun DrawScope.assetGroup(name: String, time: Float, block: DrawScope.()
     when (name) {
         "svg-cat-breathe" -> {
             val p = wave(time, 3.8f); sy += 0.018f * p; ty = -1.8f * p; pivot = Offset(120f, 232f)
+        }
+        "svg-loaf-breathe" -> {
+            val p = wave(time, 4f); sy += 0.022f * p; ty = -1.2f * p; pivot = Offset(132f, 231f)
         }
         "svg-cat-tail", "svg-cat-tail-sleep" -> {
             val sleep = name.endsWith("sleep")

@@ -4,6 +4,7 @@ Run from the repository root: python tools/import_visual_assets.py
 Only the three asset-generating functions are evaluated, in an isolated Node VM.
 """
 import json
+import copy
 import re
 import subprocess
 from pathlib import Path
@@ -174,7 +175,35 @@ for name, filename in [('Focus','home-focus'), ('Happy','home-happy'), ('Sleep',
             '            }',
         ]
     params = ', leaf: Boolean = false, gaze: Offset = Offset.Zero' if name == 'Focus' else ''
+    if name in ('Focus', 'Sleep'):
+        body_color = '(if (dark) Color(0xFF232329) else Color(0xFF1E1E22))'
+        lines = [line.replace(body_color, f'(bodyColor ?: {body_color})')
+                 .replace('Color(0xFF47474E)', '(detailColor ?: Color(0xFF47474E))') for line in lines]
+        lines[0] = lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
+        params += ', bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true'
     functions += [f'internal fun DrawScope.drawImported{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
+
+# User-supplied replacement for every legacy loaf pose. Preserve its paths and
+# its own breathing timing/pivot rather than reshaping the sitting mascot.
+loaf = ET.parse(SOURCE / 'cat-loaf.svg').getroot()
+dark_loaf = copy.deepcopy(loaf)
+for root in (loaf, dark_loaf):
+    for element in root.iter():
+        if element.get('class') == 'svg-cat-breathe':
+            element.set('class', 'svg-loaf-breathe')
+for element in dark_loaf.iter():
+    for key in ('fill', 'stroke'):
+        palette = {'#1E1E22':'#232329', '#EFEFEF':'rgba(0,0,0,0.45)', '#27272A':'#E4E4E7'}
+        if element.get(key) in palette:
+            element.set(key, palette[element.get(key)])
+loaf_lines = emit(loaf, dark_loaf, classes(loaf), classes(dark_loaf))
+loaf_lines = [line.replace('(if (dark) Color(0xFF232329) else Color(0xFF1E1E22))',
+                          '(bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)))')
+             .replace('Color(0xFF47474E)', '(detailColor ?: Color(0xFF47474E))')
+             .replace('Color(0xFFFFFFFF)', '(eyeColor ?: Color.White)') for line in loaf_lines]
+loaf_lines[0] = loaf_lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
+functions += ['internal fun DrawScope.drawImportedLoaf(dark: Boolean, time: Float, bodyColor: Color? = null, eyeColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {',
+              *loaf_lines, '}', '']
 
 # Three supplied chart drawings. Stretch only the body; preserve the eyes/leaf proportions.
 for name, file in [('Black','black'),('Leaf','leaf'),('Gray','gray')]:
@@ -265,5 +294,38 @@ for file, mono in [('ic_launcher_foreground.xml',False),('ic_launcher_monochrome
     v = vector(mono)
     ET.indent(v)
     ET.ElementTree(v).write(RES / 'drawable' / file,encoding='utf-8',xml_declaration=True)
+
+def widget_vector(dark=False):
+    root = ET.parse(OUT / ('home-focus-dark.svg' if dark else 'home-focus.svg')).getroot()
+    v = ET.Element('vector', va(width='200dp', height='200dp', viewportWidth=210, viewportHeight=210))
+    drawing = ET.SubElement(v, 'group', va(translateX=-15, translateY=-35))
+    def walk(el, inherited=None):
+        t = tag(el)
+        if t in ('style', 'defs'):
+            return
+        a = dict(inherited or {'fill':'none'}); a.update(el.attrib)
+        if t in ('svg','g'):
+            for child in el:
+                walk(child, {k:value for k,value in a.items() if k in ('fill','stroke','stroke-width','stroke-linecap','stroke-linejoin')})
+            return
+        if t == 'ellipse' and el.get('cy') == '233':
+            return  # The widget has its own surface; no ground shadow is needed.
+        attrs = dict(pathData=shape(el))
+        if a.get('fill','none') != 'none':
+            attrs['fillColor'] = a['fill']
+        if a.get('stroke','none') != 'none':
+            attrs.update(strokeColor=a['stroke'], strokeWidth=a.get('stroke-width',1),
+                         strokeLineCap=a.get('stroke-linecap','butt'),strokeLineJoin=a.get('stroke-linejoin','miter'))
+        if 'opacity' in a:
+            attrs.update(fillAlpha=a['opacity'],strokeAlpha=a['opacity'])
+        ET.SubElement(drawing,'path',va(**attrs))
+    walk(root)
+    ET.indent(v)
+    directory = RES / ('drawable-night' if dark else 'drawable')
+    directory.mkdir(exist_ok=True)
+    ET.ElementTree(v).write(directory / 'widget_cat.xml', encoding='utf-8', xml_declaration=True)
+
+widget_vector()
+widget_vector(True)
 
 print(f'Imported {len(paths)} native paths, homepage states, splash, chart cats, and launcher icon.')

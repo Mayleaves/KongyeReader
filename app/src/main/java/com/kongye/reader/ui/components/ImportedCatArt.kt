@@ -67,41 +67,48 @@ private object ImportedCatPaths {
     val p54 by lazy { svgPath("M179.7 750a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0Z") }
     val p55 by lazy { svgPath("M185.7 748a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0Z") }
     val p56 by lazy { svgPath("M191.7 750a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0Z") }
-    val p57 by lazy { svgPath("M4,296.78L13.35,18.47c.64-5,4.46-5,7.65-1l15.3,20h35.69l15.3-20c3.19-4,7.01-4,7.65,1l13.96,278.31H4Z") }
-    val p58 by lazy { svgPath("M21.36 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z") }
-    val p59 by lazy { svgPath("M24.37 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z") }
-    val p60 by lazy { svgPath("M35.19 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z") }
-    val p61 by lazy { svgPath("M63.23 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z") }
-    val p62 by lazy { svgPath("M66.24 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z") }
-    val p63 by lazy { svgPath("M77.06 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z") }
-    val p64 by lazy { svgPath("M50.67 66.94a3.91 2.2 0 1 0 7.82 0a3.91 2.2 0 1 0 -7.82 0Z") }
-    val p65 by lazy { svgPath("M54.58,73.01v7.34M54.58,80.35l-3.67,3.06M54.58,80.35l3.67,3.06") }
-    val p66 by lazy { svgPath("M51.5,37.36c-3-13.5,4-25.5,19-27.5-1,15-9,25-19,27.5Z") }
-    val p67 by lazy { svgPath("M51.5,37.36c4.67-9,10-17.17,16-24.5") }
-    val p68 by lazy { svgPath("M53.5,21.86l3.8,5.2,5.7.3") }
-    val p69 by lazy { svgPath("M59,15.86l3,4.2,4.5.3") }
-    val p70 by lazy { svgPath("M52.46 67.74a3.98 2.24 0 1 0 7.96 0a3.98 2.24 0 1 0 -7.96 0Z") }
-    val p71 by lazy { svgPath("M56.44,73.92v7.47M56.44,81.4l-3.74,3.11M56.44,81.4l3.74,3.11") }
-    val p72 by lazy { svgPath("M87.45,62.21c-6.89-.75-12.98.89-18.28,4.94") }
-    val p73 by lazy { svgPath("M43.71,67.15c-5.3-4.05-11.39-5.69-18.28-4.94") }
+    val p57 by lazy { svgPath("M58 233a74 6 0 1 0 148 0a74 6 0 1 0 -148 0Z") }
+    val p58 by lazy { svgPath("M 65 231 C 61 206, 70 183, 86 177 L 134 177 C 174 177, 203 198, 203 224 C 203 237, 191 244, 168 244.5 C 146 245, 127 244.5, 114 249 C 109 250.8, 106 247.5, 106.5 243.5 C 107 239.5, 110.5 238, 115 237 C 128 234, 148 234.5, 168 234 C 181 233.5, 189 232.2, 191 231 L 65 231 Z") }
+    val p59 by lazy { svgPath("M 99 199 L 103 203 L 107 199") }
+    val p60 by lazy { svgPath("M 78 214 C 86 211.5, 95 212, 98.5 216.5 C 100.2 218.8, 100.5 222, 100.5 225.5") }
+    val p61 by lazy { svgPath("M 128 214 C 120 211.5, 111 212, 107.5 216.5 C 105.8 218.8, 105.5 222, 105.5 225.5") }
+    val p62 by lazy { svgPath("M88 124 Q99 131 110 124") }
+    val p63 by lazy { svgPath("M130 124 Q141 131 152 124") }
+    val p64 by lazy { svgPath("M4,296.78L13.35,18.47c.64-5,4.46-5,7.65-1l15.3,20h35.69l15.3-20c3.19-4,7.01-4,7.65,1l13.96,278.31H4Z") }
+    val p65 by lazy { svgPath("M21.36 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z") }
+    val p66 by lazy { svgPath("M24.37 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z") }
+    val p67 by lazy { svgPath("M35.19 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z") }
+    val p68 by lazy { svgPath("M63.23 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z") }
+    val p69 by lazy { svgPath("M66.24 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z") }
+    val p70 by lazy { svgPath("M77.06 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z") }
+    val p71 by lazy { svgPath("M50.67 66.94a3.91 2.2 0 1 0 7.82 0a3.91 2.2 0 1 0 -7.82 0Z") }
+    val p72 by lazy { svgPath("M54.58,73.01v7.34M54.58,80.35l-3.67,3.06M54.58,80.35l3.67,3.06") }
+    val p73 by lazy { svgPath("M51.5,37.36c-3-13.5,4-25.5,19-27.5-1,15-9,25-19,27.5Z") }
+    val p74 by lazy { svgPath("M51.5,37.36c4.67-9,10-17.17,16-24.5") }
+    val p75 by lazy { svgPath("M53.5,21.86l3.8,5.2,5.7.3") }
+    val p76 by lazy { svgPath("M59,15.86l3,4.2,4.5.3") }
+    val p77 by lazy { svgPath("M52.46 67.74a3.98 2.24 0 1 0 7.96 0a3.98 2.24 0 1 0 -7.96 0Z") }
+    val p78 by lazy { svgPath("M56.44,73.92v7.47M56.44,81.4l-3.74,3.11M56.44,81.4l3.74,3.11") }
+    val p79 by lazy { svgPath("M87.45,62.21c-6.89-.75-12.98.89-18.28,4.94") }
+    val p80 by lazy { svgPath("M43.71,67.15c-5.3-4.05-11.39-5.69-18.28-4.94") }
 }
 
-internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero) {
-    drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero, bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("svg-cat-tail", time) {
-        assetStroke(ImportedCatPaths.p1, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), 11.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p1, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), 11.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
     }
     assetGroup("svg-cat-breathe", time) {
-        drawPath(ImportedCatPaths.p2, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
-        assetStroke(ImportedCatPaths.p3, Color(0xFF47474E), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
-        assetStroke(ImportedCatPaths.p4, Color(0xFF47474E), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
-        assetStroke(ImportedCatPaths.p5, Color(0xFF47474E), 2.2f, StrokeCap.Round, StrokeJoin.Round, 0.7f, 1f)
+        drawPath(ImportedCatPaths.p2, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+        assetStroke(ImportedCatPaths.p3, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p4, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p5, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Round, 0.7f, 1f)
         assetGroup("svg-ear-l", time) {
-            drawPath(ImportedCatPaths.p6, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
+            drawPath(ImportedCatPaths.p6, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
             assetStroke(ImportedCatPaths.p7, Color(0xFF3A3A40), 3.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
         }
         assetGroup("svg-ear-r", time) {
-            drawPath(ImportedCatPaths.p8, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
+            drawPath(ImportedCatPaths.p8, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
             assetStroke(ImportedCatPaths.p9, Color(0xFF3A3A40), 3.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
         }
         assetGroup("svg-head-leaf", time) {
@@ -109,11 +116,11 @@ internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boole
             assetStroke(ImportedCatPaths.p10, (if (leaf) Color(0xFFB8230C) else if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.4f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
             assetStroke(ImportedCatPaths.p11, (if (leaf) Color(0xFFB8230C) else if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         }
-        drawPath(ImportedCatPaths.p12, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
-        assetStroke(ImportedCatPaths.p13, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p14, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p15, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p16, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        drawPath(ImportedCatPaths.p12, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+        assetStroke(ImportedCatPaths.p13, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p14, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p15, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p16, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
         assetGroup("svg-eye-blink", time) {
             drawPath(ImportedCatPaths.p17, Color(0xFFFFFFFF), alpha = 1.0f)
             drawPath(ImportedCatPaths.p18, Color(0xFFFFFFFF), alpha = 1.0f)
@@ -192,33 +199,33 @@ internal fun DrawScope.drawImportedHappy(dark: Boolean, time: Float) {
     }
 }
 
-internal fun DrawScope.drawImportedSleep(dark: Boolean, time: Float) {
-    drawPath(ImportedCatPaths.p35, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+internal fun DrawScope.drawImportedSleep(dark: Boolean, time: Float, bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p35, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("svg-cat-tail-sleep", time) {
-        assetStroke(ImportedCatPaths.p36, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), 12.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p36, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), 12.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
     assetGroup("svg-cat-breathe", time) {
-        drawPath(ImportedCatPaths.p2, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
-        assetStroke(ImportedCatPaths.p3, Color(0xFF47474E), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
-        assetStroke(ImportedCatPaths.p4, Color(0xFF47474E), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
-        assetStroke(ImportedCatPaths.p5, Color(0xFF47474E), 2.2f, StrokeCap.Round, StrokeJoin.Round, 0.7f, 1f)
+        drawPath(ImportedCatPaths.p2, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+        assetStroke(ImportedCatPaths.p3, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p4, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p5, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Round, 0.7f, 1f)
         assetGroup("svg-ear-l", time) {
-            drawPath(ImportedCatPaths.p6, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
+            drawPath(ImportedCatPaths.p6, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
             assetStroke(ImportedCatPaths.p7, Color(0xFF3A3A40), 3.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
         }
         assetGroup("svg-ear-r", time) {
-            drawPath(ImportedCatPaths.p8, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
+            drawPath(ImportedCatPaths.p8, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
             assetStroke(ImportedCatPaths.p9, Color(0xFF3A3A40), 3.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
         }
         assetGroup("svg-head-leaf", time) {
             assetStroke(ImportedCatPaths.p10, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.4f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
             assetStroke(ImportedCatPaths.p11, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         }
-        drawPath(ImportedCatPaths.p12, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), alpha = 1.0f)
-        assetStroke(ImportedCatPaths.p13, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p14, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p15, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
-        assetStroke(ImportedCatPaths.p16, Color(0xFF47474E), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        drawPath(ImportedCatPaths.p12, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+        assetStroke(ImportedCatPaths.p13, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p14, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p15, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+        assetStroke(ImportedCatPaths.p16, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
         assetStroke(ImportedCatPaths.p37, Color(0xFFFFFFFF), 4.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         assetStroke(ImportedCatPaths.p38, Color(0xFFFFFFFF), 4.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         assetStroke(ImportedCatPaths.p39, Color(0xFF52525B), 2.8f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
@@ -302,77 +309,109 @@ internal fun DrawScope.drawImportedSplash(dark: Boolean, time: Float) {
     }
 }
 
+internal fun DrawScope.drawImportedLoaf(dark: Boolean, time: Float, bodyColor: Color? = null, eyeColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p57, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+    assetGroup("svg-loaf-breathe", time) {
+        drawPath(ImportedCatPaths.p58, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+        assetStroke(ImportedCatPaths.p59, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Round, 0.65f, 1f)
+        assetStroke(ImportedCatPaths.p60, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p61, (detailColor ?: Color(0xFF47474E)), 3.2f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        withTransform({ translate(103.0f, 161.0f); scale(0.76f, 0.76f, pivot = Offset.Zero); translate(-120.0f, -121.0f) }) {
+            assetGroup("svg-ear-l", time) {
+                drawPath(ImportedCatPaths.p6, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+                assetStroke(ImportedCatPaths.p7, Color(0xFF3A3A40), 3.2f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+            }
+            assetGroup("svg-ear-r", time) {
+                drawPath(ImportedCatPaths.p8, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+                assetStroke(ImportedCatPaths.p9, Color(0xFF3A3A40), 3.2f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+            }
+            assetGroup("svg-head-leaf", time) {
+                assetStroke(ImportedCatPaths.p10, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.6f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
+                assetStroke(ImportedCatPaths.p11, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.2f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+            }
+            drawPath(ImportedCatPaths.p12, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), alpha = 1.0f)
+            assetStroke(ImportedCatPaths.p13, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+            assetStroke(ImportedCatPaths.p14, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+            assetStroke(ImportedCatPaths.p15, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+            assetStroke(ImportedCatPaths.p16, (detailColor ?: Color(0xFF47474E)), 2.2f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
+            assetStroke(ImportedCatPaths.p62, (eyeColor ?: Color.White), 4.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+            assetStroke(ImportedCatPaths.p63, (eyeColor ?: Color.White), 4.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+            assetStroke(ImportedCatPaths.p23, Color(0xFF52525B), 2.8f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        }
+    }
+}
+
 internal fun DrawScope.drawImportedBarBlack(body: Path) {
     val time = 0f
     assetGroup("st2", time) {
         drawPath(body, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st0", time) {
-        drawPath(ImportedCatPaths.p58, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p65, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st2", time) {
-        drawPath(ImportedCatPaths.p59, Color(0xFF0A0A0A), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p66, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st0", time) {
-        drawPath(ImportedCatPaths.p60, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p67, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st0", time) {
-        drawPath(ImportedCatPaths.p61, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p68, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st2", time) {
-        drawPath(ImportedCatPaths.p62, Color(0xFF0A0A0A), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p69, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st0", time) {
-        drawPath(ImportedCatPaths.p63, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p70, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p64, Color(0xFF787878), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p71, Color(0xFF787878), alpha = 1.0f)
     }
     assetGroup("st1", time) {
-        assetStroke(ImportedCatPaths.p65, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p72, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
 }
 
 internal fun DrawScope.drawImportedBarLeaf(body: Path) {
     val time = 0f
     assetGroup("st4", time) {
-        drawPath(ImportedCatPaths.p66, Color(0xFFEE4326), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p73, Color(0xFFEE4326), alpha = 1.0f)
     }
     assetGroup("st2", time) {
-        assetStroke(ImportedCatPaths.p67, Color(0xFFB8230C), 1.8f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p74, Color(0xFFB8230C), 1.8f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
     assetGroup("st0", time) {
-        assetStroke(ImportedCatPaths.p68, Color(0xFFB8230C), 1.4f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p75, Color(0xFFB8230C), 1.4f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
     assetGroup("st0", time) {
-        assetStroke(ImportedCatPaths.p69, Color(0xFFB8230C), 1.4f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p76, Color(0xFFB8230C), 1.4f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
     assetGroup("st5", time) {
         drawPath(body, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p58, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p65, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st5", time) {
-        drawPath(ImportedCatPaths.p59, Color(0xFF0A0A0A), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p66, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p60, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p67, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p61, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p68, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st5", time) {
-        drawPath(ImportedCatPaths.p62, Color(0xFF0A0A0A), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p69, Color(0xFF0A0A0A), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p63, Color(0xFFFFFFFF), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p70, Color(0xFFFFFFFF), alpha = 1.0f)
     }
     assetGroup("st6", time) {
-        drawPath(ImportedCatPaths.p64, Color(0xFF787878), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p71, Color(0xFF787878), alpha = 1.0f)
     }
     assetGroup("st1", time) {
-        assetStroke(ImportedCatPaths.p65, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p72, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
 }
 
@@ -382,15 +421,15 @@ internal fun DrawScope.drawImportedBarGray(body: Path) {
         drawPath(body, Color(0xFFD6D8DC), alpha = 1.0f)
     }
     assetGroup("st3", time) {
-        drawPath(ImportedCatPaths.p70, Color(0xFF787878), alpha = 1.0f)
+        drawPath(ImportedCatPaths.p77, Color(0xFF787878), alpha = 1.0f)
     }
     assetGroup("st1", time) {
-        assetStroke(ImportedCatPaths.p71, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p78, Color(0xFF787878), 1.0f, StrokeCap.Round, StrokeJoin.Round, 1.0f, 1f)
     }
     assetGroup("st0", time) {
-        assetStroke(ImportedCatPaths.p72, Color(0xFFFFFFFF), 3.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p79, Color(0xFFFFFFFF), 3.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
     }
     assetGroup("st0", time) {
-        assetStroke(ImportedCatPaths.p73, Color(0xFFFFFFFF), 3.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        assetStroke(ImportedCatPaths.p80, Color(0xFFFFFFFF), 3.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
     }
 }

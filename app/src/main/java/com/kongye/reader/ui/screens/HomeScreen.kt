@@ -34,11 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -108,6 +110,10 @@ fun HomeScreen() {
     val gazeRadius = with(LocalDensity.current) { 100.dp.toPx() }
     var fingerPosition by remember { mutableStateOf<Offset?>(null) }
     var homeOrigin by remember { mutableStateOf(Offset.Zero) }
+    val buttonBounds = remember { mutableMapOf<String, Rect>() }
+    fun Modifier.excludeFromGaze(key: String): Modifier = onGloballyPositioned {
+        buttonBounds[key] = it.boundsInRoot()
+    }
     var catEyeCenter by remember { mutableStateOf(Offset.Zero) }
     var catHeadTop by remember { mutableStateOf(0f) }
     var speech by remember { mutableStateOf("") }
@@ -130,12 +136,17 @@ fun HomeScreen() {
             try {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                    fingerPosition = down.position
+                    // Latch for this gesture: a button press must never move the eyes,
+                    // even if the finger later drags outside the button.
+                    val follows = buttonBounds.values.none { it.contains(down.position + homeOrigin) }
+                    fingerPosition = down.position.takeIf { follows }
+                    var pressed = true
                     do {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         val finger = event.changes.firstOrNull { it.id == down.id }
-                        fingerPosition = finger?.takeIf { it.pressed }?.position
-                    } while (fingerPosition != null)
+                        pressed = finger?.pressed == true
+                        fingerPosition = finger?.takeIf { follows && it.pressed }?.position
+                    } while (pressed)
                 }
             } finally {
                 fingerPosition = null
@@ -157,8 +168,8 @@ fun HomeScreen() {
             ) {
                 Logo()
                 Spacer(Modifier.weight(1f))
-                IconBtn(Ico.LIST) { Nav.push(Screen.Shelf) }
-                IconBtn(Ico.RING) { Nav.push(Screen.Prefs) }
+                IconBtn(Ico.LIST, Modifier.excludeFromGaze("shelf")) { Nav.push(Screen.Shelf) }
+                IconBtn(Ico.RING, Modifier.excludeFromGaze("prefs")) { Nav.push(Screen.Prefs) }
             }
             Spacer(Modifier.weight(1f))
             // Anchor speech to the cat's resting layout, outside the animated hop.
@@ -199,12 +210,13 @@ fun HomeScreen() {
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(Fmt.clock(today)) }
                 },
                 ico = Ico.CLOCK,
+                modifier = Modifier.excludeFromGaze("today"),
                 chevron = true,
             ) { Nav.push(Screen.Stats) }
             Spacer(Modifier.weight(1f))
             InkButton(
                 if (current != null) "继续阅读" else "导入书籍",
-                Modifier.size(width = 200.dp, height = 60.dp),
+                Modifier.size(width = 200.dp, height = 60.dp).excludeFromGaze("read"),
             ) {
                 if (current != null) Nav.openBook(current.id) else Nav.pickFiles()
             }
@@ -220,6 +232,7 @@ fun HomeScreen() {
                     "《${current.title}》· $label", 13.sp, c.text2,
                     modifier = Modifier
                         .widthIn(max = 280.dp)
+                        .excludeFromGaze("book")
                         .press { Nav.push(Screen.Shelf) },
                     maxLines = 1, align = TextAlign.Center,
                 )
@@ -234,7 +247,8 @@ fun HomeScreen() {
             Modifier
                 .align(Alignment.BottomStart)
                 .navigationBarsPadding()
-                .padding(start = 14.dp, bottom = 14.dp),
+                .padding(start = 14.dp, bottom = 14.dp)
+                .excludeFromGaze("garden"),
         ) { Nav.push(Screen.Garden) }
         AnimatedVisibility(
             speechVisible,
