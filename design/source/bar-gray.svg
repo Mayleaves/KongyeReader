@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 112.89 296.78">
+  <!-- Generator: Adobe Illustrator 29.8.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 2)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke: #fff;
+        stroke-width: 3px;
+      }
+
+      .st0, .st1 {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .st2 {
+        fill: #d6d8dc;
+      }
+
+      .st1 {
+        stroke: #787878;
+        stroke-linejoin: round;
+      }
+
+      .st3 {
+        fill: #787878;
+      }
+    </style>
+  </defs>
+  <path class="st2" d="M4,296.78L13.35,18.47c.64-5,4.46-5,7.65-1l15.3,20h35.69l15.3-20c3.19-4,7.01-4,7.65,1l13.96,278.31H4Z"/>
+  <g>
+    <ellipse class="st3" cx="56.44" cy="67.74" rx="3.98" ry="2.24"/>
+    <path class="st1" d="M56.44,73.92v7.47M56.44,81.4l-3.74,3.11M56.44,81.4l3.74,3.11"/>
+    <g>
+      <path class="st0" d="M87.45,62.21c-6.89-.75-12.98.89-18.28,4.94"/>
+      <path class="st0" d="M43.71,67.15c-5.3-4.05-11.39-5.69-18.28-4.94"/>
+    </g>
+  </g>
+</svg>

@@ -3,7 +3,12 @@ package com.kongye.reader.ui.screens
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,12 +23,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -34,11 +49,15 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kongye.reader.data.Library
+import com.kongye.reader.data.CatRest
+import com.kongye.reader.data.CatRestPolicy
 import com.kongye.reader.data.Stats
 import com.kongye.reader.ui.Fmt
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
-import com.kongye.reader.ui.components.CatMascot
+import com.kongye.reader.ui.components.DashboardCat
+import com.kongye.reader.ui.components.CatSpeechBubble
+import com.kongye.reader.ui.components.catGazeAt
 import com.kongye.reader.ui.components.Chip
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.IconBtn
@@ -46,10 +65,11 @@ import com.kongye.reader.ui.components.InkButton
 import com.kongye.reader.ui.components.Logo
 import com.kongye.reader.ui.components.Signpost
 import com.kongye.reader.ui.components.T
-import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
 private val quotes = listOf(
@@ -67,15 +87,61 @@ fun HomeScreen() {
     val c = K.c
     val books by Library.books.collectAsState()
     val sessions by Stats.sessions.collectAsState()
+    val wakeMemory by CatRest.state.collectAsState()
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = LocalDateTime.now()
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
+        }
+    }
     val current = remember(books) {
         books.filter { it.lastReadAt > 0 }.maxByOrNull { it.lastReadAt } ?: books.maxByOrNull { it.addedAt }
     }
-    val today = remember(sessions) { Stats.todayMillis(sessions) }
+    val today = remember(sessions, now.toLocalDate()) { Stats.todayMillis(sessions) }
+    val totalRead = remember(sessions) { sessions.sumOf { it.millis } }
+    val sleeping = CatRestPolicy.sleeping(today, totalRead, now, wakeMemory)
     val scope = rememberCoroutineScope()
     val hop = remember { Animatable(0f) }
+    var petSignal by remember { mutableIntStateOf(0) }
     val hopPx = with(LocalDensity.current) { 34.dp.toPx() }
+    val gazeRadius = with(LocalDensity.current) { 100.dp.toPx() }
+    var fingerPosition by remember { mutableStateOf<Offset?>(null) }
+    var homeOrigin by remember { mutableStateOf(Offset.Zero) }
+    var catEyeCenter by remember { mutableStateOf(Offset.Zero) }
+    var catHeadTop by remember { mutableStateOf(0f) }
+    var speech by remember { mutableStateOf("") }
+    var speechSignal by remember { mutableIntStateOf(0) }
+    var speechVisible by remember { mutableStateOf(false) }
+    var speechHeight by remember { mutableIntStateOf(0) }
+    val bubbleGap = with(LocalDensity.current) { 50.dp.toPx() }
+    val headInset = with(LocalDensity.current) { 16.dp.toPx() }
+    LaunchedEffect(speechSignal) {
+        if (speechSignal > 0) {
+            speechVisible = true
+            delay(2200)
+            speechVisible = false
+        }
+    }
 
-    Box(Modifier.fillMaxSize().background(c.bg)) {
+    Box(Modifier.fillMaxSize().background(c.bg)
+        .onGloballyPositioned { homeOrigin = it.positionInRoot() }
+        .pointerInput(Unit) {
+            try {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    fingerPosition = down.position
+                    do {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        val finger = event.changes.firstOrNull { it.id == down.id }
+                        fingerPosition = finger?.takeIf { it.pressed }?.position
+                    } while (fingerPosition != null)
+                }
+            } finally {
+                fingerPosition = null
+            }
+        },
+    ) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -95,20 +161,37 @@ fun HomeScreen() {
                 IconBtn(Ico.RING) { Nav.push(Screen.Prefs) }
             }
             Spacer(Modifier.weight(1f))
-            CatMascot(
-                Modifier
-                    .offset { IntOffset(0, hop.value.roundToInt()) }
-                    .press(scaleTo = 0.97f) {
-                        Toast.show(quotes.random())
-                        scope.launch {
-                            hop.animateTo(-hopPx, tween(140))
-                            hop.animateTo(0f, spring(dampingRatio = 0.4f, stiffness = 500f))
+            // Anchor speech to the cat's resting layout, outside the animated hop.
+            Box(Modifier.size(210.dp).onGloballyPositioned {
+                catHeadTop = it.positionInRoot().y + headInset
+            }) {
+                DashboardCat(
+                    Modifier
+                        .offset { IntOffset(0, hop.value.roundToInt()) }
+                        .onGloballyPositioned {
+                            catEyeCenter = it.positionInRoot() + Offset(it.size.width / 2f, it.size.height * (91f / 210f))
                         }
-                    },
-                size = 210.dp,
-                blink = true,
-                accent = today >= 30 * 60_000,
-            )
+                        .press(scaleTo = 0.97f) {
+                            if (sleeping) {
+                                CatRest.wake(totalRead, LocalDateTime.now())
+                                speech = "醒啦，陪你继续读书"
+                            } else {
+                                petSignal++
+                                speech = quotes.random()
+                                scope.launch {
+                                    hop.animateTo(-hopPx, tween(140))
+                                    hop.animateTo(0f, spring(dampingRatio = 0.4f, stiffness = 500f))
+                                }
+                            }
+                            speechSignal++
+                        },
+                    size = 210.dp,
+                    petSignal = petSignal,
+                    leaf = today >= 30 * 60_000,
+                    gaze = catGazeAt(fingerPosition?.plus(homeOrigin), catEyeCenter, gazeRadius),
+                    sleeping = sleeping,
+                )
+            }
             Spacer(Modifier.height(12.dp))
             Chip(
                 buildAnnotatedString {
@@ -153,5 +236,13 @@ fun HomeScreen() {
                 .navigationBarsPadding()
                 .padding(start = 14.dp, bottom = 14.dp),
         ) { Nav.push(Screen.Garden) }
+        AnimatedVisibility(
+            speechVisible,
+            modifier = Modifier.align(Alignment.TopCenter)
+                .offset { IntOffset(0, (catHeadTop - homeOrigin.y - bubbleGap - speechHeight).roundToInt().coerceAtLeast(0)) }
+                .onSizeChanged { speechHeight = it.height },
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) { CatSpeechBubble(speech) }
     }
 }

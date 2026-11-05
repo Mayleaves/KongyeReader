@@ -17,7 +17,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -186,49 +185,5 @@ fun HangingCat(modifier: Modifier = Modifier, width: Dp = 190.dp) {
                 }
             }
         }
-    }
-}
-
-/** 统计图里的“猫柱”：柱顶是猫头，数值小的灰色闭眼 */
-fun DrawScope.drawCatBar(x: Float, top: Float, base: Float, w: Float, color: Color, eye: Color, sleep: Boolean, accent: Color?) {
-    val r = w * 0.32f
-    val p = Path().apply {
-        moveTo(x, base)
-        lineTo(x, top + r)
-        cubicTo(x, top + r * 0.3f, x + w * 0.05f, top, x + w * 0.18f, top - w * 0.02f)
-        lineTo(x + w * 0.10f, top - w * 0.42f)
-        lineTo(x + w * 0.40f, top - w * 0.06f)
-        lineTo(x + w * 0.60f, top - w * 0.06f)
-        lineTo(x + w * 0.90f, top - w * 0.42f)
-        lineTo(x + w * 0.82f, top - w * 0.02f)
-        cubicTo(x + w * 0.95f, top, x + w, top + r * 0.3f, x + w, top + r)
-        lineTo(x + w, base)
-        close()
-    }
-    drawPath(p, color)
-    drawPath(p, color, style = Stroke(w * 0.06f, join = StrokeJoin.Round))
-    val ey = top + w * 0.36f
-    if (sleep) {
-        val arcs = Path().apply {
-            moveTo(x + w * 0.2f, ey)
-            quadraticTo(x + w * 0.3f, ey + w * 0.12f, x + w * 0.4f, ey)
-            moveTo(x + w * 0.6f, ey)
-            quadraticTo(x + w * 0.7f, ey + w * 0.12f, x + w * 0.8f, ey)
-        }
-        drawPath(arcs, eye, style = Stroke(w * 0.07f, cap = StrokeCap.Round))
-    } else {
-        drawCircle(eye, w * 0.15f, Offset(x + w * 0.3f, ey))
-        drawCircle(eye, w * 0.15f, Offset(x + w * 0.7f, ey))
-        drawCircle(color, w * 0.07f, Offset(x + w * 0.33f, ey))
-        drawCircle(color, w * 0.07f, Offset(x + w * 0.73f, ey))
-    }
-    if (accent != null) {
-        val leaf = Path().apply {
-            moveTo(x + w * 0.5f, top - w * 0.1f)
-            cubicTo(x + w * 0.4f, top - w * 0.6f, x + w * 0.7f, top - w * 0.9f, x + w * 1.05f, top - w * 0.85f)
-            cubicTo(x + w * 1.0f, top - w * 0.4f, x + w * 0.8f, top - w * 0.12f, x + w * 0.5f, top - w * 0.1f)
-            close()
-        }
-        drawPath(leaf, accent)
     }
 }

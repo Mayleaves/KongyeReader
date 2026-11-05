@@ -1,5 +1,6 @@
 package com.kongye.reader
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
         if (!importing && Settings.value.resumeLast && Nav.stack.size == 1) {
             Library.books.value.filter { it.lastReadAt > 0 }.maxByOrNull { it.lastReadAt }?.let { Nav.openBook(it.id) }
         }
-        setContent { App() }
+        setContent { App(showSplash = savedInstanceState == null) }
         lifecycleScope.launch { Settings.state.collect { applyBars() } }
     }
 
@@ -95,6 +96,8 @@ class MainActivity : ComponentActivity() {
     }
 
     /** 阅读页注册后，音量键用来翻页 */
+    // Activity 的公开按键入口；忽略 androidx.core 父类实现上的库内限制标记。
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val handler = volumeHandler
         if (handler != null && Settings.value.volumeKeys &&

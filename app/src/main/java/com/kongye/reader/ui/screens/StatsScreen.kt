@@ -61,7 +61,7 @@ import com.kongye.reader.ui.components.SmoothShape
 import com.kongye.reader.ui.components.T
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.bigDuration
-import com.kongye.reader.ui.components.drawCatBar
+import com.kongye.reader.ui.components.drawReadingCatBar
 import com.kongye.reader.ui.theme.K
 import java.time.LocalDate
 import java.time.YearMonth
@@ -277,6 +277,7 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
         val w = if (heads) min(slot * 0.62f, 30.dp.toPx()) else slot * 0.56f
         val maxV = max(maxBar, avg).coerceAtLeast(1L).toFloat()
         val avail = base - topPad
+        val averageY = base - avg / maxV * avail
         val tops = FloatArray(n)
         bars.forEachIndexed { i, b ->
             val x = i * slot + (slot - w) / 2
@@ -284,8 +285,9 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
             val col = if (gray) c.track else c.ink
             if (heads) {
                 val h = max(w * 0.9f, b.value / maxV * avail)
-                tops[i] = base - h
-                if (!b.future) drawCatBar(x, base - h, base, w, col, if (gray) c.card else c.eye, gray, if (b.value == maxBar && b.value > 0) c.accent else null)
+                val grayEarY = averageY.takeIf { gray && avg > 0 }
+                tops[i] = grayEarY ?: (base - h)
+                if (!b.future) drawReadingCatBar(x, base - h, base, w, gray, b.value == maxBar && b.value > 0, grayEarY)
             } else {
                 val h = max(3.dp.toPx(), b.value / maxV * avail)
                 tops[i] = base - h
@@ -294,8 +296,7 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
         }
         drawLine(c.ink, Offset(0f, base), Offset(size.width, base), 1.2.dp.toPx())
         if (avg > 0) {
-            val y = base - avg / maxV * avail
-            drawLine(c.accent, Offset(0f, y), Offset(size.width, y), 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())))
+            drawLine(c.accent, Offset(0f, averageY), Offset(size.width, averageY), 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())))
         }
         bars.forEachIndexed { i, b ->
             if (!b.showLabel) return@forEachIndexed
@@ -307,7 +308,7 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
             val pw = lay.size.width + 14.dp.toPx()
             val ph = lay.size.height + 8.dp.toPx()
             val cx = (sel * slot + slot / 2).coerceIn(pw / 2, size.width - pw / 2)
-            val bottom = tops[sel] - (if (heads) w * 0.95f else 0f) - 6.dp.toPx()
+            val bottom = tops[sel] - 6.dp.toPx()
             drawRoundRect(c.ink, Offset(cx - pw / 2, bottom - ph), Size(pw, ph), CornerRadius(8.dp.toPx()))
             drawText(lay, topLeft = Offset(cx - lay.size.width / 2, bottom - ph + 4.dp.toPx()))
         }

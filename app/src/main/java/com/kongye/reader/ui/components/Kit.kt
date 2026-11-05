@@ -440,15 +440,16 @@ fun ToastHost(modifier: Modifier = Modifier) {
     if (msg != null) last = msg
     Box(modifier.fillMaxSize().navigationBarsPadding().padding(bottom = 96.dp), contentAlignment = Alignment.BottomCenter) {
         AnimatedVisibility(msg != null, enter = fadeIn() + slideInVertically { it / 2 }, exit = fadeOut()) {
-            Box(
-                Modifier
-                    .padding(horizontal = 32.dp)
-                    .background(K.c.ink, SmoothShape(16.dp))
-                    .padding(horizontal = 18.dp, vertical = 11.dp),
-            ) {
-                T(last, 14.sp, K.c.onInk, FontWeight.Medium, align = TextAlign.Center)
-            }
+            ToastBubble(last, Modifier.padding(horizontal = 32.dp))
         }
+    }
+}
+
+/** The original 1.2.2 toast appearance, shared with the cat's head-anchored bubble. */
+@Composable
+fun ToastBubble(text: String, modifier: Modifier = Modifier) {
+    Box(modifier.background(K.c.ink, SmoothShape(16.dp)).padding(horizontal = 18.dp, vertical = 11.dp)) {
+        T(text, 14.sp, K.c.onInk, FontWeight.Medium, align = TextAlign.Center)
     }
 }
 

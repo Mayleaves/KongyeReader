@@ -2,6 +2,7 @@ package com.kongye.reader
 
 import android.app.Application
 import com.kongye.reader.data.Dict
+import com.kongye.reader.data.CatRest
 import com.kongye.reader.data.Library
 import com.kongye.reader.data.Settings
 import com.kongye.reader.data.Stats
@@ -16,6 +17,7 @@ class KongyeReaderApp : Application() {
         Settings.load()
         Library.load()
         Stats.load()
+        CatRest.load()
         Store.io.launch { Dict.prepare() }
     }
 

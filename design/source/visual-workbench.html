@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空叶阅读 · 视觉重塑与SVG资产工作台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 看板猫猫核心 SVG 动画 */
+        @keyframes catBreathe {
+            0%, 100% { transform: scaleY(1) translateY(0); }
+            50% { transform: scaleY(1.018) translateY(-1.8px); }
+        }
+        @keyframes tailSway {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(11deg); }
+        }
+        @keyframes tailSleepBreathe {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(2.2deg); }
+        }
+        @keyframes earTwitchLeft {
+            0%, 84%, 100% { transform: rotate(0deg); }
+            88% { transform: rotate(-4.5deg); }
+            93% { transform: rotate(1.5deg); }
+        }
+        @keyframes earTwitchRight {
+            0%, 60%, 100% { transform: rotate(0deg); }
+            64% { transform: rotate(4.5deg); }
+            68% { transform: rotate(0deg); }
+        }
+        @keyframes leafFloat {
+            0%, 100% { transform: rotate(-5deg) translateY(0px); }
+            50% { transform: rotate(7deg) translateY(-2.5px); }
+        }
+        @keyframes eyeBlink {
+            0%, 45%, 49%, 94%, 98%, 100% { transform: scaleY(1); }
+            47%, 96% { transform: scaleY(0.06); }
+        }
+        @keyframes zzzBubble1 {
+            0% { opacity: 0; transform: translate(0, 4px) scale(0.65); }
+            35% { opacity: 0.92; }
+            100% { opacity: 0; transform: translate(14px, -22px) scale(1.1); }
+        }
+        @keyframes zzzBubble2 {
+            0%, 22% { opacity: 0; transform: translate(0, 4px) scale(0.55); }
+            60% { opacity: 0.9; }
+            100% { opacity: 0; transform: translate(22px, -34px) scale(1.2); }
+        }
+        @keyframes heartFloatBouncy {
+            0%, 100% { transform: translateY(3px) scale(0.86); opacity: 0.12; }
+            50% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+        }
+        @keyframes cheekPulse {
+            0%, 100% { transform: scale(1); opacity: 0.72; }
+            50% { transform: scale(1.12); opacity: 0.95; }
+        }
+
+        .svg-cat-breathe {
+            animation: catBreathe 3.8s ease-in-out infinite;
+            transform-origin: 120px 232px;
+        }
+        .svg-cat-tail {
+            animation: tailSway 3.1s ease-in-out infinite;
+            transform-origin: 154px 218px;
+        }
+        .svg-cat-tail-sleep {
+            animation: tailSleepBreathe 4.5s ease-in-out infinite;
+            transform-origin: 150px 220px;
+        }
+        .svg-ear-l {
+            animation: earTwitchLeft 6.5s ease-in-out infinite;
+            transform-origin: 96px 104px;
+        }
+        .svg-ear-r {
+            animation: earTwitchRight 7.8s ease-in-out infinite;
+            transform-origin: 144px 104px;
+        }
+        .svg-head-leaf {
+            animation: leafFloat 3.4s ease-in-out infinite;
+            transform-origin: 120px 76px;
+        }
+        .svg-eye-blink {
+            animation: eyeBlink 5.4s infinite;
+            transform-origin: 120px 125px;
+        }
+        .svg-zzz-1 {
+            animation: zzzBubble1 2.8s ease-out infinite;
+        }
+        .svg-zzz-2 {
+            animation: zzzBubble2 2.8s ease-out infinite;
+        }
+
+        /* 开屏动画慢放倍率变量 */
+        .splash-stage {
+            --speed: 1;
+        }
+        .splash-stage.slow-motion {
+            --speed: 2;
+        }
+
+        /* 定制滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(150, 150, 150, 0.3);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F4F6] text-[#18181B] min-h-screen transition-colors duration-300 selection:bg-zinc-900 selection:text-white">
+
+    <!-- 顶部全局导航与控制器 -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/85 border-b border-zinc-200/80 transition-colors duration-300" id="topHeader">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- 左侧品牌标识 -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#18181B] text-white flex items-center justify-center shadow-sm">
+                    <svg class="w-6 h-6" viewBox="0 0 64 64" fill="none">
+                        <path d="M18 38 C18 26, 46 26, 46 38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M21 30 L17 16 L28 24 Z" fill="currentColor"/>
+                        <path d="M43 30 L47 16 L36 24 Z" fill="currentColor"/>
+                        <circle cx="26" cy="32" r="2.8" fill="currentColor"/>
+                        <circle cx="38" cy="32" r="2.8" fill="currentColor"/>
+                        <path d="M12 46 Q22 41 32 46 Q42 41 52 46" stroke="#FF8A65" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="font-bold text-base sm:text-lg tracking-tight">空叶阅读</h1>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 font-medium border border-zinc-200/70">SVG 视觉资产工作台</span>
+                    </div>
+                    <p class="text-xs text-zinc-500 hidden sm:block">极简黑白灰美学 · 1:1 实机复刻 · 纯矢量可交互 SVG 源码库</p>
+                </div>
+            </div>
+
+            <!-- 中间胶囊分段控制器 -->
+            <div class="flex items-center bg-zinc-100 p-1 rounded-full border border-zinc-200/70 order-3 lg:order-2 w-full lg:w-auto justify-center overflow-x-auto">
+                <button onclick="switchView('all')" id="tab-all" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-[#18181B] text-white shadow-sm whitespace-nowrap">
+                    同屏全景对比 (3合1)
+                </button>
+                <button onclick="switchView('mascot')" id="tab-mascot" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all text-zinc-600 hover:text-zinc-900 whitespace-nowrap">
+                    1. 首页看板猫猫
+                </button>
+                <button onclick="switchView('icon')" id="tab-icon" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all text-zinc-600 hover:text-zinc-900 whitespace-nowrap">
+                    2. App 图标设计
+                </button>
+                <button onclick="switchView('splash')" id="tab-splash" class="tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all text-zinc-600 hover:text-zinc-900 whitespace-nowrap">
+                    3. 开屏动画模拟器
+                </button>
+            </div>
+
+            <!-- 右侧全局深浅色切换与源码抽屉按钮 -->
+            <div class="flex items-center gap-2 order-2 lg:order-3">
+                <button onclick="toggleGlobalTheme()" id="globalThemeBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium bg-white border border-zinc-200/90 shadow-sm hover:bg-zinc-50 transition-all">
+                    <span id="themeIconWrap" class="w-4 h-4 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </span>
+                    <span id="themeBtnText">浅色预览</span>
+                </button>
+                <button onclick="openCodeModal('mascot')" class="px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium bg-[#18181B] text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <span>查看/导出全部 SVG</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体工作台内容区 -->
+    <main class="max-w-[1440px] mx-auto px-4 sm:px-6 py-6">
+        <div id="workspaceGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+            <!-- ==================== 模块 1：首页看板猫猫 · 实机交互预览 ==================== -->
+            <section id="section-mascot" class="bg-white rounded-3xl border border-zinc-200/80 shadow-sm overflow-hidden flex flex-col">
+                <!-- 模块标题栏 -->
+                <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <h2 class="font-bold text-base">首页看板猫猫 · 1:1 实机预览</h2>
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-0.5">保留原版呆萌黑猫神韵，升级空心叶呆毛、呼吸与点击互动</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="copySvgAsset('mascot')" class="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors" title="复制看板猫猫 SVG 代码">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                            </svg>
+                        </button>
+                        <button onclick="downloadSvgAsset('mascot', 'kongye-cat-mascot.svg')" class="px-3 py-1.5 rounded-xl bg-[#18181B] text-white text-xs font-medium hover:bg-zinc-800 transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>.SVG</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 看板猫猫状态控制器 -->
+                <div class="px-5 py-3 bg-zinc-50/80 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-1 bg-zinc-200/70 p-1 rounded-xl">
+                        <button onclick="setCatMood('focus')" id="mood-focus" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-sm transition-all">
+                            专注伴读
+                        </button>
+                        <button onclick="setCatMood('happy')" id="mood-happy" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all">
+                            摸头开心 ^ ^
+                        </button>
+                        <button onclick="setCatMood('sleep')" id="mood-sleep" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all">
+                            小憩打盹 zZ
+                        </button>
+                    </div>
+                    <span class="text-[11px] text-zinc-400">💡 点击屏幕中的猫猫可摸头互动</span>
+                </div>
+
+                <!-- 手机实机模拟器（1:1 还原用户图1《空叶阅读》首页） -->
+                <div class="p-6 flex justify-center items-center bg-gradient-to-b from-zinc-50/50 to-zinc-100/50 flex-1">
+                    <div id="phoneFrameHome" class="w-[330px] h-[680px] rounded-[44px] p-3 bg-[#18181B] shadow-2xl relative select-none transition-colors duration-300">
+                        <!-- 手机内屏 -->
+                        <div id="homeScreenInner" class="w-full h-full rounded-[34px] bg-[#FFFFFF] text-[#1A1A1A] flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+
+                            <!-- 顶部状态栏 12:03 -->
+                            <div class="px-6 pt-3 pb-1 flex items-center justify-between text-[11px] font-semibold tracking-tight opacity-90">
+                                <div class="flex items-center gap-1.5">
+                                    <span>12:03</span>
+                                    <span class="w-3.5 h-3.5 rounded bg-sky-500 text-white flex items-center justify-center text-[8px]">☁</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] opacity-75">5G</span>
+                                    <div class="flex items-end gap-0.5 h-2.5">
+                                        <span class="w-0.5 h-1 bg-current rounded-full"></span>
+                                        <span class="w-0.5 h-1.5 bg-current rounded-full"></span>
+                                        <span class="w-0.5 h-2 bg-current rounded-full"></span>
+                                        <span class="w-0.5 h-2.5 bg-current rounded-full"></span>
+                                    </div>
+                                    <span class="ml-1 px-1.5 py-0.2 bg-emerald-500 text-white rounded text-[9px] font-bold">74</span>
+                                </div>
+                            </div>
+
+                            <!-- 1:1 复刻顶部栏：“空叶阅读” + 两道斜线 + 列表图标 + 双圆环设置图标 -->
+                            <div class="px-6 pt-3 pb-2 flex items-center justify-between">
+                                <div class="flex items-start">
+                                    <span class="text-[22px] font-bold tracking-tight leading-none">空叶阅读</span>
+                                    <svg class="w-4 h-4 ml-0.5 -mt-0.5" viewBox="0 0 20 20" fill="none">
+                                        <line x1="6" y1="12" x2="10" y2="5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                                        <line x1="12" y1="13" x2="16" y2="8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="flex items-center gap-5">
+                                    <button onclick="showToast('已模拟跳转：书架（共 6 本）')" class="opacity-85 hover:opacity-100 transition-opacity" title="书架">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                            <circle cx="4" cy="6" r="1" fill="currentColor"/>
+                                            <line x1="8" y1="6" x2="20" y2="6"/>
+                                            <circle cx="4" cy="12" r="1" fill="currentColor"/>
+                                            <line x1="8" y1="12" x2="20" y2="12"/>
+                                            <circle cx="4" cy="18" r="1" fill="currentColor"/>
+                                            <line x1="8" y1="18" x2="20" y2="18"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="toggleGlobalTheme()" class="opacity-85 hover:opacity-100 transition-opacity" title="切换深浅色外观">
+                                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="9"/>
+                                            <circle cx="12" cy="12" r="4"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 中间核心区：全新重塑 SVG 看板猫猫 + 今日阅读胶囊 -->
+                            <div class="flex-1 flex flex-col items-center justify-center -mt-4">
+                                <!-- 互动提示气泡 -->
+                                <div id="catSpeechBubble" class="mb-1 px-3 py-1 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-600 opacity-0 transform translate-y-1 transition-all duration-300 pointer-events-none">
+                                    呼噜呼噜~ 继续看书吧 🍃
+                                </div>
+
+                                <!-- 看板猫猫 SVG 容器 (点击可摸头) -->
+                                <div onclick="petCat()" class="w-52 h-52 flex items-center justify-center cursor-pointer relative group" title="点击摸摸看板猫猫">
+                                    <div id="mascotSvgContainer" class="w-full h-full">
+                                        <!-- 由 JS 渲染并注入支持深浅色与3种状态的纯净 SVG -->
+                                    </div>
+                                </div>
+
+                                <!-- 1:1 复刻：“今日阅读 0:16 >” 胶囊标签 -->
+                                <button onclick="showToast('今日已专注阅读 16 分钟')" id="readingTimePill" class="mt-2 px-4 py-1.5 rounded-full bg-[#F4F4F5] hover:bg-zinc-200/80 transition-colors flex items-center gap-1.5 text-xs">
+                                    <svg class="w-3.5 h-3.5 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <polyline points="12 7 12 12 15 14"/>
+                                    </svg>
+                                    <span class="opacity-80">今日阅读</span>
+                                    <span class="font-bold">0:16</span>
+                                    <svg class="w-3 h-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- 底部区：继续阅读按钮 + 书籍进度 + 左下角“猫园”路牌 -->
+                            <div class="px-6 pb-5 pt-2 flex flex-col items-center relative">
+                                <button onclick="showToast('继续阅读《灵异-死亡学院 (6.24)》')" id="continueReadBtn" class="w-44 py-3.5 rounded-full bg-[#1C1C1E] text-white text-sm font-medium shadow-md hover:opacity-95 active:scale-95 transition-all">
+                                    继续阅读
+                                </button>
+                                <p class="mt-3 text-[11px] text-zinc-400 tracking-tight">
+                                    《灵异-死亡学院 (6.24)》· 读到 0.1%
+                                </p>
+
+                                <!-- 左下角 1:1 复刻“猫园”木牌 -->
+                                <div class="w-full flex justify-start mt-5">
+                                    <button onclick="showToast('进入一周猫园：本周已收集 2 只猫猫')" class="group flex flex-col items-center focus:outline-none">
+                                        <div id="catGardenSign" class="relative flex items-center justify-center pl-4 pr-3.5 py-1.5 bg-[#EFEFEF] text-zinc-600 text-xs font-medium rounded-r-md shadow-xs group-hover:-translate-y-0.5 transition-transform" style="clip-path: polygon(16% 0%, 100% 0%, 100% 100%, 16% 100%, 0% 50%);">
+                                            <span>猫园</span>
+                                        </div>
+                                        <div id="catGardenPost" class="w-1.5 h-3 bg-[#DFDFDF] rounded-b-sm ml-1"></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部设计说明 -->
+                <div class="px-5 py-3.5 bg-zinc-50 border-t border-zinc-100 text-xs text-zinc-500 flex items-center justify-between">
+                    <span>特征：无痕耳廓衔接 + 开心手绘5爱心浮动 + 小憩耷拉尾巴</span>
+                    <button onclick="openCodeModal('mascot')" class="text-zinc-900 font-medium hover:underline">查看 SVG 源码 &rarr;</button>
+                </div>
+            </section>
+
+            <!-- ==================== 模块 2：App 图标设计 · 多场景预览 ==================== -->
+            <section id="section-icon" class="bg-white rounded-3xl border border-zinc-200/80 shadow-sm overflow-hidden flex flex-col">
+                <!-- 模块标题栏 -->
+                <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <h2 class="font-bold text-base">App 图标设计 · 多尺寸规范</h2>
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-0.5">看板猫头 + 左实心叶右镂空叶 + 搭叶黑猫手，适配 iOS / Android</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="copySvgAsset('icon')" class="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors" title="复制图标 SVG 代码">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                            </svg>
+                        </button>
+                        <button onclick="downloadSvgAsset('icon', 'kongye-app-icon.svg')" class="px-2.5 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-medium transition-colors">
+                            .SVG
+                        </button>
+                        <button onclick="exportIconPng()" class="px-3 py-1.5 rounded-xl bg-[#18181B] text-white text-xs font-medium hover:bg-zinc-800 transition-colors flex items-center gap-1">
+                            <span>导出 512px PNG</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 图标配色风格切换器 -->
+                <div class="px-5 py-3 bg-zinc-50/80 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-1 bg-zinc-200/70 p-1 rounded-xl">
+                        <button onclick="setIconVariant('light')" id="icon-var-light" class="icon-var-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-sm transition-all">
+                            浅色极简版 (白底)
+                        </button>
+                        <button onclick="setIconVariant('dark')" id="icon-var-dark" class="icon-var-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all">
+                            深色沉浸版 (黑底)
+                        </button>
+                        <button onclick="setIconVariant('sunset')" id="icon-var-sunset" class="icon-var-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all">
+                            猫园落日版 (暖阳)
+                        </button>
+                    </div>
+                    <label class="flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer">
+                        <input type="checkbox" id="toggleGridLines" onchange="toggleIconGrid()" class="rounded border-zinc-300 text-zinc-900 focus:ring-0">
+                        <span>显示黄金网格线</span>
+                    </label>
+                </div>
+
+                <!-- 图标展示主舞台 -->
+                <div class="p-6 flex-1 flex flex-col justify-between gap-6 bg-gradient-to-b from-zinc-50/40 to-zinc-100/60">
+
+                    <!-- 512x512 主视觉大图预览 -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-56 h-56 sm:w-60 sm:h-60 rounded-[52px] shadow-xl flex items-center justify-center overflow-hidden border border-zinc-200/60 transition-transform duration-300 hover:scale-[1.02]" id="mainIconPreviewWrap">
+                            <!-- 图标 SVG 本体 -->
+                            <div id="appIconSvgContainer" class="w-full h-full"></div>
+                            <!-- Apple 图标黄金分割网格层 (默认隐藏) -->
+                            <svg id="iconGridOverlay" class="w-full h-full absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200" viewBox="0 0 512 512" fill="none">
+                                <rect x="32" y="32" width="448" height="448" rx="100" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="6 4"/>
+                                <circle cx="256" cy="256" r="196" stroke="#3B82F6" stroke-width="1.5"/>
+                                <circle cx="256" cy="256" r="136" stroke="#3B82F6" stroke-width="1" stroke-dasharray="4 4"/>
+                                <line x1="0" y1="256" x2="512" y2="256" stroke="#3B82F6" stroke-width="1"/>
+                                <line x1="256" y1="0" x2="256" y2="512" stroke="#3B82F6" stroke-width="1"/>
+                                <line x1="0" y1="0" x2="512" y2="512" stroke="#3B82F6" stroke-width="0.75" opacity="0.5"/>
+                                <line x1="512" y1="0" x2="0" y2="512" stroke="#3B82F6" stroke-width="0.75" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <span class="mt-3 text-xs font-mono text-zinc-400">Master Vector · 512 × 512 px</span>
+                    </div>
+
+                    <!-- 多平台圆角裁切规范对比 (iOS Squircle / Android Circle / Rounded Square) -->
+                    <div class="bg-white/90 rounded-2xl p-4 border border-zinc-200/70 shadow-xs">
+                        <div class="text-xs font-semibold text-zinc-500 mb-3 flex items-center justify-between">
+                            <span>多平台圆角与尺寸实机适配</span>
+                            <span class="text-[11px] font-normal text-zinc-400">iOS / Android Adaptive</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="flex flex-col items-center p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                <div id="iosIconThumb" class="w-14 h-14 rounded-[14px] shadow-md overflow-hidden"></div>
+                                <span class="mt-2 text-xs font-medium text-zinc-700">iOS 桌面</span>
+                                <span class="text-[10px] text-zinc-400">Squircle 22.5%</span>
+                            </div>
+                            <div class="flex flex-col items-center p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                <div id="androidIconThumb" class="w-14 h-14 rounded-full shadow-md overflow-hidden"></div>
+                                <span class="mt-2 text-xs font-medium text-zinc-700">Android 圆标</span>
+                                <span class="text-[10px] text-zinc-400">Circle Mask</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                <div class="h-14 flex items-center justify-center gap-2">
+                                    <div id="miniIconThumb36" class="w-9 h-9 rounded-lg shadow-sm overflow-hidden"></div>
+                                    <div id="miniIconThumb24" class="w-6 h-6 rounded-md shadow-xs overflow-hidden"></div>
+                                </div>
+                                <span class="mt-2 text-xs font-medium text-zinc-700">小尺寸识别度</span>
+                                <span class="text-[10px] text-zinc-400">36px / 24px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模拟手机桌面壁纸上的实机效果 -->
+                    <div class="rounded-2xl p-4 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black text-white shadow-inner">
+                        <div class="text-[11px] text-zinc-400 mb-3 flex items-center justify-between">
+                            <span>📱 手机桌面实机图标视觉对比</span>
+                            <span>主屏幕预览</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3 place-items-center">
+                            <div class="flex flex-col items-center gap-1.5 cursor-pointer group" onclick="showToast('点击启动「空叶阅读」')">
+                                <div id="homescreenMockIcon" class="w-13 h-13 rounded-[13px] shadow-lg overflow-hidden group-hover:scale-105 transition-transform ring-2 ring-white/20"></div>
+                                <span class="text-[11px] font-medium tracking-tight text-white">空叶阅读</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 opacity-60">
+                                <div class="w-13 h-13 rounded-[13px] bg-white text-zinc-900 flex flex-col items-center justify-center shadow">
+                                    <span class="text-[9px] font-bold text-rose-500">星期五</span>
+                                    <span class="text-lg font-bold leading-none mt-0.5">24</span>
+                                </div>
+                                <span class="text-[11px] text-zinc-300">日历</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 opacity-60">
+                                <div class="w-13 h-13 rounded-[13px] bg-amber-100 text-amber-900 flex flex-col overflow-hidden shadow">
+                                    <div class="h-3.5 bg-amber-400 w-full"></div>
+                                    <div class="p-1.5 space-y-1">
+                                        <div class="h-1 bg-amber-900/30 rounded w-8"></div>
+                                        <div class="h-1 bg-amber-900/30 rounded w-6"></div>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] text-zinc-300">备忘录</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 opacity-60">
+                                <div class="w-13 h-13 rounded-[13px] bg-zinc-700 text-zinc-200 flex items-center justify-center shadow">
+                                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <circle cx="12" cy="12" r="4"/>
+                                    </svg>
+                                </div>
+                                <span class="text-[11px] text-zinc-300">设置</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 底部设计说明 -->
+                <div class="px-5 py-3.5 bg-zinc-50 border-t border-zinc-100 text-xs text-zinc-500 flex items-center justify-between">
+                    <span>设计诠释：左实心叶与右镂空叶化为书卷，看板猫猫搭爪探头伴读</span>
+                    <button onclick="openCodeModal('icon')" class="text-zinc-900 font-medium hover:underline">查看 SVG 源码 &rarr;</button>
+                </div>
+            </section>
+
+            <!-- ==================== 模块 3：开屏动画 (Splash Screen) · 实机模拟器 ==================== -->
+            <section id="section-splash" class="bg-white rounded-3xl border border-zinc-200/80 shadow-sm overflow-hidden flex flex-col">
+                <!-- 模块标题栏 -->
+                <div class="p-5 border-b border-zinc-100 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                            <h2 class="font-bold text-base">开屏动画 (Splash) · 实机模拟器</h2>
+                        </div>
+                        <p class="text-xs text-zinc-500 mt-0.5">右叶旋转下落 &rarr; 左叶镜像展开 &rarr; 看板猫探头落爪 &rarr; 品牌浮现</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="copySvgAsset('splash')" class="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors" title="复制开屏动画 SVG 代码">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                            </svg>
+                        </button>
+                        <button onclick="downloadSvgAsset('splash', 'kongye-splash-screen.svg')" class="px-3 py-1.5 rounded-xl bg-[#18181B] text-white text-xs font-medium hover:bg-zinc-800 transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>.SVG</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 开屏动画调试工具栏 -->
+                <div class="px-5 py-3 bg-zinc-50/80 border-b border-zinc-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="replaySplash()" class="px-3 py-1.5 rounded-xl bg-[#18181B] text-white text-xs font-medium hover:bg-zinc-800 active:scale-95 transition-all flex items-center gap-1.5 shadow-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span>重播开屏动画</span>
+                        </button>
+                        <button onclick="toggleSplashSpeed()" id="splashSpeedBtn" class="px-2.5 py-1.5 rounded-xl bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 transition-all">
+                            1.0x 正常速度
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-1 text-[11px] text-zinc-500">
+                        <span>阶段:</span>
+                        <span id="splashStepBadge" class="font-semibold text-zinc-800 px-2 py-0.5 rounded bg-zinc-200/70">完整定格</span>
+                    </div>
+                </div>
+
+                <!-- 开屏动画手机模拟器 -->
+                <div class="p-6 flex justify-center items-center bg-gradient-to-b from-zinc-50/50 to-zinc-100/50 flex-1">
+                    <div class="w-[330px] h-[680px] rounded-[44px] p-3 bg-[#18181B] shadow-2xl relative select-none">
+                        <div id="splashScreenInner" class="w-full h-full rounded-[34px] bg-[#FFFFFF] flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+                            <!-- 右上角跳过胶囊 -->
+                            <div class="absolute top-5 right-5 z-20">
+                                <button onclick="replaySplash()" class="px-3 py-1 rounded-full text-[11px] bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20 transition-colors">
+                                    跳过 3s
+                                </button>
+                            </div>
+
+                            <!-- 完整 SVG 开屏动画舞台 -->
+                            <div id="splashSvgContainer" class="w-full h-full flex items-center justify-center splash-stage">
+                                <!-- 由 JS 注入含关键帧动画的独立 SVG -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部设计说明 -->
+                <div class="px-5 py-3.5 bg-zinc-50 border-t border-zinc-100 text-xs text-zinc-500 flex items-center justify-between">
+                    <span>1:1 原版复刻开屏动画源代码 + 图1看板猫猫头 + 底部小猫爪印</span>
+                    <button onclick="openCodeModal('splash')" class="text-zinc-900 font-medium hover:underline">查看 SVG 源码 &rarr;</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ==================== SVG 源码查看与复制模态框 ==================== -->
+    <div id="codeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-zinc-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-base text-zinc-900">SVG 矢量源码导出中心</span>
+                    <div class="flex items-center bg-zinc-100 p-1 rounded-xl ml-2">
+                        <button onclick="switchModalCodeTab('mascot')" id="modal-tab-mascot" class="modal-code-tab px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-xs">看板猫猫 SVG</button>
+                        <button onclick="switchModalCodeTab('icon')" id="modal-tab-icon" class="modal-code-tab px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600">App 图标 SVG</button>
+                        <button onclick="switchModalCodeTab('splash')" id="modal-tab-splash" class="modal-code-tab px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600">开屏动画 SVG</button>
+                    </div>
+                </div>
+                <button onclick="closeCodeModal()" class="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 bg-zinc-950 text-zinc-100 font-mono text-xs overflow-auto flex-1">
+                <pre id="svgCodeDisplay" class="whitespace-pre-wrap break-all leading-relaxed select-all"></pre>
+            </div>
+            <div class="px-6 py-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
+                <span class="text-xs text-zinc-500">提示：所有 SVG 均采用标准 viewBox，可直接放入 Android VectorDrawable、iOS 或 Flutter / Web 项目中使用。</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="copyCurrentModalCode()" class="px-4 py-2 rounded-xl bg-zinc-200 hover:bg-zinc-300 text-zinc-900 text-xs font-semibold transition-colors">
+                        一键复制代码
+                    </button>
+                    <button onclick="downloadCurrentModalCode()" class="px-4 py-2 rounded-xl bg-[#18181B] hover:bg-zinc-800 text-white text-xs font-semibold transition-colors">
+                        下载 .SVG 文件
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的 Canvas 用于导出高清 PNG 图标 -->
+    <canvas id="pngExportCanvas" width="512" height="512" class="hidden"></canvas>
+
+    <!-- 顶部轻提示 Toast -->
+    <div id="toastBanner" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-[#18181B] text-white text-xs font-medium shadow-xl border border-white/10 opacity-0 pointer-events-none transform translate-y-2 transition-all duration-300 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="toastMessage">已复制到剪贴板</span>
+    </div>
+
+    <script>
+        // ==================== 全局状态管理 ====================
+        const state = {
+            darkMode: false,           // 全局深浅色模式
+            catMood: 'focus',          // 'focus' | 'happy' | 'sleep'
+            iconVariant: 'light',      // 'light' | 'dark' | 'sunset'
+            showIconGrid: false,
+            splashSlowMotion: false,
+            activeModalTab: 'mascot',
+            petCount: 0
+        };
+
+        // ==================== 1. 生成全新看板猫猫 SVG ====================
+        function getMascotSvgMarkup(mood = state.catMood, isDark = state.darkMode) {
+            const catBodyColor = isDark ? '#232329' : '#1E1E22';
+            const innerEarColor = '#3A3A40';
+            const pawLineColor = '#47474E';
+            const shadowColor = isDark ? 'rgba(0,0,0,0.45)' : '#EFEFEF';
+            const leafStroke = mood === 'happy' ? 'rgb(184, 35, 12)' : (isDark ? '#E4E4E7' : '#27272A');
+            const leafFill = mood === 'happy' ? 'rgb(238, 67, 38)' : 'none';
+            const heartRed = '#E04F33';    // 手绘参考图中的暖朱红爱心色
+            const accentCoral = '#FF8A65';
+
+            // 尾巴姿态：专注/开心时向上翘起摇摆；小憩打盹时位置上移至 y=220，使尾巴底边高于身体底边(y=231)不漏底，末端向下圆润垂落
+            const tailMarkup = mood === 'sleep'
+                ? `<!-- 小憩打盹状态：贴地平铺后末端向下圆润垂钩的猫尾巴（高度上调避免根部漏底） -->
+    <path class="svg-cat-tail-sleep" d="M150 220 L188 220 C200 220, 205 227, 200 238" stroke="${catBodyColor}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
+                : `<!-- 专注/开心状态：向上翘起摇晃的猫尾巴 -->
+    <path class="svg-cat-tail" d="M150 222 C184 222, 196 196, 185 173" stroke="${catBodyColor}" stroke-width="11" stroke-linecap="round" fill="none"/>`;
+
+            let eyesAndMouthMarkup = '';
+            let extraFloatingMarkup = '';
+
+            if (mood === 'focus') {
+                eyesAndMouthMarkup = `
+                    <!-- 专注伴读大眼睛 (带自然眨眼动画与星光高光) -->
+                    <g class="svg-eye-blink">
+                        <circle cx="99" cy="126" r="14.5" fill="#FFFFFF"/>
+                        <circle cx="141" cy="126" r="14.5" fill="#FFFFFF"/>
+                        <circle cx="101" cy="126" r="6.8" fill="#18181B"/>
+                        <circle cx="139" cy="126" r="6.8" fill="#18181B"/>
+                        <circle cx="104" cy="122.5" r="2.2" fill="#FFFFFF"/>
+                        <circle cx="142" cy="122.5" r="2.2" fill="#FFFFFF"/>
+                    </g>
+                    <!-- 经典 W 猫猫嘴 -->
+                    <path d="M113 139.5 Q116.5 143.5 120 139.5 Q123.5 143.5 127 139.5" stroke="#52525B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                `;
+            } else if (mood === 'happy') {
+                eyesAndMouthMarkup = `
+                    <!-- 摸头眯眼笑 ^ ^ -->
+                    <path d="M87 127 Q99 114 111 127" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+                    <path d="M129 127 Q141 114 153 127" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+                    <!-- 暖粉害羞腮红 -->
+                    <g class="svg-cheek-pulse">
+                        <ellipse cx="83" cy="134" rx="6" ry="3.2" fill="${accentCoral}" opacity="0.8"/>
+                        <ellipse cx="157" cy="134" rx="6" ry="3.2" fill="${accentCoral}" opacity="0.8"/>
+                    </g>
+                    <!-- 开心吐舌与 W 猫嘴无缝衔接 (先画小舌头在下层，再画 W 猫嘴盖在上方) -->
+                    <path d="M116.2 140.2 C116.2 146.2, 123.8 146.2, 123.8 140.2 Z" fill="${accentCoral}"/>
+                    <path d="M112 138.5 Q116 143 120 138.5 Q124 143 128 138.5" stroke="#52525B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                `;
+                extraFloatingMarkup = `
+                    <!-- 1:1 复刻手绘 5 颗暖红爱心 (带错峰 Q 弹上浮动画) -->
+                    <g class="svg-heart-1">
+                        <path d="M52 58 C52 52, 43 49, 40 54 C37 59, 43 68, 52 73 C61 68, 67 59, 64 54 C61 49, 52 52, 52 58 Z" fill="${heartRed}" transform="rotate(-15 52 62)"/>
+                    </g>
+                    <g class="svg-heart-2">
+                        <path d="M61 83 C61 79.5, 55.5 77.5, 53.5 80.5 C51.5 83.5, 55.5 89, 61 92 C66.5 89, 70.5 83.5, 68.5 80.5 C66.5 77.5, 61 79.5, 61 83 Z" fill="${heartRed}" transform="rotate(-8 61 86)"/>
+                    </g>
+                    <g class="svg-heart-3">
+                        <path d="M63 148 C63 143.5, 56 141, 53.5 145 C51 149, 56 156, 63 160 C70 156, 75 149, 72.5 145 C70 141, 63 143.5, 63 148 Z" fill="${heartRed}" transform="rotate(-18 63 152)"/>
+                    </g>
+                    <g class="svg-heart-4">
+                        <path d="M177 78 C177 72.5, 169 70, 166 74.5 C163 79, 168.5 87, 177 92 C185.5 87, 191 79, 188 74.5 C185 70, 177 72.5, 177 78 Z" fill="${heartRed}" transform="rotate(16 177 83)"/>
+                    </g>
+                    <g class="svg-heart-5">
+                        <path d="M179 104 C179 101, 174.5 99.5, 173 102 C171.5 104.5, 174.5 109, 179 111.5 C183.5 109, 186.5 104.5, 185 102 C183.5 99.5, 179 101, 179 104 Z" fill="${heartRed}" transform="rotate(12 179 107)"/>
+                    </g>
+                `;
+            } else if (mood === 'sleep') {
+                eyesAndMouthMarkup = `
+                    <!-- 图3同款：白色微垂闭眼弧线 -->
+                    <path d="M90 120 Q101 121.5 110 129" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+                    <path d="M150 120 Q139 121.5 130 129" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+                    <!-- 与专注伴读猫嘴一致的深灰色波浪小嘴 (#52525B) -->
+                    <path d="M111 138.5 Q115 142.5 120 139.5 Q125 142.5 129 138.5" stroke="#52525B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                `;
+                extraFloatingMarkup = `
+                    <!-- 小憩 Zzz 睡眠气泡 -->
+                    <text x="163" y="96" fill="${leafStroke}" font-size="14" font-weight="700" class="svg-zzz-1">z</text>
+                    <text x="176" y="75" fill="${leafStroke}" font-size="20" font-weight="700" class="svg-zzz-2">Z</text>
+                `;
+            }
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" width="100%" height="100%" fill="none">
+    <style>
+        @keyframes catBreathe { 0%, 100% { transform: scaleY(1) translateY(0); } 50% { transform: scaleY(1.018) translateY(-1.8px); } }
+        @keyframes tailSway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(11deg); } }
+        @keyframes tailSleepBreathe { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(2.2deg); } }
+        @keyframes earTwitchLeft { 0%, 84%, 100% { transform: rotate(0deg); } 88% { transform: rotate(-4.5deg); } 93% { transform: rotate(1.5deg); } }
+        @keyframes earTwitchRight { 0%, 60%, 100% { transform: rotate(0deg); } 64% { transform: rotate(4.5deg); } 68% { transform: rotate(0deg); } }
+        @keyframes leafFloat { 0%, 100% { transform: rotate(-5deg) translateY(0px); } 50% { transform: rotate(7deg) translateY(-2.5px); } }
+        @keyframes eyeBlink { 0%, 45%, 49%, 94%, 98%, 100% { transform: scaleY(1); } 47%, 96% { transform: scaleY(0.06); } }
+        @keyframes zzzBubble1 { 0% { opacity: 0; transform: translate(0, 4px) scale(0.65); } 35% { opacity: 0.92; } 100% { opacity: 0; transform: translate(14px, -22px) scale(1.1); } }
+        @keyframes zzzBubble2 { 0%, 22% { opacity: 0; transform: translate(0, 4px) scale(0.55); } 60% { opacity: 0.9; } 100% { opacity: 0; transform: translate(22px, -34px) scale(1.2); } }
+        @keyframes heartFloatBouncy {
+            0%, 100% { transform: translateY(3px) scale(0.86); opacity: 0.12; }
+            50% { transform: translateY(-6px) scale(1.08); opacity: 1; }
+        }
+        @keyframes cheekPulse { 0%, 100% { transform: scale(1); opacity: 0.72; } 50% { transform: scale(1.12); opacity: 0.95; } }
+        .svg-cat-breathe { animation: catBreathe 3.8s ease-in-out infinite; transform-origin: 120px 232px; }
+        .svg-cat-tail { animation: tailSway 3.1s ease-in-out infinite; transform-origin: 154px 218px; }
+        .svg-cat-tail-sleep { animation: tailSleepBreathe 4.5s ease-in-out infinite; transform-origin: 150px 220px; }
+        .svg-ear-l { animation: earTwitchLeft 6.5s ease-in-out infinite; transform-origin: 96px 104px; }
+        .svg-ear-r { animation: earTwitchRight 7.8s ease-in-out infinite; transform-origin: 144px 104px; }
+        .svg-head-leaf { animation: leafFloat 3.4s ease-in-out infinite; transform-origin: 120px 76px; }
+        .svg-eye-blink { animation: eyeBlink 5.4s infinite; transform-origin: 120px 125px; }
+        .svg-zzz-1 { animation: zzzBubble1 2.8s ease-out infinite; }
+        .svg-zzz-2 { animation: zzzBubble2 2.8s ease-out infinite; }
+        .svg-heart-1 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0s; transform-origin: 52px 62px; }
+        .svg-heart-2 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.5s; transform-origin: 61px 86px; }
+        .svg-heart-3 { animation: heartFloatBouncy 2.4s ease-in-out infinite 1.0s; transform-origin: 63px 152px; }
+        .svg-heart-4 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.3s; transform-origin: 177px 83px; }
+        .svg-heart-5 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.8s; transform-origin: 179px 107px; }
+        .svg-cheek-pulse { animation: cheekPulse 1.8s ease-in-out infinite; transform-origin: 120px 134px; }
+    </style>
+
+    <!-- 底部椭圆柔和投影 -->
+    <ellipse cx="120" cy="233" rx="${mood === 'sleep' ? '64' : '54'}" ry="6.5" fill="${shadowColor}"/>
+
+    ${tailMarkup}
+
+    <!-- 猫猫呼吸主躯干 -->
+    <g class="svg-cat-breathe">
+        <!-- 圆润坐姿身体 -->
+        <path d="M77 231 C77 174, 93 156, 120 156 C147 156, 163 174, 163 231 Z" fill="${catBodyColor}"/>
+
+        <!-- 标志性前腿分割线 -->
+        <line x1="106" y1="194" x2="106" y2="231" stroke="${pawLineColor}" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="134" y1="194" x2="134" y2="231" stroke="${pawLineColor}" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- 胸前极简小领结纹理 -->
+        <path d="M115 169 L120 174 L125 169" stroke="${pawLineColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+
+        <!-- 左耳 (外侧边缘从 M74.4 116 顺着猫头椭圆切线无缝向上延伸，彻底消除接缝缺口) -->
+        <g class="svg-ear-l">
+            <path d="M74.4 116 C74.4 98, 79 74, 82 59 C83.2 53.5, 90 52.5, 94.2 57.5 L116 86 L108 118 Z" fill="${catBodyColor}"/>
+            <path d="M84 89 L87 69 L98 83" stroke="${innerEarColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </g>
+
+        <!-- 右耳 (外侧边缘从 M165.6 116 顺着猫头椭圆切线无缝向上延伸) -->
+        <g class="svg-ear-r">
+            <path d="M165.6 116 C165.6 98, 161 74, 158 59 C156.8 53.5, 150 52.5, 145.8 57.5 L124 86 L132 118 Z" fill="${catBodyColor}"/>
+            <path d="M156 89 L153 69 L142 83" stroke="${innerEarColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </g>
+
+        <!-- 头顶灵魂设计：「空叶」呆毛 -->
+        <g class="svg-head-leaf">
+            <path d="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" stroke="${leafStroke}" stroke-width="2.4" stroke-linejoin="round" fill="${leafFill}"/>
+            <path d="M120 79 C117 70, 111 65, 107 67" stroke="${leafStroke}" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </g>
+
+        <!-- 饱满圆润猫头 (无异色描边，与双耳同色一体融合) -->
+        <ellipse cx="120" cy="121" rx="46" ry="41" fill="${catBodyColor}"/>
+
+        <!-- 两侧灵动小胡须 -->
+        <line x1="66" y1="124" x2="75" y2="126" stroke="${pawLineColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="68" y1="133" x2="76" y2="133" stroke="${pawLineColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="174" y1="124" x2="165" y2="126" stroke="${pawLineColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <line x1="172" y1="133" x2="164" y2="133" stroke="${pawLineColor}" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+        ${eyesAndMouthMarkup}
+    </g>
+
+    ${extraFloatingMarkup}
+</svg>`;
+        }
+
+        // ==================== 2. 生成 App 图标 SVG (图1造型：看板猫头 + 左实心叶右镂空叶 + 双黑猫手) ====================
+        function getAppIconSvgMarkup(variant = state.iconVariant) {
+            let bgFill = '#FFFFFF';
+            let catFill = '#1E1E22';
+            let earInner = '#3A3A40';
+            let leafColor = '#1E1E22';
+            let whiskerColor = '#8E8E93';
+            let sunVisible = false;
+            let borderStroke = '#E4E4E7';
+
+            if (variant === 'dark') {
+                bgFill = '#141417';
+                catFill = '#27272E';
+                earInner = '#52525B';
+                leafColor = '#F4F4F5';
+                whiskerColor = '#71717A';
+                borderStroke = '#27272A';
+            } else if (variant === 'sunset') {
+                bgFill = '#FAF8F5';
+                catFill = '#1E1E22';
+                earInner = '#3A3A40';
+                leafColor = '#1E1E22';
+                whiskerColor = '#8E8E93';
+                sunVisible = true;
+                borderStroke = '#E7E5E4';
+            }
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+    <defs>
+        <linearGradient id="sunsetGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF7E67"/>
+            <stop offset="100%" stop-color="#FFB88C" stop-opacity="0.25"/>
+        </linearGradient>
+    </defs>
+
+    <!-- 图标底板 -->
+    <rect width="512" height="512" rx="115" fill="${bgFill}"/>
+    <rect x="2" y="2" width="508" height="508" rx="113" stroke="${borderStroke}" stroke-width="4" opacity="0.5"/>
+
+    ${sunVisible ? `<!-- 猫园暖阳背景点缀 -->
+    <circle cx="132" cy="128" r="54" fill="url(#sunsetGrad)"/>` : ''}
+
+    <!-- 1. 看板猫猫头主体 (居中黄金比例放大) -->
+    <g transform="translate(8, 22) scale(2.06)">
+        <!-- 左耳 (无痕切线衔接) -->
+        <path d="M74.4 116 C74.4 98, 79 74, 82 59 C83.2 53.5, 90 52.5, 94.2 57.5 L116 86 L108 118 Z" fill="${catFill}"/>
+        <path d="M84 89 L87 69 L98 83" stroke="${earInner}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+        <!-- 右耳 (无痕切线衔接) -->
+        <path d="M165.6 116 C165.6 98, 161 74, 158 59 C156.8 53.5, 150 52.5, 145.8 57.5 L124 86 L132 118 Z" fill="${catFill}"/>
+        <path d="M156 89 L153 69 L142 83" stroke="${earInner}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+        <!-- 头顶「空叶」呆毛与小分枝 -->
+        <path d="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" stroke="${leafColor}" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+        <path d="M120 79 C117 70, 111 65, 107 67" stroke="${leafColor}" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+
+        <!-- 圆润猫头 -->
+        <ellipse cx="120" cy="121" rx="46" ry="41" fill="${catFill}"/>
+
+        <!-- 两侧胡须 -->
+        <line x1="65" y1="124" x2="75" y2="126" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="67" y1="133" x2="76" y2="133" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="175" y1="124" x2="165" y2="126" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="173" y1="133" x2="164" y2="133" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+
+        <!-- 呆萌大眼睛 -->
+        <circle cx="99" cy="126" r="14.5" fill="#FFFFFF"/>
+        <circle cx="141" cy="126" r="14.5" fill="#FFFFFF"/>
+        <circle cx="101" cy="126" r="6.8" fill="#18181B"/>
+        <circle cx="139" cy="126" r="6.8" fill="#18181B"/>
+        <circle cx="104" cy="122.5" r="2.2" fill="#FFFFFF"/>
+        <circle cx="142" cy="122.5" r="2.2" fill="#FFFFFF"/>
+
+        <!-- W 猫猫嘴 -->
+        <path d="M113 139.5 Q116.5 143.5 120 139.5 Q123.5 143.5 127 139.5" stroke="#52525B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+
+    <!-- 2. 底部双叶托底 (图1造型：左侧实心叶 + 右侧镂空叶带叶脉斜线) -->
+    <g>
+        <!-- 白色衬底遮罩，隔开猫下巴与双叶交界 -->
+        <path d="M88 338 C164 344, 222 368, 256 412 C290 368, 348 344, 424 338 C406 426, 336 446, 256 446 C176 446, 106 426, 88 338 Z" fill="${bgFill}"/>
+
+        <!-- 左侧：实心黑叶 -->
+        <path d="M256 414 C220 368, 162 344, 94 338 C114 418, 190 442, 256 414 Z" fill="${leafColor}" stroke="${leafColor}" stroke-width="10" stroke-linejoin="round"/>
+
+        <!-- 右侧：镂空叶 + 内部叶脉斜线 -->
+        <path d="M256 414 C292 368, 350 344, 418 338 C398 418, 322 442, 256 414 Z" fill="${bgFill}" stroke="${leafColor}" stroke-width="12" stroke-linejoin="round"/>
+        <path d="M294 396 Q342 380 378 364" stroke="${leafColor}" stroke-width="10" stroke-linecap="round"/>
+
+        <!-- 3. 扒在左右叶片上沿的两只圆润黑色小猫手 -->
+        <ellipse cx="184" cy="358" rx="22" ry="14" transform="rotate(14 184 358)" fill="${catFill}" stroke="${bgFill}" stroke-width="6"/>
+        <ellipse cx="328" cy="358" rx="22" ry="14" transform="rotate(-14 328 358)" fill="${catFill}" stroke="${bgFill}" stroke-width="6"/>
+    </g>
+</svg>`;
+        }
+
+        // ==================== 3. 生成开屏动画 (Splash Screen) SVG (1:1 采用用户提供的开屏动画源代码) ====================
+        function getSplashScreenSvgMarkup(isDark = state.darkMode) {
+            const bgColor = isDark ? '#121214' : '#FFFFFF';
+            const primaryInk = isDark ? '#F4F4F5' : '#1C1C1E';
+            const catColor = isDark ? '#232329' : '#1C1C1E';
+            const innerEarColor = '#3A3A40';
+            const whiskerColor = isDark ? '#71717A' : '#8E8E93';
+            const subTextColor = isDark ? '#A1A1AA' : '#8E8E93';
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="100%" height="100%">
+  <defs>
+    <style>
+      .splash-bg { fill: ${bgColor}; }
+
+      /* 1. 核心右侧空心叶：从上方竖直状态顺时针旋转下落，直接成为右侧书页（全程不消失） */
+      .hero-right-leaf {
+        transform-origin: 187.5px 386px;
+        animation: leaf-spin-settle calc(1.25s * var(--speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      /* 叶片外轮廓与叶脉的描边生长动画 */
+      .hero-leaf-outline {
+        stroke-dasharray: 220;
+        stroke-dashoffset: 220;
+        fill: ${bgColor};
+        fill-opacity: 0;
+        animation:
+          outline-draw calc(0.55s * var(--speed, 1)) cubic-bezier(0.4, 0, 0.2, 1) forwards,
+          leaf-fill-solid calc(0.3s * var(--speed, 1)) ease calc(0.85s * var(--speed, 1)) forwards;
+      }
+      .hero-leaf-vein {
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+        animation: vein-draw calc(0.4s * var(--speed, 1)) ease-out calc(0.25s * var(--speed, 1)) forwards;
+      }
+
+      /* 2. 左侧实心黑叶：当右叶旋转到位时，从书脊中心向左镜像展开 */
+      .left-solid-leaf {
+        opacity: 0;
+        transform-origin: 187.5px 386px;
+        transform: scale(0.2) rotate(35deg);
+        animation: left-leaf-unfold calc(0.65s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(0.98s * var(--speed, 1)) forwards;
+      }
+
+      /* 书卷底部白色柔和衬底（隔开猫身与叶片交界） */
+      .book-base-mask {
+        opacity: 0;
+        animation: simple-fade calc(0.3s * var(--speed, 1)) ease calc(1.05s * var(--speed, 1)) forwards;
+      }
+
+      /* 3. 看板猫猫：从合拢的叶片书卷后方探出头来 */
+      .splash-cat {
+        opacity: 0;
+        transform: translateY(38px) scale(0.9);
+        transform-origin: 187.5px 355px;
+        animation: cat-peek-up calc(0.8s * var(--speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) calc(1.08s * var(--speed, 1)) forwards;
+      }
+
+      /* 搭在两片叶子上的小猫爪 */
+      .cat-paws {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.7);
+        transform-origin: 187.5px 355px;
+        animation: paws-drop calc(0.5s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(1.32s * var(--speed, 1)) forwards;
+      }
+
+      /* 猫猫眨眼、动耳与头顶小芽（原坐标基于看板猫 120,121 局部坐标系） */
+      .splash-eyes {
+        transform-origin: 120px 126px;
+        animation: splash-blink 2.8s infinite calc(1.85s * var(--speed, 1));
+      }
+      .head-sprout {
+        opacity: 0;
+        transform: scale(0) rotate(-25deg);
+        transform-origin: 120px 79px;
+        animation: sprout-pop calc(0.55s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(1.45s * var(--speed, 1)) forwards;
+      }
+      .head-sprout-float {
+        transform-origin: 120px 79px;
+        animation: leaf-float 3.4s ease-in-out infinite 2s;
+      }
+      .splash-ear-l {
+        transform-origin: 96px 104px;
+        animation: ear-twitch-l 6.5s ease-in-out infinite 2s;
+      }
+      .splash-ear-r {
+        transform-origin: 144px 104px;
+        animation: ear-twitch-r 7.8s ease-in-out infinite 2s;
+      }
+
+      /* 4. 底部品牌名与Slogan */
+      .brand-title {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: fade-up calc(0.75s * var(--speed, 1)) ease-out calc(1.4s * var(--speed, 1)) forwards;
+      }
+      .brand-sub {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fade-up calc(0.75s * var(--speed, 1)) ease-out calc(1.58s * var(--speed, 1)) forwards;
+      }
+
+      /* 关键帧：图1竖直微倾 -> 顺时针旋转下落 -> 图2右叶原位重合 */
+      @keyframes leaf-spin-settle {
+        0% {
+          transform: translate(-18px, -72px) rotate(-54deg) scale(1.06);
+        }
+        42% {
+          transform: translate(-14px, -64px) rotate(-48deg) scale(1.06);
+        }
+        100% {
+          transform: translate(0px, 0px) rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes outline-draw {
+        0% { stroke-dashoffset: 220; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes leaf-fill-solid {
+        to { fill-opacity: 1; }
+      }
+      @keyframes vein-draw {
+        0% { stroke-dashoffset: 60; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes left-leaf-unfold {
+        0% { opacity: 0; transform: scale(0.25) rotate(32deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      }
+      @keyframes simple-fade {
+        to { opacity: 1; }
+      }
+      @keyframes cat-peek-up {
+        0% { opacity: 0; transform: translateY(38px) scale(0.9); }
+        100% { opacity: 1; transform: translateY(0px) scale(1); }
+      }
+      @keyframes paws-drop {
+        0% { opacity: 0; transform: translateY(-8px) scale(0.7); }
+        100% { opacity: 1; transform: translateY(0px) scale(1); }
+      }
+      @keyframes sprout-pop {
+        0% { opacity: 0; transform: scale(0) rotate(-25deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      }
+      @keyframes splash-blink {
+        0%, 16%, 24%, 100% { transform: scaleY(1); }
+        20% { transform: scaleY(0.08); }
+      }
+      @keyframes leaf-float {
+        0%, 100% { transform: rotate(-4deg) translateY(0px); }
+        50% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes ear-twitch-l {
+        0%, 84%, 100% { transform: rotate(0deg); }
+        88% { transform: rotate(-4.5deg); }
+        93% { transform: rotate(1.5deg); }
+      }
+      @keyframes ear-twitch-r {
+        0%, 60%, 100% { transform: rotate(0deg); }
+        64% { transform: rotate(4.5deg); }
+        68% { transform: rotate(0deg); }
+      }
+      @keyframes fade-up {
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  </defs>
+
+  <!-- 纯白背景 -->
+  <rect class="splash-bg" width="375" height="812" />
+
+  <!-- 后景图层：探头猫猫（1:1 使用 App 图标/看板猫的完整头部路径，在书页展开后向上浮现） -->
+  <g class="splash-cat">
+    <g transform="translate(187.5, 314) scale(1.22) translate(-120, -121)">
+      <!-- 左耳 (与 App 图标完全一致的无痕切线衔接) -->
+      <g class="splash-ear-l">
+        <path d="M74.4 116 C74.4 98, 79 74, 82 59 C83.2 53.5, 90 52.5, 94.2 57.5 L116 86 L108 118 Z" fill="${catColor}"/>
+        <path d="M84 89 L87 69 L98 83" stroke="${innerEarColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+
+      <!-- 右耳 (与 App 图标完全一致的无痕切线衔接) -->
+      <g class="splash-ear-r">
+        <path d="M165.6 116 C165.6 98, 161 74, 158 59 C156.8 53.5, 150 52.5, 145.8 57.5 L124 86 L132 118 Z" fill="${catColor}"/>
+        <path d="M156 89 L153 69 L142 83" stroke="${innerEarColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+
+      <!-- 头顶「空叶」呆毛与小分枝 -->
+      <g class="head-sprout">
+        <g class="head-sprout-float">
+          <path d="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" stroke="${primaryInk}" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+          <path d="M120 79 C117 70, 111 65, 107 67" stroke="${primaryInk}" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+        </g>
+      </g>
+
+      <!-- 圆润饱满猫头 (与 App 图标完全一致的 ellipse 造型) -->
+      <ellipse cx="120" cy="121" rx="46" ry="41" fill="${catColor}"/>
+
+      <!-- 两侧胡须 -->
+      <line x1="65" y1="124" x2="75" y2="126" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="67" y1="133" x2="76" y2="133" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="175" y1="124" x2="165" y2="126" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="173" y1="133" x2="164" y2="133" stroke="${whiskerColor}" stroke-width="2.2" stroke-linecap="round"/>
+
+      <!-- 呆萌大眼睛 (带自然眨眼动画) -->
+      <g class="splash-eyes">
+        <circle cx="99" cy="126" r="14.5" fill="#FFFFFF"/>
+        <circle cx="141" cy="126" r="14.5" fill="#FFFFFF"/>
+        <circle cx="101" cy="126" r="6.8" fill="#18181B"/>
+        <circle cx="139" cy="126" r="6.8" fill="#18181B"/>
+        <circle cx="104" cy="122.5" r="2.2" fill="#FFFFFF"/>
+        <circle cx="142" cy="122.5" r="2.2" fill="#FFFFFF"/>
+      </g>
+
+      <!-- W 猫猫嘴 -->
+      <path d="M113 139.5 Q116.5 143.5 120 139.5 Q123.5 143.5 127 139.5" stroke="#52525B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- 中景遮罩：书卷白色外衬底，确保叶片与黑猫身体形成干净边界 -->
+  <path class="book-base-mask" d="M 106 352 C 142 352, 170 364, 187.5 384 C 205 364, 233 352, 269 352 C 269 388, 236 406, 187.5 406 C 139 406, 106 388, 106 352 Z" fill="${bgColor}" />
+
+  <!-- 前景左叶：左半边实心黑叶（右叶旋转归位时同步展开） -->
+  <g class="left-solid-leaf">
+    <path d="M 110 354 C 144 354, 172 366, 187.5 386 C 166 402, 125 398, 110 354 Z" fill="${primaryInk}" />
+  </g>
+
+  <!-- 前景核心右叶（主角）：从图1竖直位置顺时针旋转，直接重合为图2右侧空心叶 -->
+  <g class="hero-right-leaf">
+    <path class="hero-leaf-outline" d="M 187.5 386 C 203 366, 231 354, 265 354 C 250 398, 209 402, 187.5 386 Z" stroke="${primaryInk}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="hero-leaf-vein" d="M 202 380 Q 226 375 245 364" fill="none" stroke="${primaryInk}" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- 最前景：搭在左右叶片上方的小猫爪（对应图2红框上沿的猫爪遮挡关系） -->
+  <g class="cat-paws">
+    <ellipse cx="150" cy="355" rx="10" ry="6.5" fill="${catColor}" stroke="${bgColor}" stroke-width="2.5" />
+    <ellipse cx="225" cy="355" rx="10" ry="6.5" fill="${catColor}" stroke="${bgColor}" stroke-width="2.5" />
+  </g>
+
+  <!-- 底部品牌标识 -->
+  <g class="brand-title">
+    <text x="182" y="690" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="24" font-weight="700" fill="${primaryInk}" letter-spacing="2">空叶阅读</text>
+    <line x1="238" y1="671" x2="243" y2="664" stroke="${primaryInk}" stroke-width="2.8" stroke-linecap="round" />
+    <line x1="244" y1="674" x2="249" y2="667" stroke="${primaryInk}" stroke-width="2.8" stroke-linecap="round" />
+  </g>
+
+  <g class="brand-sub">
+    <text x="187.5" y="718" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="12" font-weight="400" fill="${subTextColor}" letter-spacing="4">一叶知秋 · 静享阅读</text>
+    <!-- 保留最底部的猫爪印记 -->
+    <circle cx="187.5" cy="756" r="3.5" fill="${subTextColor}" opacity="0.42" />
+    <circle cx="181.5" cy="750" r="1.8" fill="${subTextColor}" opacity="0.42" />
+    <circle cx="187.5" cy="748" r="1.8" fill="${subTextColor}" opacity="0.42" />
+    <circle cx="193.5" cy="750" r="1.8" fill="${subTextColor}" opacity="0.42" />
+  </g>
+</svg>`;
+        }
+
+        // ==================== 渲染与交互控制函数 ====================
+        function renderAllAssets() {
+            const mascotContainer = document.getElementById('mascotSvgContainer');
+            if (mascotContainer) {
+                mascotContainer.innerHTML = getMascotSvgMarkup(state.catMood, state.darkMode);
+            }
+
+            const iconMarkup = getAppIconSvgMarkup(state.iconVariant);
+            const iconIds = ['appIconSvgContainer', 'iosIconThumb', 'androidIconThumb', 'miniIconThumb36', 'miniIconThumb24', 'homescreenMockIcon'];
+            iconIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = iconMarkup;
+            });
+
+            const splashContainer = document.getElementById('splashSvgContainer');
+            if (splashContainer) {
+                splashContainer.innerHTML = getSplashScreenSvgMarkup(state.darkMode);
+            }
+
+            const homeScreenInner = document.getElementById('homeScreenInner');
+            const readingTimePill = document.getElementById('readingTimePill');
+            const continueReadBtn = document.getElementById('continueReadBtn');
+            const catGardenSign = document.getElementById('catGardenSign');
+            const catGardenPost = document.getElementById('catGardenPost');
+            const splashScreenInner = document.getElementById('splashScreenInner');
+
+            if (state.darkMode) {
+                homeScreenInner.className = 'w-full h-full rounded-[34px] bg-[#121214] text-[#F4F4F5] flex flex-col justify-between relative overflow-hidden transition-colors duration-300';
+                readingTimePill.className = 'mt-2 px-4 py-1.5 rounded-full bg-[#27272A] hover:bg-zinc-700 transition-colors flex items-center gap-1.5 text-xs text-zinc-200';
+                continueReadBtn.className = 'w-44 py-3.5 rounded-full bg-[#F4F4F5] text-[#18181B] text-sm font-semibold shadow-md hover:opacity-95 active:scale-95 transition-all';
+                catGardenSign.className = 'relative flex items-center justify-center pl-4 pr-3.5 py-1.5 bg-[#27272A] text-zinc-300 text-xs font-medium rounded-r-md shadow-xs group-hover:-translate-y-0.5 transition-transform';
+                catGardenPost.className = 'w-1.5 h-3 bg-[#3F3F46] rounded-b-sm ml-1';
+                splashScreenInner.className = 'w-full h-full rounded-[34px] bg-[#121214] flex flex-col justify-between relative overflow-hidden transition-colors duration-300';
+            } else {
+                homeScreenInner.className = 'w-full h-full rounded-[34px] bg-[#FFFFFF] text-[#1A1A1A] flex flex-col justify-between relative overflow-hidden transition-colors duration-300';
+                readingTimePill.className = 'mt-2 px-4 py-1.5 rounded-full bg-[#F4F4F5] hover:bg-zinc-200/80 transition-colors flex items-center gap-1.5 text-xs';
+                continueReadBtn.className = 'w-44 py-3.5 rounded-full bg-[#1C1C1E] text-white text-sm font-medium shadow-md hover:opacity-95 active:scale-95 transition-all';
+                catGardenSign.className = 'relative flex items-center justify-center pl-4 pr-3.5 py-1.5 bg-[#EFEFEF] text-zinc-600 text-xs font-medium rounded-r-md shadow-xs group-hover:-translate-y-0.5 transition-transform';
+                catGardenPost.className = 'w-1.5 h-3 bg-[#DFDFDF] rounded-b-sm ml-1';
+                splashScreenInner.className = 'w-full h-full rounded-[34px] bg-[#FFFFFF] flex flex-col justify-between relative overflow-hidden transition-colors duration-300';
+            }
+        }
+
+        function setCatMood(mood) {
+            state.catMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.className = 'mood-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all';
+            });
+            const activeBtn = document.getElementById(`mood-${mood}`);
+            if (activeBtn) {
+                activeBtn.className = 'mood-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-sm transition-all';
+            }
+            document.getElementById('mascotSvgContainer').innerHTML = getMascotSvgMarkup(state.catMood, state.darkMode);
+        }
+
+        function petCat() {
+            state.petCount++;
+            const phrases = [
+                '喵呜~ 今天也要继续看书哦 🍃',
+                '呼噜呼噜... 头顶的小树叶晃起来啦 ✨',
+                '再读 15 分钟，猫园里就会多一只新伙伴！🐾',
+                '摸头杀 +1！猫猫进入开心模式 ^ ^'
+            ];
+            const bubble = document.getElementById('catSpeechBubble');
+            bubble.textContent = phrases[state.petCount % phrases.length];
+            bubble.classList.remove('opacity-0', 'translate-y-1');
+            bubble.classList.add('opacity-100', 'translate-y-0');
+
+            setCatMood('happy');
+
+            clearTimeout(window.petBubbleTimer);
+            window.petBubbleTimer = setTimeout(() => {
+                bubble.classList.remove('opacity-100', 'translate-y-0');
+                bubble.classList.add('opacity-0', 'translate-y-1');
+            }, 2600);
+        }
+
+        function setIconVariant(variant) {
+            state.iconVariant = variant;
+            document.querySelectorAll('.icon-var-btn').forEach(btn => {
+                btn.className = 'icon-var-btn px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all';
+            });
+            const activeBtn = document.getElementById(`icon-var-${variant}`);
+            if (activeBtn) {
+                activeBtn.className = 'icon-var-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-sm transition-all';
+            }
+            renderAllAssets();
+        }
+
+        function toggleIconGrid() {
+            const checked = document.getElementById('toggleGridLines').checked;
+            const grid = document.getElementById('iconGridOverlay');
+            grid.style.opacity = checked ? '1' : '0';
+        }
+
+        function replaySplash() {
+            const container = document.getElementById('splashSvgContainer');
+            const badge = document.getElementById('splashStepBadge');
+            if (!container) return;
+            container.innerHTML = '';
+            void container.offsetWidth;
+            container.innerHTML = getSplashScreenSvgMarkup(state.darkMode);
+
+            const factor = state.splashSlowMotion ? 2 : 1;
+            if (badge) badge.textContent = '1. 右叶旋平';
+            clearTimeout(window.sTimer1);
+            clearTimeout(window.sTimer2);
+            clearTimeout(window.sTimer3);
+
+            window.sTimer1 = setTimeout(() => { if (badge) badge.textContent = '2. 左叶展开'; }, 950 * factor);
+            window.sTimer2 = setTimeout(() => { if (badge) badge.textContent = '3. 猫猫探头'; }, 1400 * factor);
+            window.sTimer3 = setTimeout(() => { if (badge) badge.textContent = '4. 品牌定格'; }, 1950 * factor);
+        }
+
+        function toggleSplashSpeed() {
+            state.splashSlowMotion = !state.splashSlowMotion;
+            const stage = document.getElementById('splashSvgContainer');
+            const btn = document.getElementById('splashSpeedBtn');
+            if (state.splashSlowMotion) {
+                stage.classList.add('slow-motion');
+                btn.textContent = '0.5x 慢放调试中';
+                btn.className = 'px-2.5 py-1.5 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-medium transition-all';
+            } else {
+                stage.classList.remove('slow-motion');
+                btn.textContent = '1.0x 正常速度';
+                btn.className = 'px-2.5 py-1.5 rounded-xl bg-white border border-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-100 transition-all';
+            }
+            replaySplash();
+        }
+
+        function toggleGlobalTheme() {
+            state.darkMode = !state.darkMode;
+            const btnText = document.getElementById('themeBtnText');
+            const iconWrap = document.getElementById('themeIconWrap');
+
+            if (state.darkMode) {
+                btnText.textContent = '深色预览';
+                iconWrap.innerHTML = `<svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>`;
+                setIconVariant('dark');
+            } else {
+                btnText.textContent = '浅色预览';
+                iconWrap.innerHTML = `<svg class="w-4 h-4 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`;
+                setIconVariant('light');
+            }
+            renderAllAssets();
+            showToast(state.darkMode ? '已切换至「深色模式」预览' : '已切换至「浅色模式」预览');
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all text-zinc-600 hover:text-zinc-900 whitespace-nowrap';
+            });
+            document.getElementById(`tab-${view}`).className = 'tab-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all bg-[#18181B] text-white shadow-sm whitespace-nowrap';
+
+            const grid = document.getElementById('workspaceGrid');
+            const sections = {
+                mascot: document.getElementById('section-mascot'),
+                icon: document.getElementById('section-icon'),
+                splash: document.getElementById('section-splash')
+            };
+
+            if (view === 'all') {
+                grid.className = 'grid grid-cols-1 lg:grid-cols-3 gap-6 items-start';
+                Object.values(sections).forEach(s => s.classList.remove('hidden'));
+            } else {
+                grid.className = 'max-w-xl mx-auto';
+                Object.entries(sections).forEach(([key, sec]) => {
+                    if (key === view) {
+                        sec.classList.remove('hidden');
+                    } else {
+                        sec.classList.add('hidden');
+                    }
+                });
+                if (view === 'splash') replaySplash();
+            }
+        }
+
+        function getRawSvgByKey(key) {
+            if (key === 'mascot') return getMascotSvgMarkup(state.catMood, state.darkMode);
+            if (key === 'icon') return getAppIconSvgMarkup(state.iconVariant);
+            if (key === 'splash') return getSplashScreenSvgMarkup(state.darkMode);
+            return '';
+        }
+
+        function copyTextToClipboard(text, successMsg) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg || 'SVG 源码已复制到剪贴板');
+            } catch (err) {
+                showToast('复制失败，请打开源码窗口手动复制');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function copySvgAsset(key) {
+            const svgCode = getRawSvgByKey(key);
+            const names = { mascot: '看板猫猫', icon: 'App 图标', splash: '开屏动画' };
+            copyTextToClipboard(svgCode, `已复制「${names[key]}」SVG 矢量代码`);
+        }
+
+        function downloadSvgAsset(key, filename) {
+            const svgCode = getRawSvgByKey(key);
+            const blob = new Blob([svgCode], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`已下载 ${filename}`);
+        }
+
+        function exportIconPng() {
+            const svgString = getAppIconSvgMarkup(state.iconVariant);
+            const canvas = document.getElementById('pngExportCanvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function () {
+                ctx.clearRect(0, 0, 512, 512);
+                ctx.drawImage(img, 0, 0, 512, 512);
+                URL.revokeObjectURL(url);
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = `kongye-app-icon-${state.iconVariant}-512px.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                showToast('已导出 512×512 高清 PNG 图标');
+            };
+            img.src = url;
+        }
+
+        function openCodeModal(tabKey) {
+            document.getElementById('codeModal').classList.remove('hidden');
+            document.getElementById('codeModal').classList.add('flex');
+            switchModalCodeTab(tabKey || 'mascot');
+        }
+
+        function closeCodeModal() {
+            document.getElementById('codeModal').classList.add('hidden');
+            document.getElementById('codeModal').classList.remove('flex');
+        }
+
+        function switchModalCodeTab(tabKey) {
+            state.activeModalTab = tabKey;
+            document.querySelectorAll('.modal-code-tab').forEach(btn => {
+                btn.className = 'modal-code-tab px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-600';
+            });
+            const activeBtn = document.getElementById(`modal-tab-${tabKey}`);
+            if (activeBtn) {
+                activeBtn.className = 'modal-code-tab px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-zinc-900 shadow-xs';
+            }
+            document.getElementById('svgCodeDisplay').textContent = getRawSvgByKey(tabKey);
+        }
+
+        function copyCurrentModalCode() {
+            copySvgAsset(state.activeModalTab);
+        }
+
+        function downloadCurrentModalCode() {
+            const filenames = {
+                mascot: 'kongye-cat-mascot.svg',
+                icon: 'kongye-app-icon.svg',
+                splash: 'kongye-splash-screen.svg'
+            };
+            downloadSvgAsset(state.activeModalTab, filenames[state.activeModalTab]);
+        }
+
+        function showToast(msg) {
+            const banner = document.getElementById('toastBanner');
+            const text = document.getElementById('toastMessage');
+            text.textContent = msg;
+            banner.classList.remove('opacity-0', 'translate-y-2');
+            banner.classList.add('opacity-100', 'translate-y-0');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                banner.classList.remove('opacity-100', 'translate-y-0');
+                banner.classList.add('opacity-0', 'translate-y-2');
+            }, 2400);
+        }
+
+        window.onload = function () {
+            renderAllAssets();
+        };
+    </script>
+</body>
+</html>

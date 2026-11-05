@@ -46,6 +46,7 @@ object Stats {
 
     fun clear() {
         _sessions.value = emptyList()
+        CatRest.reset()
         saver.flush()
     }
 

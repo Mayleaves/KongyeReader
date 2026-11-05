@@ -88,7 +88,7 @@ object TxtParser {
 
     private class Kind(val kind: Int, val num: Int = -1)
 
-    fun isSpace(c: Char) = c.isWhitespace() || c == '　' || c == ' ' || c == '﻿' || c == '​'
+    fun isSpace(c: Char) = c.isWhitespace() || c == '　' || c == ' ' || c == '\uFEFF' || c == '\u200B'
 
     fun parse(text: String): Parsed {
         // 先切成行：去掉首尾空白，记下每行前后是不是空行（单独占一行的短句才可能是标题）

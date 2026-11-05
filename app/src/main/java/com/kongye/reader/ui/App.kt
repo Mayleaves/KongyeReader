@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -38,12 +39,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +61,7 @@ import com.kongye.reader.ui.components.GhostButton
 import com.kongye.reader.ui.components.HangingCat
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.InkButton
+import com.kongye.reader.ui.components.ReadingSplash
 import com.kongye.reader.ui.components.SmoothShape
 import com.kongye.reader.ui.components.T
 import com.kongye.reader.ui.components.ToastHost
@@ -74,7 +80,16 @@ import com.kongye.reader.ui.theme.LightPalette
 import com.kongye.reader.ui.theme.LocalPalette
 
 @Composable
-fun App() {
+fun App(showSplash: Boolean = false) {
+    var splashVisible by rememberSaveable { mutableStateOf(showSplash) }
+    var splashFinishing by remember { mutableStateOf(false) }
+    val splashExit = remember { Animatable(if (splashVisible) 0f else 1f) }
+    LaunchedEffect(splashFinishing, splashVisible) {
+        if (splashFinishing && splashVisible) {
+            splashExit.animateTo(1f, tween(480, easing = FastOutSlowInEasing))
+            splashVisible = false
+        }
+    }
     val settings by Settings.state.collectAsState()
     val dark = when (settings.theme) {
         1 -> false
@@ -91,30 +106,52 @@ fun App() {
         // 最先注册，优先级最低：页面里的弹层、阅读菜单会先拦截返回键
         BackHandler(Nav.stack.size > 1) { Nav.pop() }
         Box(Modifier.fillMaxSize().background(K.c.bg)) {
-            AnimatedContent(
-                targetState = Nav.top,
-                transitionSpec = {
-                    val fwd = Nav.forward
-                    val enter = fadeIn(tween(220)) + slideInHorizontally(tween(280, easing = FastOutSlowInEasing)) { if (fwd) it / 5 else -it / 5 }
-                    val exit = fadeOut(tween(180)) + slideOutHorizontally(tween(280, easing = FastOutSlowInEasing)) { if (fwd) -it / 8 else it / 5 }
-                    (enter togetherWith exit).using(SizeTransform(clip = false))
-                },
-                contentKey = { it.key },
-                label = "nav",
-            ) { s ->
-                when (s) {
-                    Screen.Home -> HomeScreen()
-                    Screen.Shelf -> ShelfScreen()
-                    is Screen.Reader -> ReaderScreen(s.bookId)
-                    Screen.Stats -> StatsScreen()
-                    Screen.Timeline -> TimelineScreen()
-                    Screen.Garden -> GardenScreen()
-                    Screen.Prefs -> PrefsScreen()
+            Box(Modifier.fillMaxSize().graphicsLayer {
+                val progress = if (splashVisible) splashExit.value else 1f
+                alpha = progress
+                translationY = 12.dp.toPx() * (1f - progress)
+                scaleX = 0.985f + 0.015f * progress
+                scaleY = scaleX
+            }) {
+                AnimatedContent(
+                    targetState = Nav.top,
+                    transitionSpec = {
+                        val fwd = Nav.forward
+                        val enter = fadeIn(tween(220)) + slideInHorizontally(tween(280, easing = FastOutSlowInEasing)) { if (fwd) it / 5 else -it / 5 }
+                        val exit = fadeOut(tween(180)) + slideOutHorizontally(tween(280, easing = FastOutSlowInEasing)) { if (fwd) -it / 8 else it / 5 }
+                        (enter togetherWith exit).using(SizeTransform(clip = false))
+                    },
+                    contentKey = { it.key },
+                    label = "nav",
+                ) { s ->
+                    when (s) {
+                        Screen.Home -> HomeScreen()
+                        Screen.Shelf -> ShelfScreen()
+                        is Screen.Reader -> ReaderScreen(s.bookId)
+                        Screen.Stats -> StatsScreen()
+                        Screen.Timeline -> TimelineScreen()
+                        Screen.Garden -> GardenScreen()
+                        Screen.Prefs -> PrefsScreen()
+                    }
+                }
+                ImportBusy()
+                ImportFailure()
+                ToastHost()
+            }
+            if (splashVisible) {
+                BackHandler { }
+                Box(Modifier.fillMaxSize().graphicsLayer {
+                    val progress = splashExit.value
+                    alpha = 1f - progress
+                    scaleX = 1f + 0.025f * progress
+                    scaleY = scaleX
+                }) {
+                    ReadingSplash(
+                        onFinished = { splashFinishing = true },
+                        onSkip = { splashVisible = false },
+                    )
                 }
             }
-            ImportBusy()
-            ImportFailure()
-            ToastHost()
         }
     }
 }
