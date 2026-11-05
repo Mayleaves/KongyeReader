@@ -2,8 +2,6 @@ package com.kongye.reader.ui.components
 
 import android.graphics.Typeface
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,8 +63,6 @@ fun DashboardCat(
     val dark = K.c.dark
     val time = assetTime()
     var happy by remember { mutableStateOf(false) }
-    val gazeX by animateFloatAsState(gaze.x, tween(100), label = "cat-gaze-x")
-    val gazeY by animateFloatAsState(gaze.y, tween(100), label = "cat-gaze-y")
     LaunchedEffect(petSignal) {
         if (petSignal > 0) {
             happy = true
@@ -87,17 +83,18 @@ fun DashboardCat(
             when {
                 sleeping -> drawImportedSleep(dark, time)
                 happy -> drawImportedHappy(dark, time)
-                else -> drawImportedFocus(dark, time, leaf, Offset(gazeX, gazeY))
+                // Use the latest pointer position directly; no tween trails the finger.
+                else -> drawImportedFocus(dark, time, leaf, gaze)
             }
         }
     }
 }
 
-/** A circular limit keeps pupils and their highlights inside the eye whites. */
+/** Increase travel with finger distance, approaching the eye-white limit smoothly. */
 internal fun catGazeAt(pointer: Offset?, eyeCenter: Offset, radius: Float): Offset {
     if (pointer == null || radius <= 0f) return Offset.Zero
-    val delta = (pointer - eyeCenter) / radius
-    return delta / delta.getDistance().coerceAtLeast(1f)
+    val delta = pointer - eyeCenter
+    return delta / (radius + delta.getDistance())
 }
 
 /** Full-screen cold-start animation. SVG coordinates/timing come from the workbench. */

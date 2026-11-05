@@ -39,16 +39,24 @@ import kotlin.math.PI
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
     private var skipOnly = false
+    private var gazeOnly = false
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
         skipOnly = arguments?.getString("check") == "splash-skip"
+        gazeOnly = arguments?.getString("check") == "gaze-distance"
         start()
     }
 
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (gazeOnly) {
+                checkGazeLimits()
+                checkGazeDistance()
+                finish(0, Bundle().apply { putString("result", "PASS: pupil travel increases with finger distance, follows direction, stays in eye whites and resets on release") })
+                return
+            }
             if (skipOnly) {
                 checkSplashSkip()
                 finish(0, Bundle().apply { putString("result", "PASS: one tap skips splash immediately without activating the button underneath") })
@@ -226,6 +234,34 @@ class VisualRegression : Instrumentation() {
         for (point in listOf(Offset.Zero, Offset(10000f, 10000f), Offset(-1000f, 300f))) {
             check(catGazeAt(point, center, 100f).getDistance() <= 1.00001f) { "Pupil can leave the eye white" }
         }
+    }
+
+    private fun checkGazeDistance() {
+        val center = Offset(250f, 300f)
+        var previousTravel = 0f
+        var previousX = 0f
+        val result = StringBuilder()
+        for (distance in listOf(25f, 100f, 250f, 500f, 5000f)) {
+            val gaze = catGazeAt(center + Offset(distance, 0f), center, 100f)
+            check(gaze.x > previousTravel && gaze.x < 1f && gaze.y == 0f)
+            check(catGazeAt(center - Offset(distance, 0f), center, 100f).x == -gaze.x)
+            val bitmap = render(720,780) {
+                drawContext.transform.scale(3f, 3f, Offset.Zero)
+                drawImportedFocus(false, 0f, gaze=gaze)
+            }
+            var count = 0; var sum = 0L
+            for (y in 350..405) for (x in 265..450) {
+                if (bitmap.getPixel(x,y) == android.graphics.Color.rgb(24,24,27)) { count++; sum+=x }
+            }
+            check(count>50)
+            val pupilX = sum.toFloat()/count
+            check(pupilX > previousX) { "Rendered pupils did not move farther at distance=$distance" }
+            result.append("distance=$distance normalizedTravel=${gaze.x} pupilX=$pupilX\n")
+            save(bitmap,"gaze-distance-${distance.toInt()}"); bitmap.recycle()
+            previousTravel=gaze.x; previousX=pupilX
+        }
+        check(catGazeAt(null,center,100f)==Offset.Zero)
+        File(output,"gaze-distance-result.txt").writeText(result.toString())
     }
 
     private fun checkRestPolicy() {
