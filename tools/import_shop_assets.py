@@ -11,6 +11,9 @@
   （tools/shop_measurements.json，浏览器里 getBBox 量的）等比换算到每只动物自己的坐标里。
 - 挂件：背景图/白膜节日配饰.html 里 19 个节日 × 6 个位置（路牌、小屋、天空、三块空地）的挂件。
   HTML 舞台是 260x540，按路牌、小屋、太阳、空地对到背景的 400x800 坐标里（ORN_SLOTS）。
+- 成就奖励：tools/achievement_rewards.json（tools/import_achievements.py 从成就 HTML 取出）里的鎏金看板猫（四个姿势）、
+  4 件饰品、4 张背景、4 件挂件、3 个图标。lock 是对应成就的编号，点亮成就才能用，不用叶子买。
+  奖励背景是 260x540 的布局，挂件位置按路牌、小屋、太阳、空地重新对过（REWARD_SLOTS）。
 - 图标：看板 HTML 的 getAppIconSvgMarkup：经典落日（免费）、极简（浅色，要解锁）、极简落日（要解锁），胡须压到猫头下面。
 """
 import json
@@ -42,7 +45,7 @@ ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
 NEWER = Path('E:/Chrome')  # 新画的版本先放在这里，和素材目录里同名的旧版二选一
 
 # —— 商品清单：文件名 → (编号, 名字, 价格叶子)；商城按组排：空叶自己的猫、小动物、小马宝莉、表情 ——
-KONGYE = [('极简猫.svg', 'mincat', '极简猫', 0)]
+KONGYE = [('极简猫.svg', 'mincat', '极简猫', 200)]
 ANIMALS = [
     ('小猫.svg', 'cat', '小猫', 120), ('小狗.svg', 'dog', '小狗', 120), ('小猪.svg', 'pig', '小猪', 120),
     ('小羊.svg', 'sheep', '小羊', 120), ('小老鼠.svg', 'mouse', '小老鼠', 120), ('小鸡.svg', 'chicken', '小鸡', 120),
@@ -85,9 +88,25 @@ ORN_SLOTS = {
     'F': {'x': 157, 'y': 685, 's': 1.8, 'name': '下面的池塘'},
 }
 ORN_PRICE = {'A': 40, 'B': 60, 'C': 60, 'D': 40, 'E': 40, 'F': 50}
+# 成就奖励背景（260x540，默认农场的另一种排法）上的挂件位置：
+# 400x800 的锚点相对路牌、小屋、太阳、空地的偏移按 0.655 缩小，再挂到这张图的同一处
+REWARD_SLOTS = {
+    'A': {'x': 79, 'y': 74, 's': 1.05, 'name': '路牌'},
+    'B': {'x': 186, 'y': 68.3, 's': 0.85, 'name': '小屋'},
+    'C': {'x': 143, 'y': 37.5, 's': 1.05, 'name': '天空'},
+    'D': {'x': 78.4, 'y': 193.5, 's': 1.05, 'name': '上面的空地'},
+    'E': {'x': 186.3, 'y': 324.1, 's': 1.05, 'name': '中间的空地'},
+    'F': {'x': 102, 'y': 462, 's': 1.18, 'name': '下面的池塘'},
+}
+REWARD_SIGN = {'x': 65.3, 'y': 87.5, 'size': 8.5, 'color': '#FFFFFF', 'bold': True, 'spacing': 0, 'kai': False, 'text': ''}
+REWARDS = json.loads((ROOT / 'tools/achievement_rewards.json').read_text(encoding='utf-8'))
+REWARD_BG = {'c14': 'rainwindow', 'c15': 'sunlibrary', 'c16': 'forest', 'c17': 'galaxytrain'}
+REWARD_ICON = {'e7': ('gold', '#111115'), 'e8': ('neon', '#0D0B18'), 'e9': ('pixel', '#F4EFE6')}
 # 谷歌猪是 emoji：朝左、几乎占满画布，比别的动物大一圈。翻成朝右，放进更大的画布（size），
 # 让身体宽度和别的动物差不多，脚落在画布 82% 高的地方（和别的动物在格子里站得一样低）
-REFRAME = {'notopig': {'mirror': True, 'size': 236, 'feet': 0.82}}
+REFRAME = {'notopig': {'mirror': True, 'size': 236, 'feet': 0.82},
+           # 乌鸦几乎占满画布，比乌鸫大一圈：放进 150 的画布，宽高和乌鸫差不多，脚和乌鸫一样落在 84% 的地方
+           'crow': {'size': 150, 'feet': 0.842}}
 
 
 def q(tag):
@@ -318,7 +337,7 @@ def source(file, private):
     return ART / '生物' / (f'小马宝莉/{file}' if private else file)
 
 
-for group, items, private in (('kongye', KONGYE, False), ('animal', ANIMALS, False), ('pony', PONIES, True), ('emoji', EMOJI, False)):
+for group, items, private in (('kongye', KONGYE, False), ('animal', ANIMALS, False), ('emoji', EMOJI, False), ('pony', PONIES, True)):
     for file, aid, name, price in items:
         if aid == 'mincat':
             root = mincat_svg()
@@ -367,6 +386,37 @@ for group, items, private in (('kongye', KONGYE, False), ('animal', ANIMALS, Fal
         catalog['animals'].append({'id': aid, 'name': name, 'price': price, 'group': group, 'res': res, 'private': private, 'vb': vb,
                                    'dual': arch['dualEyes'], 'flip': arch['facingLeft'], 'slots': slots})
 
+# 成就「看板猫猫」：鎏金看板猫，240x260 和看板猫同一套坐标；四个姿势各一张图，首页按状态换
+gold_res = {}
+for pose, markup in REWARDS['poses'].items():
+    root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 240 260">{markup}</svg>')
+    prepare(root)
+    res = 'shop_animal_goldcat' if pose == 'focus' else f'shop_goldcat_{pose}'
+    gold_res[pose] = res
+    jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
+arch = data['arch'][file_arch['猫.svg']]
+gold_slots = {code: map_anchor(anchor, MEASURE['arch'][file_arch['猫.svg']], MEASURE['reward']['pose-focus'])
+              for code, anchor in arch['anchors'].items()}
+catalog['animals'].insert(1, {'id': 'goldcat', 'name': '鎏金看板猫', 'price': 0, 'lock': 'c7', 'group': 'kongye',
+                              'res': gold_res['focus'], 'private': False, 'vb': [0.0, 0.0, 240.0, 260.0],
+                              'dual': arch['dualEyes'], 'flip': arch['facingLeft'], 'slots': gold_slots,
+                              'poses': {k: v for k, v in gold_res.items() if k != 'focus'}})
+
+# 成就奖励饰品：和白膜配饰同样以部位锚点为原点
+for aid in ('c10', 'c11', 'c12', 'c13'):
+    r = REWARDS['rewards'][aid]
+    entry = {'id': f'ach_{aid}', 'name': r['name'], 'slot': r['slot'], 'price': 0, 'lock': aid}
+    variants = [('main', r['single'], f'{aid}-single'), ('dual', r['svg'], aid)] if r['single'] else [('main', r['svg'], aid)]
+    for key, markup, mkey in variants:
+        x, y, w, h = MEASURE['reward'][mkey]
+        box = [round(x - 4, 1), round(y - 4, 1), round(w + 8, 1), round(h + 8, 1)]
+        root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="{" ".join(map(str, box))}">{markup}</svg>')
+        prepare(root)
+        res = f'shop_acc_ach_{aid}' + ('_dual' if key == 'dual' else '')
+        jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
+        entry[key] = {'res': res, 'box': box}
+    catalog['accessories'].append(entry)
+
 # —— 3. 背景：去掉文字和返回胶囊，路牌文字的位置留给 App ——
 for file, bid, name, price in BACKGROUNDS:
     root = ET.parse(ART / '背景图' / file).getroot()
@@ -398,6 +448,27 @@ for file, bid, name, price in BACKGROUNDS:
     jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
     catalog['backgrounds'].append({'id': bid, 'name': name, 'price': price, 'res': res, 'vb': viewbox(root), 'sign': sign})
 
+# 成就奖励背景：去掉底部的返回胶囊
+for aid, bid in REWARD_BG.items():
+    r = REWARDS['rewards'][aid]
+    # 新画的版本（E:/Chrome/<编号>.svg，比如 bg-sun-library.svg）优先
+    newer = NEWER / f"bg-{ {'rainwindow': 'rain-window', 'sunlibrary': 'sun-library', 'forest': 'forest-sanctuary', 'galaxytrain': 'galaxy-train'}[bid] }.svg"
+    if newer.exists():
+        root = ET.parse(newer).getroot()
+        root.attrib.pop('width', None)
+        root.attrib.pop('height', None)
+    else:
+        root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 260 540">{r["svg"]}</svg>')
+    for parent in list(root.iter()):
+        for child in list(parent):
+            if 'translate(130, 510)' in (child.get('transform') or ''):
+                parent.remove(child)
+    prepare(root)
+    res = f'shop_bg_{bid}'
+    jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
+    catalog['backgrounds'].append({'id': bid, 'name': r['name'], 'price': 0, 'lock': aid, 'res': res,
+                                   'vb': [0.0, 0.0, 260.0, 540.0], 'sign': REWARD_SIGN, 'slots': REWARD_SLOTS})
+
 # —— 4. 节日挂件：每件按自己的外框转成小图，App 按 ORN_SLOTS 摆到背景上 ——
 orn_html = (ART / '背景图/白膜节日配饰.html').read_text(encoding='utf-8')
 o0, o1 = orn_html.index('const SCENE_SLOTS'), orn_html.index('const slotOffsets')
@@ -421,6 +492,19 @@ for fest in fests:
         catalog['ornaments'].append({'id': f'orn_{key}_{slot.lower()}', 'name': item['name'], 'fest': key, 'slot': slot,
                                      'price': ORN_PRICE[slot], 'res': res, 'box': box})
 
+# 成就奖励挂件：单独一组「成就奖励」
+catalog['festivals'].append({'id': 'achieve', 'name': '成就奖励', 'color': '#D89B3C'})
+for aid in ('c18', 'c19', 'c20', 'c21'):
+    r = REWARDS['rewards'][aid]
+    x, y, w, h = MEASURE['reward'][aid]
+    box = [round(x - 3, 2), round(y - 3, 2), round(w + 6, 2), round(h + 6, 2)]
+    root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="{" ".join(map(str, box))}">{r["svg"]}</svg>')
+    prepare(root)
+    res = f'shop_orn_ach_{aid}'
+    jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
+    catalog['ornaments'].append({'id': f'orn_ach_{aid}', 'name': r['name'], 'fest': 'achieve', 'slot': r['slot'],
+                                 'price': 0, 'lock': aid, 'res': res, 'box': box})
+
 # —— 5. 图标：看板 HTML 生成落日版、浅色极简版 ——
 board = BOARD.read_text(encoding='utf-8')
 b0, b1 = board.index('        const state = {'), board.index('        function renderAllAssets()')
@@ -437,7 +521,7 @@ out.minlight = vm.runInContext("getAppIconSvgMarkup('light')", ctx);
 process.stdout.write(JSON.stringify(out));
 """)
 ANDROID = 'http://schemas.android.com/apk/res/android'
-icon_bg = {'sunset': '#FAF8F5', 'minimal': '#FAF8F5', 'minlight': '#FFFFFF'}
+icon_bg = {'sunset': '#FAF8F5', 'minimal': '#FAF8F5', 'minlight': '#FFFFFF', **{k: c for k, c in REWARD_ICON.values()}}
 icon_jobs = []
 for key, markup in icons.items():
     markup = whiskers_under_head(markup)
@@ -448,12 +532,23 @@ for key, markup in icons.items():
     (ROOT / f'design/generated/icon-{key}.svg').write_text(whiskers_under_head(markup), encoding='utf-8')
     out = RES / 'drawable' / f'ic_launcher_fg_{key}.xml'
     icon_jobs.append((ET.tostring(root, encoding='unicode'), out))
+# 成就奖励图标：底板（大圆角矩形和装饰边框）交给背景层
+for aid, (key, _) in REWARD_ICON.items():
+    root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 512 512">{REWARDS["rewards"][aid]["svg"]}</svg>')
+    for parent in list(root.iter()):
+        for child in list(parent):
+            if local(child) == 'rect' and float(child.get('width', 0)) >= 400:
+                parent.remove(child)
+    prepare(root)
+    icon_jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'ic_launcher_fg_{key}.xml'))
 jobs += icon_jobs
 catalog['icons'] = [
     {'id': 'default', 'name': '经典', 'price': 0},
-    {'id': 'sunset', 'name': '经典落日', 'price': 0},
+    {'id': 'sunset', 'name': '经典落日', 'price': 200},
     {'id': 'minlight', 'name': '极简', 'price': 200},
     {'id': 'minimal', 'name': '极简落日', 'price': 300},
+    *[{'id': key, 'name': REWARDS['rewards'][aid]['name'].removesuffix('图标'), 'price': 0, 'lock': aid}
+      for aid, (key, _) in REWARD_ICON.items()],
 ]
 
 # —— 转换、收尾 ——

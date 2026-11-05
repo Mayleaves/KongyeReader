@@ -130,7 +130,7 @@ private fun GardenTab(profile: Profile, animals: List<ShopAnimal>) {
                 val has = profile.has(b.id)
                 Pick(
                     on = profile.gardenBg == b.id,
-                    label = if (has) b.name else "${b.name} · ${b.price}叶",
+                    label = if (has) b.name else if (b.lock != null) "${b.name} · 成就" else "${b.name} · ${b.price}叶",
                     locked = !has,
                     modifier = m,
                     ratio = 0.68f,
@@ -280,7 +280,7 @@ private fun IconTab(profile: Profile) {
                 val has = profile.has("icon_${i.id}")
                 Pick(
                     on = profile.icon == i.id,
-                    label = if (has) i.name else "${i.name} · ${i.price}叶",
+                    label = if (has) i.name else if (i.lock != null) "${i.name} · 成就" else "${i.name} · ${i.price}叶",
                     locked = !has,
                     modifier = m,
                     onClick = {
@@ -342,8 +342,8 @@ private fun AnimalGrid(animals: List<ShopAnimal>, mascot: Boolean, selected: (St
     Grid(ids, cols = 4, collapsedRows = 2, selected = selected) { id, m ->
         if (id == Shop.MASCOT) {
             Pick(selected(id), "看板猫", modifier = m, onClick = { onPick(id) }) { CatMascot(size = 50.dp, shadow = false) }
-        } else if (id == Shop.MINCAT) {
-            // 极简猫和看板猫一样大
+        } else if (id == Shop.MINCAT || id == Shop.GOLDCAT) {
+            // 极简猫、鎏金看板猫和看板猫一样大
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, size = 50.dp, shadow = false) }
         } else {
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) {

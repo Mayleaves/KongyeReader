@@ -74,6 +74,9 @@ def shape(el):
         return a['d']
     if t == 'line':
         return f"M{a['x1']} {a['y1']}L{a['x2']} {a['y2']}"
+    if t in ('polygon', 'polyline'):
+        pts = re.findall(r'-?[\d.]+', a['points'])
+        return 'M' + 'L'.join(f'{x} {y}' for x, y in zip(pts[::2], pts[1::2])) + ('Z' if t == 'polygon' else '')
     if t in ('circle', 'ellipse'):
         x, y = float(a['cx']), float(a['cy'])
         rx, ry = float(a.get('rx', a.get('r', 0))), float(a.get('ry', a.get('r', 0)))
@@ -292,6 +295,95 @@ for name in ('Focus', 'Happy', 'Sleep', 'Loaf', 'Splash'):
             params += ', eyeColor: Color? = null'
         params += ', shadow: Boolean = true'
     functions += [f'internal fun DrawScope.drawMinimal{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
+
+# —— 鎏金看板猫（成就「看板猫猫」的奖励）：成就 HTML 里的四个姿势，和看板猫同一套 240x260 骨架。
+# 原稿没有动画 class，这里按部位分组，套上看板猫的 class（尾巴、呼吸、双耳、叶子、眨眼、腮红、爱心、Zzz），
+# 动画、转动中心都和看板猫一样 ——
+REWARDS = json.loads((ROOT / 'tools/achievement_rewards.json').read_text(encoding='utf-8'))
+SVG_NS_ = 'http://www.w3.org/2000/svg'
+
+
+def gold_tag(pose, markup):
+    src = ET.fromstring(f'<svg xmlns="{SVG_NS_}" viewBox="0 0 240 260">{markup}</svg>')[0]
+    kids = list(src)
+    root = ET.Element(f'{{{SVG_NS_}}}svg', {'viewBox': '0 0 240 260'})
+
+    def grp(cls, items):
+        g = ET.Element(f'{{{SVG_NS_}}}g', {'class': cls})
+        g.extend(items)
+        return g
+
+    def d(e):
+        return (e.get('d') or '').replace(' ', '')
+
+    def regroup(items):
+        """耳朵（轮廓+内耳线）、叶子（叶片+叶柄+小金点）、眼睛、腮红各包成一组；嵌套的 <g> 往里找"""
+        out, i = [], 0
+        while i < len(items):
+            e = items[i]
+            tag = e.tag.split('}')[-1]
+            if tag == 'g':
+                inner = list(e)
+                for c in inner:
+                    e.remove(c)
+                e.extend(regroup(inner))
+                out.append(e)
+                i += 1
+            elif d(e).startswith('M74.4116'):
+                out.append(grp('svg-ear-l', items[i:i + 2])); i += 2
+            elif d(e).startswith('M165.6116'):
+                out.append(grp('svg-ear-r', items[i:i + 2])); i += 2
+            elif d(e).startswith('M12079C12066'):
+                n = 3 if i + 2 < len(items) and items[i + 2].tag.endswith('circle') and items[i + 2].get('cx') == '142' else 2
+                out.append(grp('svg-head-leaf', items[i:i + n])); i += n
+            elif tag == 'circle' and e.get('fill') == '#FFFFFF' and e.get('cx') in ('99', '141') and pose == 'focus':
+                out.append(grp('svg-eye-blink', items[i:i + 6])); i += 6
+            elif tag == 'ellipse' and e.get('fill') == '#FF8A65':
+                out.append(grp('svg-cheek-pulse', items[i:i + 2])); i += 2
+            else:
+                out.append(e); i += 1
+        return out
+
+    root.extend(kids[:2])  # 地上的两层光环影子
+    body = next(i for i, e in enumerate(kids) if d(e).startswith('M77231') or d(e).startswith('M65231'))
+    if pose != 'loaf':
+        root.append(grp('svg-cat-tail-sleep' if pose == 'sleep' else 'svg-cat-tail', kids[2:body]))
+    rest = kids[2:] if pose == 'loaf' else kids[body:]
+    hearts = [e for e in rest if 'rotate(' in (e.get('transform') or '') and e.tag.endswith('path')]
+    texts = [e for e in rest if e.tag.endswith('text')]
+    keep = [e for e in rest if e not in hearts and e not in texts]
+    root.append(grp('svg-loaf-breathe' if pose == 'loaf' else 'svg-cat-breathe', regroup(keep)))
+    for n, h in enumerate(hearts, 1):
+        root.append(grp(f'svg-heart-{n}', [h]))
+    for n, t in enumerate(texts, 1):
+        root.append(grp(f'svg-zzz-{n}', [t]))
+    return root
+
+
+for name in ('Focus', 'Happy', 'Sleep', 'Loaf'):
+    root = gold_tag(name.lower(), REWARDS['poses'][name.lower()])
+    (OUT / f'gold-{name.lower()}.svg').write_text(ET.tostring(root, encoding='unicode'), encoding='utf-8')
+    lines = emit(root, root, {}, {})
+    lines[0] = lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
+    lines[1] = lines[1].replace('drawPath(', 'if (shadow) drawPath(', 1)
+    params = ''
+    if name != 'Loaf':
+        # 叶子和看板猫一样：当天读满半小时才长出来（鎏金叶子保持原色）
+        i = next(i for i, line in enumerate(lines) if 'assetGroup("svg-head-leaf", time) {' in line)
+        lines[i] = lines[i].replace('assetGroup(', 'if (leaf) assetGroup(', 1)
+        params += ', leaf: Boolean = false'
+    else:
+        lines = leafify(lines, 'svg-head-leaf', drop=True)
+    if name == 'Focus':
+        eyes = next(e for e in root.iter() if e.get('class') == 'svg-eye-blink')
+        lines = follow_gaze(lines, [path_ref(shape(e)) for e in list(eyes)[2:]])
+        params += ', gaze: Offset = Offset.Zero'
+    if name != 'Happy':
+        params += ', shadow: Boolean = true'
+    else:
+        lines[0] = lines[0].replace('if (shadow) ', '')
+        lines[1] = lines[1].replace('if (shadow) ', '')
+    functions += [f'internal fun DrawScope.drawGold{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
 
 # Three supplied chart drawings. Stretch only the body; preserve the eyes/leaf proportions.
 for name, file in [('Black','black'),('Leaf','leaf'),('Gray','gray')]:

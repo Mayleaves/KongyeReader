@@ -1,0 +1,55 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="0 0 240 260"><ns0:ellipse cx="120" cy="233" rx="64" ry="9" fill="#FEF3C7" opacity="0.7" />
+  <ns0:ellipse cx="120" cy="233" rx="54" ry="6" fill="#F59E0B" opacity="0.38" />
+  
+  
+  <ns0:g class="svg-cat-tail"><ns0:ellipse cx="187" cy="186" rx="8.5" ry="3.6" transform="rotate(-14 187 186)" fill="none" stroke="#B45309" stroke-width="3.2" />
+  <ns0:ellipse cx="185.5" cy="195" rx="8.5" ry="3.5" transform="rotate(-22 185.5 195)" fill="none" stroke="#B45309" stroke-width="2.8" />
+  <ns0:path d="M150 222 C184 222, 196 196, 185 173" stroke="#1B1B1B" stroke-width="11" stroke-linecap="round" fill="none" />
+  <ns0:path d="M179 188 C184 191, 191 189.5, 195 184" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round" fill="none" />
+  <ns0:path d="M180.5 188 C184.5 190.2, 190 189, 193.5 184.8" stroke="#FEF08A" stroke-width="1.8" stroke-linecap="round" fill="none" />
+  <ns0:path d="M177.5 196 C182.5 199.5, 189.5 198, 193.5 192" stroke="#D97706" stroke-width="3.6" stroke-linecap="round" fill="none" />
+  <ns0:path d="M179 196 C183 198.5, 188.5 197.2, 192 192.8" stroke="#FDE047" stroke-width="1.4" stroke-linecap="round" fill="none" />
+  <ns0:circle cx="196.5" cy="184.5" r="2" fill="#FBBF24" />
+  <ns0:polygon points="203,183 204.8,187 209,188.8 204.8,190.6 203,194.6 201.2,190.6 197,188.8 201.2,187" fill="#FDE047" />
+  
+  </ns0:g><ns0:g class="svg-cat-breathe"><ns0:path d="M77 231 C77 174, 93 156, 120 156 C147 156, 163 174, 163 231 Z" fill="#1B1B1B" />
+  
+  <ns0:line x1="106" y1="194" x2="106" y2="229.4" stroke="#B45309" stroke-width="3.2" stroke-linecap="round" />
+  <ns0:line x1="134" y1="194" x2="134" y2="229.4" stroke="#B45309" stroke-width="3.2" stroke-linecap="round" />
+  
+  <ns0:path d="M111 168 L120 174 L129 168" stroke="#F59E0B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <ns0:polygon points="120,165 123,171 129,174 123,177 120,183 117,177 111,174 117,171" fill="#FBBF24" />
+  <ns0:circle cx="120" cy="174" r="2" fill="#FFFBEB" />
+  
+  <ns0:g class="svg-ear-l"><ns0:path d="M74.4 116 C74.4 98, 79 74, 82 59 C83.2 53.5, 90 52.5, 94.2 57.5 L116 86 L108 118 Z" fill="#1B1B1B" />
+  <ns0:path d="M84 89 L87 69 L98 83" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  </ns0:g><ns0:g class="svg-ear-r"><ns0:path d="M165.6 116 C165.6 98, 161 74, 158 59 C156.8 53.5, 150 52.5, 145.8 57.5 L124 86 L132 118 Z" fill="#1B1B1B" />
+  <ns0:path d="M156 89 L153 69 L142 83" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  </ns0:g><ns0:g class="svg-head-leaf"><ns0:path d="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" stroke="#F59E0B" stroke-width="2.8" stroke-linejoin="round" fill="#EF4444" />
+  <ns0:path d="M120 79 C117 70, 111 65, 107 67" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none" />
+  <ns0:circle cx="142" cy="52" r="2.2" fill="#FBBF24" />
+  
+  </ns0:g><ns0:line x1="65" y1="124" x2="80" y2="127" stroke="#777777" stroke-width="2.4" stroke-linecap="round" />
+  <ns0:line x1="67" y1="133" x2="80" y2="133" stroke="#777777" stroke-width="2.4" stroke-linecap="round" />
+  <ns0:line x1="175" y1="124" x2="160" y2="127" stroke="#777777" stroke-width="2.4" stroke-linecap="round" />
+  <ns0:line x1="173" y1="133" x2="160" y2="133" stroke="#777777" stroke-width="2.4" stroke-linecap="round" />
+  
+  <ns0:ellipse cx="120" cy="121" rx="46" ry="41" fill="#1B1B1B" />
+  
+  
+  <ns0:path d="M87 127 Q99 114 111 127" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" />
+  <ns0:path d="M129 127 Q141 114 153 127" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" />
+  <ns0:g class="svg-cheek-pulse"><ns0:ellipse cx="83" cy="134" rx="6" ry="3.2" fill="#FF8A65" opacity="0.85" />
+  <ns0:ellipse cx="157" cy="134" rx="6" ry="3.2" fill="#FF8A65" opacity="0.85" />
+  </ns0:g><ns0:path d="M116.2 140.2 C116.2 146.2, 123.8 146.2, 123.8 140.2 Z" fill="#FF8A65" />
+  <ns0:path d="M112 138.5 Q116 143 120 138.5 Q124 143 128 138.5" stroke="#F59E0B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  
+  </ns0:g><ns0:g class="svg-heart-1"><ns0:path d="M52 58 C52 52, 43 49, 40 54 C37 59, 43 68, 52 73 C61 68, 67 59, 64 54 C61 49, 52 52, 52 58 Z" fill="#E04F33" stroke="#FBBF24" stroke-width="1.2" transform="rotate(-15 52 62)" />
+  </ns0:g><ns0:g class="svg-heart-2"><ns0:path d="M61 83 C61 79.5, 55.5 77.5, 53.5 80.5 C51.5 83.5, 55.5 89, 61 92 C66.5 89, 70.5 83.5, 68.5 80.5 C66.5 77.5, 61 79.5, 61 83 Z" fill="#F59E0B" transform="rotate(-8 61 86)" />
+  </ns0:g><ns0:g class="svg-heart-3"><ns0:path d="M63 148 C63 143.5, 56 141, 53.5 145 C51 149, 56 156, 63 160 C70 156, 75 149, 72.5 145 C70 141, 63 143.5, 63 148 Z" fill="#E04F33" transform="rotate(-18 63 152)" />
+  </ns0:g><ns0:g class="svg-heart-4"><ns0:path d="M177 78 C177 72.5, 169 70, 166 74.5 C163 79, 168.5 87, 177 92 C185.5 87, 191 79, 188 74.5 C185 70, 177 72.5, 177 78 Z" fill="#E04F33" stroke="#FBBF24" stroke-width="1.2" transform="rotate(16 177 83)" />
+  </ns0:g><ns0:g class="svg-heart-5"><ns0:path d="M179 104 C179 101, 174.5 99.5, 173 102 C171.5 104.5, 174.5 109, 179 111.5 C183.5 109, 186.5 104.5, 185 102 C183.5 99.5, 179 101, 179 104 Z" fill="#F59E0B" transform="rotate(12 179 107)" />
+</ns0:g></ns0:svg>

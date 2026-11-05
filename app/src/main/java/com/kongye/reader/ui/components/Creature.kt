@@ -41,22 +41,34 @@ fun Creature(
     flip: Boolean = false,
     faceLeft: Boolean = false,
     shadow: Boolean = true,
+    /** 鎏金看板猫换姿势：happy / sleep / loaf，不给就是坐着 */
+    pose: String? = null,
 ) {
     val animal = Shop.animal(id) ?: return
-    val mirror = flip != (faceLeft && !animal.flip)
+    // 极简猫、鎏金看板猫是正脸坐着的，不用“朝左”
+    val front = id == Shop.MINCAT || id == Shop.GOLDCAT
+    val mirror = flip != (faceLeft && !animal.flip && !front)
     val pieces = outfitPieces(animal, outfit)
     val dark = K.c.dark
-    val body = if (id == Shop.MINCAT) null else painterResource(Shop.drawable(animal.res))
+    val native = id == Shop.MINCAT || id == Shop.GOLDCAT
+    val body = if (native) null else painterResource(Shop.drawable(pose?.let { animal.poses[it] } ?: animal.res))
+    // 鎏金看板猫和看板猫同一套 240x260 坐标，取景也和看板猫一样
+    val mascotFrame = id == Shop.GOLDCAT
     Canvas(if (size != null) modifier.size(size) else modifier) {
         val vb = animal.vb
-        val (k, ox, oy) = if (body == null) minimalFrame() else {
+        val (k, ox, oy) = if (mascotFrame) {
+            val s = this.size.minDimension / 210f
+            Triple(s, (this.size.width - 240f * s) / 2f, -35f * s)
+        } else if (body == null) minimalFrame() else {
             val k = minOf(this.size.width / vb[2], this.size.height / vb[3])
             Triple(k, (this.size.width - vb[2] * k) / 2, (this.size.height - vb[3] * k) / 2)
         }
         withTransform({ if (mirror) scale(-1f, 1f, pivot = center) }) {
             drawOutfit(animal, pieces, k, ox, oy, behind = true)
             if (body != null) translate(ox, oy) { with(body) { draw(Size(vb[2] * k, vb[3] * k)) } }
-            else withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawMinimalFocus(dark, 0f, shadow = shadow) }
+            else withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
+                if (mascotFrame) drawGoldFocus(dark, 0f, shadow = shadow) else drawMinimalFocus(dark, 0f, shadow = shadow)
+            }
             drawOutfit(animal, pieces, k, ox, oy, behind = false)
         }
     }

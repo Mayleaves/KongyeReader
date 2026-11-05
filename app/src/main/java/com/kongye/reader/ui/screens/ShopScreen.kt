@@ -49,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kongye.reader.R
+import androidx.compose.ui.platform.LocalContext
+import com.kongye.reader.data.Achievements
 import com.kongye.reader.data.Profile
 import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Shop
@@ -141,7 +143,7 @@ fun ShopScreen() {
                         }
                         items(list, key = { it.id }) { a ->
                             ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
-                                if (a.id == Shop.MINCAT) Creature(a.id, size = 76.dp)
+                                if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, size = 76.dp)
                                 else Creature(a.id, Modifier.fillMaxSize().padding(6.dp), faceLeft = true)
                             }
                         }
@@ -236,6 +238,7 @@ private fun ItemCard(
 ) {
     val c = K.c
     val owned = profile.has(id)
+    val lock = Shop.lockOf(id)
     Column(Modifier.press(scaleTo = 0.96f, onClick = onClick)) {
         Box(
             Modifier
@@ -251,7 +254,12 @@ private fun ItemCard(
         T(name, 13.sp, c.ink, FontWeight.Medium, maxLines = 1)
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (owned) {
-                T(if (price == 0) "免费" else "已拥有", 12.sp, c.text2)
+                T(if (price == 0 && lock == null) "免费" else "已拥有", 12.sp, c.text2)
+            } else if (lock != null) {
+                // 成就奖励：不卖，点亮对应成就才有
+                Icon(Ico.TROPHY, size = 12.dp, color = c.text3)
+                Spacer(Modifier.width(3.dp))
+                T("成就解锁", 12.sp, c.text3, FontWeight.SemiBold)
             } else {
                 Icon(Ico.LEAF, size = 12.dp, color = c.accent)
                 Spacer(Modifier.width(3.dp))
@@ -264,12 +272,15 @@ private fun ItemCard(
 /** 桌面图标预览：底色 + 前景，和桌面上一样的圆角 */
 @Composable
 fun IconPreview(id: String, modifier: Modifier = Modifier) {
-    val (fg, bg) = when (id) {
-        "sunset" -> R.drawable.ic_launcher_fg_sunset to colorResource(R.color.ic_launcher_bg_sunset)
-        "minimal" -> R.drawable.ic_launcher_fg_minimal to colorResource(R.color.ic_launcher_bg_minimal)
-        "minlight" -> R.drawable.ic_launcher_fg_minlight to colorResource(R.color.ic_launcher_bg_minlight)
-        else -> R.drawable.ic_launcher_foreground to colorResource(R.color.ic_launcher_background)
-    }
+    // 前景 ic_launcher_fg_<id>、底色 ic_launcher_bg_<id>（tools/import_shop_assets.py 生成）；经典是最早那套
+    val context = LocalContext.current
+    val (fg, bg) = remember(id) {
+        @Suppress("DiscouragedApi")
+        val color = context.resources.getIdentifier("ic_launcher_bg_$id", "color", context.packageName)
+        val drawable = Shop.drawable("ic_launcher_fg_$id")
+        if (id == "default" || drawable == 0 || color == 0) R.drawable.ic_launcher_foreground to R.color.ic_launcher_background
+        else drawable to color
+    }.let { (d, c) -> d to colorResource(c) }
     Box(modifier.aspectRatio(1f).clip(SmoothShape(22.dp)).background(bg)) {
         Image(painterResource(fg), null, Modifier.fillMaxSize())
     }
@@ -284,6 +295,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         val item = last[0] ?: return@Sheet
         val price = Shop.priceOf(item) ?: 0
         val owned = profile.has(item)
+        val lock = Shop.lockOf(item)?.let { Achievements.byId(it) }
         val animal = Shop.animal(item)
         val bg = Shop.background(item)
         val acc = Shop.accessory(item)
@@ -303,11 +315,11 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
                 // 挂件：挂在自己猫园的背景上，只看挂的那一块
                 orn != null -> {
                     val gardenBg = Shop.background(profile.gardenBg)?.takeIf { profile.has(it.id) } ?: Shop.background(Shop.DEFAULT_BG)
-                    if (gardenBg != null) GardenBackdrop(
+                    if (gardenBg != null && Shop.slotsOf(gardenBg)[orn.slot] != null) GardenBackdrop(
                         gardenBg, profile.signText,
                         profile.scene.filterValues { profile.has(it) } + (orn.slot to orn.id),
                         Modifier.fillMaxSize(),
-                        focus = ornamentWindow(orn, maxWidth / maxHeight),
+                        focus = ornamentWindow(orn, maxWidth / maxHeight, gardenBg),
                     ) else OrnamentArt(orn, Modifier.size(140.dp))
                 }
                 acc != null -> Row(verticalAlignment = Alignment.CenterVertically) {
@@ -323,12 +335,14 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         T(Shop.nameOf(item), 20.sp, c.ink, FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
         val desc = when {
+            lock != null -> "成就「${lock.title}」的奖励"
             item == Shop.MASCOT -> "空叶阅读自己的猫，一开始就陪着你，首页和猫园默认都是它"
             item == "icon_minlight" -> "极简猫的浅色桌面图标，选了它开屏也换成极简猫"
             animal != null -> "领养后可以放到首页，也能请它来猫园"
             bg != null -> "猫园背景，路牌上写你起的名字"
             acc != null -> "戴在动物的${Shop.slotNames[acc.slot]}，每只动物各戴各的"
             orn != null -> "${Shop.festival(orn.fest)?.name ?: "节日"}挂件，挂在猫园的${Shop.catalog.ornamentSlots[orn.slot]?.name ?: "背景"}上"
+            item.startsWith("icon_") && item.removePrefix("icon_") in setOf("gold", "neon", "pixel") -> "成就奖励的桌面图标，随时可以换"
             item == "icon_minimal" -> "极简猫的落日桌面图标，选了它开屏也换成极简猫"
             else -> "桌面图标，随时可以换"
         }
@@ -342,6 +356,10 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             owned -> InkButton("去装扮", Modifier.fillMaxWidth(), height = 52.dp) {
                 onDismiss()
                 Nav.push(Screen.Dress)
+            }
+            lock != null -> InkButton("去看成就", Modifier.fillMaxWidth(), height = 52.dp) {
+                onDismiss()
+                Nav.push(Screen.Achievements)
             }
             profile.leaves >= price -> InkButton("用 $price 片叶子换", Modifier.fillMaxWidth(), height = 52.dp) {
                 if (Profiles.buy(item)) Toast.show("换到了「${Shop.nameOf(item)}」")

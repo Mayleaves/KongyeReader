@@ -45,7 +45,7 @@ fun GardenBackdrop(
     // 只有水墨背景的路牌用楷体；第一次要从安装包里解出字体文件，别的背景用不着
     val wenkai = remember(bg.sign?.kai) { if (bg.sign?.kai == true) ReaderFonts.family(1) else null }
     val hung = scene.mapNotNull { (slot, id) ->
-        val s = Shop.catalog.ornamentSlots[slot] ?: return@mapNotNull null
+        val s = Shop.slotsOf(bg)[slot] ?: return@mapNotNull null
         val o = Shop.ornament(id) ?: return@mapNotNull null
         val res = Shop.drawable(o.res)
         if (res == 0) null else Hung(s, o, painterResource(res))
@@ -83,15 +83,16 @@ private fun DrawScope.drawHung(h: Hung, x: Float, y: Float, f: Float) {
     translate(x + b[0] * f, y + b[1] * f) { with(h.painter) { draw(Size(b[2] * f, b[3] * f)) } }
 }
 
-/** 挂件在背景上那一块（看挂件时取景用）：以挂的位置为中心，宽 220、按 ratio 定高 */
-fun ornamentWindow(o: ShopOrnament, ratio: Float): Rect {
-    val s = Shop.catalog.ornamentSlots[o.slot] ?: return Rect(0f, 0f, 400f, 800f)
+/** 挂件在背景上那一块（看挂件时取景用）：以挂的位置为中心，宽取背景的 55%、按 ratio 定高 */
+fun ornamentWindow(o: ShopOrnament, ratio: Float, bg: ShopBackground): Rect {
+    val (vx, vy, vw, vh) = bg.vb
+    val s = Shop.slotsOf(bg)[o.slot] ?: return Rect(vx, vy, vx + vw, vy + vh)
+    val w = vw * 0.55f
     // 挂件自己的外框中心（有的挂件画在锚点旁边，比如小屋左边的礼盒）
-    val cx = (s.x + (o.box[0] + o.box[2] / 2) * s.s).coerceIn(110f, 290f)
+    val cx = (s.x + (o.box[0] + o.box[2] / 2) * s.s).coerceIn(vx + w / 2, vx + vw - w / 2)
     val cy = s.y + (o.box[1] + o.box[3] / 2) * s.s
-    val w = 220f
     val h = w / ratio
-    val top = (cy - h / 2).coerceIn(0f, 800f - h)
+    val top = (cy - h / 2).coerceIn(vy, vy + vh - h)
     return Rect(cx - w / 2, top, cx + w / 2, top + h)
 }
 

@@ -30,6 +30,10 @@ data class ShopAnimal(
     val group: String = "animal",
     val res: String,
     val private: Boolean = false,
+    /** 成就奖励：点亮这个成就才能用 */
+    val lock: String? = null,
+    /** 首页换姿势用的图（happy / sleep / loaf），目前只有鎏金看板猫 */
+    val poses: Map<String, String> = emptyMap(),
     /** SVG 的 viewBox：x, y, 宽, 高 */
     val vb: List<Float>,
     /** 正脸两只眼睛：眼镜用双镜片款 */
@@ -52,17 +56,22 @@ data class SignText(
 )
 
 @Serializable
-data class ShopBackground(val id: String, val name: String, val price: Int, val res: String, val vb: List<Float>, val sign: SignText? = null)
+data class ShopBackground(
+    val id: String, val name: String, val price: Int, val res: String, val vb: List<Float>, val sign: SignText? = null,
+    val lock: String? = null,
+    /** 挂件位置，不给就用 ornamentSlots（400x800 的背景）；成就奖励背景是 260x540，另有一套 */
+    val slots: Map<String, OrnamentSlot>? = null,
+)
 
 @Serializable
 data class AccArt(val res: String, val box: List<Float>)
 
 @Serializable
-data class ShopAccessory(val id: String, val name: String, val slot: String, val price: Int, val main: AccArt, val dual: AccArt? = null)
+data class ShopAccessory(val id: String, val name: String, val slot: String, val price: Int, val main: AccArt, val dual: AccArt? = null, val lock: String? = null)
 
 /** 节日挂件：挂在猫园背景的路牌、小屋、天空和三块空地上。box 是挂件自己的外框，原点就是挂的位置 */
 @Serializable
-data class ShopOrnament(val id: String, val name: String, val fest: String, val slot: String, val price: Int, val res: String, val box: List<Float>)
+data class ShopOrnament(val id: String, val name: String, val fest: String, val slot: String, val price: Int, val res: String, val box: List<Float>, val lock: String? = null)
 
 @Serializable
 data class Festival(val id: String, val name: String, val color: String)
@@ -71,21 +80,23 @@ data class Festival(val id: String, val name: String, val color: String)
 data class OrnamentSlot(val x: Float, val y: Float, val s: Float, val name: String)
 
 @Serializable
-data class ShopIcon(val id: String, val name: String, val price: Int)
+data class ShopIcon(val id: String, val name: String, val price: Int, val lock: String? = null)
 
 object Shop {
     /** 首页和猫园默认那只“看板猫”（不在目录里，App 自己画的） */
     const val MASCOT = "mascot"
     /** 极简猫：目录里有（饰品锚点、价格），身体由 App 自己画（和看板猫一样有三种状态、眼睛跟手指） */
     const val MINCAT = "mincat"
+    /** 鎏金看板猫：成就「看板猫猫」的奖励（连着摸 20 下，页面上写成“？”下） */
+    const val GOLDCAT = "goldcat"
     const val DEFAULT_BG = "farm"
 
     /** 商城动物分组的标题和小字 */
     val animalGroups = linkedMapOf(
-        "kongye" to ("空叶" to "首页那只猫的极简版"),
+        "kongye" to ("空叶" to "空叶阅读自己的猫"),
         "animal" to ("小动物" to "原本就有的农场伙伴"),
-        "pony" to ("小马宝莉" to "小马国的朋友"),
         "emoji" to ("表情" to "从表情包里跑出来的"),
+        "pony" to ("小马宝莉" to "小马国的朋友"),
     )
 
     val slotNames = linkedMapOf(
@@ -105,6 +116,18 @@ object Shop {
     fun background(id: String) = catalog.backgrounds.firstOrNull { it.id == id }
     fun accessory(id: String) = catalog.accessories.firstOrNull { it.id == id }
     fun ornament(id: String) = catalog.ornaments.firstOrNull { it.id == id }
+
+    /** 成就页配色方案：第一套免费，其余要用叶子换（编号 style_xxx） */
+    val styles = listOf("classic", "nightcity", "arasaka", "militech", "kangtao", "trauma", "mox", "tyger")
+    const val STYLE_PRICE = 500
+
+    /** 成就奖励对应的成就编号；不是奖励就是 null */
+    fun lockOf(id: String): String? =
+        animal(id)?.lock ?: background(id)?.lock ?: accessory(id)?.lock ?: ornament(id)?.lock
+            ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.lock
+
+    /** 挂件在这张背景上的位置 */
+    fun slotsOf(bg: ShopBackground) = bg.slots ?: catalog.ornamentSlots
     fun festival(id: String) = catalog.festivals.firstOrNull { it.id == id }
 
     /** 素材按名字查资源（目录是生成的 JSON）；res/raw/shop_keep.xml 让资源压缩保留它们 */
@@ -117,11 +140,12 @@ object Shop {
     /** 所有可以买的东西的编号：动物、背景、饰品按自己的编号，图标加前缀 */
     fun allItemIds(): List<String> =
         catalog.animals.map { it.id } + catalog.backgrounds.map { it.id } + catalog.accessories.map { it.id } +
-            catalog.ornaments.map { it.id } + catalog.icons.map { "icon_${it.id}" }
+            catalog.ornaments.map { it.id } + catalog.icons.map { "icon_${it.id}" } + styles.map { "style_$it" }
 
     fun priceOf(id: String): Int? =
         animal(id)?.price ?: background(id)?.price ?: accessory(id)?.price ?: ornament(id)?.price
             ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.price
+            ?: id.removePrefix("style_").takeIf { id.startsWith("style_") && it in styles }?.let { if (it == styles.first()) 0 else STYLE_PRICE }
 
     fun nameOf(id: String): String = if (id == MASCOT) "看板猫" else
         animal(id)?.name ?: background(id)?.name ?: accessory(id)?.name ?: ornament(id)?.name

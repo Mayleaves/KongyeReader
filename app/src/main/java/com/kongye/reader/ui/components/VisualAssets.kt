@@ -65,9 +65,11 @@ fun DashboardCat(
     leaf: Boolean = false, gaze: Offset = Offset.Zero,
     sleeping: Boolean = false,
     minimal: Boolean = false,
+    /** 鎏金看板猫：和看板猫同一套骨架、同样的动画，自带金色装饰 */
+    gold: Boolean = false,
 ) {
     val dark = K.c.dark
-    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else null
+    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else null
     val pieces = if (minCat != null) outfitPieces(minCat) else emptyList()
     val time = assetTime()
     var happy by remember { mutableStateOf(false) }
@@ -97,6 +99,20 @@ fun DashboardCat(
         }
         // Crop only the workbench's empty outer margin; keep the existing home layout.
         val s = this.size.minDimension / 210f
+        if (gold) {
+            val ox = (this@Canvas.size.width - 240f * s) / 2f
+            val oy = -35f * s
+            if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
+            withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) {
+                when {
+                    sleeping -> drawGoldSleep(dark, time, leaf)
+                    happy -> drawGoldHappy(dark, time, leaf)
+                    else -> drawGoldFocus(dark, time, leaf, gaze)
+                }
+            }
+            if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = false)
+            return@Canvas
+        }
         withTransform({
             translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
             scale(s, s, pivot = Offset.Zero)

@@ -129,7 +129,9 @@ fun GardenScreen(preview: String? = null) {
             val spots = remember(week, maxWidth, maxHeight) { placeSpots(week, maxWidth.value, maxHeight.value, monday.toEpochDay()) }
             week.forEachIndexed { i, s ->
                 val who = cast[i % cast.size]
-                if (who == Shop.MASCOT || who == Shop.MINCAT) GardenCat(s, spots[i], picked == i, minimal = who == Shop.MINCAT) { picked = if (picked == i) null else i }
+                if (who == Shop.MASCOT || who == Shop.MINCAT || who == Shop.GOLDCAT) {
+                    GardenCat(s, spots[i], picked == i, minimal = who == Shop.MINCAT, gold = who == Shop.GOLDCAT) { picked = if (picked == i) null else i }
+                }
                 else GardenCreature(who, s, spots[i], picked == i) { picked = if (picked == i) null else i }
             }
             if (week.isEmpty()) {
@@ -190,7 +192,7 @@ fun GardenScreen(preview: String? = null) {
 }
 
 @Composable
-private fun GardenCat(s: Session, spot: Spot, selected: Boolean, minimal: Boolean = false, onClick: () -> Unit) {
+private fun GardenCat(s: Session, spot: Spot, selected: Boolean, minimal: Boolean = false, gold: Boolean = false, onClick: () -> Unit) {
     val c = K.c
     val color = when {
         s.finished -> c.accent
@@ -216,6 +218,7 @@ private fun GardenCat(s: Session, spot: Spot, selected: Boolean, minimal: Boolea
             sleep = spot.loaf,
             blink = !spot.loaf,
             minimal = minimal,
+            gold = gold,
         )
         if (selected) {
             Column(

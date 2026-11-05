@@ -4,4 +4,7 @@
     <color name="ic_launcher_bg_sunset">#FAF8F5</color>
     <color name="ic_launcher_bg_minimal">#FAF8F5</color>
     <color name="ic_launcher_bg_minlight">#FFFFFF</color>
+    <color name="ic_launcher_bg_gold">#111115</color>
+    <color name="ic_launcher_bg_neon">#0D0B18</color>
+    <color name="ic_launcher_bg_pixel">#F4EFE6</color>
 </resources>

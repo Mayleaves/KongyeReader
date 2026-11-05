@@ -112,7 +112,13 @@ fun App(showSplash: Boolean = false) {
         // 新达成的成就：底部弹一句，奖励的叶子已经到账
         LaunchedEffect(Unit) {
             Profiles.unlocked.collect { a ->
-                Toast.show(if (a.reward > 0) "解锁成就「${a.title}」，叶子 +${a.reward}" else "解锁成就「${a.title}」")
+                Toast.show(
+                    when {
+                        a.item != null -> "解锁成就「${a.title}」，获得「${a.item}」"
+                        a.reward > 0 -> "解锁成就「${a.title}」，叶子 +${a.reward}"
+                        else -> "解锁成就「${a.title}」"
+                    },
+                )
             }
         }
         // 最先注册，优先级最低：页面里的弹层、阅读菜单会先拦截返回键

@@ -1,5 +1,5 @@
 {
- "_note": "Bounding boxes measured with getBBox in a browser (tools/import_shop_assets.py explains how). arch: body-type stage boxes in the 600x450 accessory stage; animals: body box in each SVG's own viewBox, ground shadow excluded; acc: accessory shape box around its anchor origin (stroke not included); orn: each festival ornament's box around its slot origin (stroke not included). [x, y, w, h]",
+ "_note": "Bounding boxes measured with getBBox in a browser (tools/import_shop_assets.py explains how). arch: body-type stage boxes in the 600x450 accessory stage; animals: body box in each SVG's own viewBox, ground shadow excluded; acc: accessory shape box around its anchor origin (stroke not included); orn: each festival ornament's box around its slot origin (stroke not included). reward: achievement reward accessories/ornaments around their origin, and the gold mascot poses without the ground shadow. [x, y, w, h]",
  "arch": {
   "type1_dual_quad": [
    181,
@@ -1170,6 +1170,86 @@
    -11,
    11,
    17.5
+  ]
+ },
+ "reward": {
+  "c10": [
+   -31,
+   -45,
+   62,
+   51.5
+  ],
+  "c11": [
+   -32.2,
+   -14,
+   64.4,
+   48
+  ],
+  "c11-single": [
+   -30,
+   -15.5,
+   46.5,
+   45.5
+  ],
+  "c12": [
+   -31.92,
+   -16.35,
+   62.37,
+   43.16
+  ],
+  "c13": [
+   -53.19,
+   -15.11,
+   65.75,
+   42.42
+  ],
+  "c18": [
+   -16.88,
+   -20.5,
+   33.75,
+   48.5
+  ],
+  "c19": [
+   -43,
+   -20.5,
+   49.5,
+   38.5
+  ],
+  "c20": [
+   -17,
+   -24,
+   31,
+   30
+  ],
+  "c21": [
+   -48,
+   -19.5,
+   95.8,
+   36.5
+  ],
+  "pose-focus": [
+   65,
+   49.8,
+   144,
+   181.2
+  ],
+  "pose-happy": [
+   36.93,
+   48.53,
+   172.07,
+   182.47
+  ],
+  "pose-sleep": [
+   65,
+   49.8,
+   136.92,
+   188.2
+  ],
+  "pose-loaf": [
+   56.5,
+   119.95,
+   146.5,
+   137.05
   ]
  }
 }

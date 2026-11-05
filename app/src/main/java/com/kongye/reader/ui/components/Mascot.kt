@@ -53,12 +53,30 @@ fun CatMascot(
     look: Float = 1f,
     /** 极简猫（200x220 的画稿），取景和经典猫一样，同样大小一样大 */
     minimal: Boolean = false,
+    /** 鎏金看板猫（猫园里也会趴着、睡觉；颜色是自己的） */
+    gold: Boolean = false,
 ) {
     val c = K.c
     val time = if (blink || pose == CatPose.LOAF) assetTime() else 0f
     val bodyColor = color.takeIf { it != c.ink }
     Canvas(modifier.size(size)) {
-        if (minimal) {
+        if (gold) {
+            if (pose == CatPose.SIT) {
+                val s = this.size.minDimension / 210f
+                withTransform({
+                    if (flip) scale(-1f, 1f, pivot = center)
+                    translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
+                    scale(s, s, pivot = Offset.Zero)
+                }) { if (sleep) drawGoldSleep(c.dark, time, shadow = shadow) else drawGoldFocus(c.dark, time, shadow = shadow) }
+            } else {
+                val s = this.size.minDimension / 200f
+                withTransform({
+                    if (flip) scale(-1f, 1f, pivot = center)
+                    scale(s, s, pivot = Offset.Zero)
+                    translate(-32f, -55f)
+                }) { drawGoldLoaf(c.dark, time, shadow) }
+            }
+        } else if (minimal) {
             val (k, ox, oy) = if (pose == CatPose.SIT) minimalFrame() else {
                 // 趴着：和经典趴姿一样的取景（200 宽的格子，脚踩同一条线）
                 val s = this.size.minDimension / 200f

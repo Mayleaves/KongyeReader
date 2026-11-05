@@ -111,6 +111,16 @@ fun HomeScreen() {
     val homeAnimal = profile.homeAnimal.takeIf { it != Shop.MASCOT && profile.has(it) && Shop.animal(it) != null }
     // 极简猫和看板猫一样：会睡、会开心、眼睛跟手指，只是画法不同
     val minimal = homeAnimal == Shop.MINCAT
+    // 鎏金看板猫：和看板猫同一套动画，走 DashboardCat
+    val gold = homeAnimal == Shop.GOLDCAT
+    // 成就「看板猫猫」：连着摸 20 下（两下之间不超过 1.5 秒）
+    val petStreak = remember { longArrayOf(0L, 0L) }
+    fun countPet() {
+        val now = System.currentTimeMillis()
+        petStreak[1] = if (now - petStreak[0] <= 1500) petStreak[1] + 1 else 1
+        petStreak[0] = now
+        if (petStreak[1] == 20L) Profiles.count("pet20")
+    }
     val scope = rememberCoroutineScope()
     val hop = remember { Animatable(0f) }
     var petSignal by remember { mutableIntStateOf(0) }
@@ -185,7 +195,7 @@ fun HomeScreen() {
             Box(Modifier.size(210.dp).onGloballyPositioned {
                 catHeadTop = it.positionInRoot().y + headInset
             }) {
-                if (homeAnimal != null && !minimal) {
+                if (homeAnimal != null && !minimal && !gold) {
                     Creature(
                         homeAnimal,
                         Modifier
@@ -214,6 +224,7 @@ fun HomeScreen() {
                                 speech = "醒啦，陪你继续读书"
                             } else {
                                 petSignal++
+                                countPet()
                                 speech = quotes.random()
                                 scope.launch {
                                     hop.animateTo(-hopPx, tween(140))
@@ -228,6 +239,7 @@ fun HomeScreen() {
                     gaze = catGazeAt(fingerPosition?.plus(homeOrigin), catEyeCenter, gazeRadius),
                     sleeping = sleeping,
                     minimal = minimal,
+                    gold = gold,
                 )
             }
             Spacer(Modifier.height(12.dp))
