@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+    <defs>
+        <linearGradient id="sunsetGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF7E67"/>
+            <stop offset="100%" stop-color="#FFB88C" stop-opacity="0.25"/>
+        </linearGradient>
+    </defs>
+
+    <!-- 图标底板 -->
+    <rect width="512" height="512" rx="115" fill="#FAF8F5"/>
+    <rect x="2" y="2" width="508" height="508" rx="113" stroke="#E7E5E4" stroke-width="4" opacity="0.5"/>
+
+    <!-- 猫园暖阳背景点缀 -->
+    <circle cx="132" cy="128" r="54" fill="url(#sunsetGrad)"/>
+
+    <!-- 1. 极简风看板猫猫头主体 (已下移至 y=244，让猫头更贴合下方双叶书卷) -->
+    <g transform="translate(256, 244) scale(2.12) translate(-100, -96)">
+        <!-- 头顶粗线「空叶」呆毛与小分枝 -->
+        <path d="M100 45 C100 28, 118 22, 122 32 C118 42, 105 45, 100 45 Z" stroke="#1B1B1B" stroke-width="4" stroke-linejoin="round" fill="#FAF8F5"/>
+        <path d="M100 45 C95 35, 86 33, 82 38" stroke="#1B1B1B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+        <!-- 纯黑极简双耳 (无内耳廓杂线) -->
+        <path d="M62 85 L56 36 C56 32, 62 30, 66 34 L92 62 Z" fill="#1B1B1B"/>
+        <path d="M138 85 L144 36 C144 32, 138 30, 134 34 L108 62 Z" fill="#1B1B1B"/>
+
+        <!-- 两侧胡须置于猫脸下层（被黑色猫脸自然遮挡根部，不叠在脸上） -->
+        <path d="M42 94 L58 96 M42 103 L58 103 M158 94 L142 96 M158 103 L142 103" stroke="#777777" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- 饱满椭圆猫头 -->
+        <ellipse cx="100" cy="96" rx="48" ry="40" fill="#1B1B1B"/>
+
+        <!-- 极简正圆大眼 (居中瞳孔，无高光杂点) -->
+        <circle cx="80" cy="98" r="14" fill="#FFFFFF"/>
+        <circle cx="80" cy="98" r="6.5" fill="#1B1B1B"/>
+        <circle cx="120" cy="98" r="14" fill="#FFFFFF"/>
+        <circle cx="120" cy="98" r="6.5" fill="#1B1B1B"/>
+
+        <!-- W 猫猫嘴 -->
+        <path d="M93 111 Q96.5 115 100 111 Q103.5 115 107 111" stroke="#555555" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- 2. 底部双叶托底 (左侧实心叶 + 右侧镂空叶带叶脉斜线) -->
+    <g>
+        <!-- 书卷底部背景遮罩衬底 -->
+        <path d="M 88 334 C 166 334, 224 358, 256 398 C 288 358, 346 334, 424 334 C 424 410, 354 446, 256 446 C 158 446, 88 410, 88 334 Z" fill="#FAF8F5"/>
+        <!-- 左侧实心黑叶 -->
+        <path d="M 96 338 C 168 338, 226 362, 256 402 C 212 436, 128 428, 96 338 Z" fill="#1B1B1B"/>
+        <!-- 右侧镂空叶 + 内部叶脉斜线 -->
+        <path d="M 256 402 C 288 362, 344 338, 416 338 C 384 428, 300 436, 256 402 Z" fill="#FAF8F5" stroke="#1B1B1B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 286 390 Q 336 378 376 356" fill="none" stroke="#1B1B1B" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <!-- 3. 扒在左右叶片上沿的两只圆润黑色小猫手 -->
+    <g>
+        <ellipse cx="178" cy="340" rx="21" ry="13.5" fill="#1B1B1B" stroke="#FAF8F5" stroke-width="5.5"/>
+        <ellipse cx="334" cy="340" rx="21" ry="13.5" fill="#1B1B1B" stroke="#FAF8F5" stroke-width="5.5"/>
+    </g>
+</svg>

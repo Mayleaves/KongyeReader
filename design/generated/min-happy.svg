@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%" fill="none">
+    <style>
+        @keyframes minHeadFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2.8px); } }
+        @keyframes minBodyBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.018); } }
+        @keyframes minTailSway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(9deg); } }
+        @keyframes minTailSleep { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(2deg); } }
+        @keyframes minLeafSway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(6deg); } }
+        @keyframes minBlink { 0%, 45%, 49%, 94%, 98%, 100% { transform: scaleY(1); } 47%, 96% { transform: scaleY(0.06); } }
+        @keyframes zzzBubble1 { 0% { opacity: 0; transform: translate(0, 4px) scale(0.65); } 35% { opacity: 0.92; } 100% { opacity: 0; transform: translate(12px, -18px) scale(1.1); } }
+        @keyframes zzzBubble2 { 0%, 22% { opacity: 0; transform: translate(0, 4px) scale(0.55); } 60% { opacity: 0.9; } 100% { opacity: 0; transform: translate(18px, -28px) scale(1.2); } }
+        @keyframes heartFloatBouncy {
+            0%, 100% { transform: translateY(3px) scale(0.86); opacity: 0.12; }
+            50% { transform: translateY(-5px) scale(1.08); opacity: 1; }
+        }
+        @keyframes cheekPulse { 0%, 100% { transform: scale(1); opacity: 0.72; } 50% { transform: scale(1.12); opacity: 0.95; } }
+        .min-head { animation: minHeadFloat 3.6s ease-in-out infinite; transform-origin: 100px 96px; }
+        .min-body { animation: minBodyBreathe 3.6s ease-in-out infinite; transform-origin: 100px 195px; }
+        .min-tail { animation: minTailSway 3.1s ease-in-out infinite; transform-origin: 126px 188px; }
+        .min-tail-sleep { animation: minTailSleep 4.5s ease-in-out infinite; transform-origin: 124px 186px; }
+        .min-leaf { animation: minLeafSway 3.4s ease-in-out infinite; transform-origin: 100px 45px; }
+        .min-eye-blink { animation: minBlink 5.4s infinite; transform-origin: 100px 98px; }
+        .svg-zzz-1 { animation: zzzBubble1 2.8s ease-out infinite; }
+        .svg-zzz-2 { animation: zzzBubble2 2.8s ease-out infinite; }
+        .svg-heart-1 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0s; transform-origin: 34px 40px; }
+        .svg-heart-2 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.5s; transform-origin: 43px 61px; }
+        .svg-heart-3 { animation: heartFloatBouncy 2.4s ease-in-out infinite 1.0s; transform-origin: 45px 123px; }
+        .svg-heart-4 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.3s; transform-origin: 158px 58px; }
+        .svg-heart-5 { animation: heartFloatBouncy 2.4s ease-in-out infinite 0.8s; transform-origin: 160px 81px; }
+        .svg-cheek-pulse { animation: cheekPulse 1.8s ease-in-out infinite; transform-origin: 100px 106px; }
+    </style>
+
+    <!-- 底部椭圆柔和投影 -->
+    <ellipse cx="100" cy="197" rx="46" ry="5" fill="#EFEFEF"/>
+
+    <!-- 极简圆拱小身体 + 尾巴（与猫头之间保持标志性的悬浮留白间距） -->
+    <g class="min-body">
+        <path d="M68 195 C68 135, 132 135, 132 195 Z" fill="#1B1B1B"/>
+        <!-- 专注/开心：向上翘起摇摆的极简尾巴 -->
+        <path class="min-tail" d="M126 188 C155 188, 162 162, 156 146" stroke="#1B1B1B" stroke-width="10" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- 悬浮猫头主体（1:1 复刻 HTML 原型坐标与比例） -->
+    <g class="min-head">
+        <!-- 头顶粗描边空心叶呆毛 -->
+        <g class="min-leaf">
+            <path d="M100 45 C100 28, 118 22, 122 32 C118 42, 105 45, 100 45 Z" stroke="rgb(184, 35, 12)" stroke-width="4" stroke-linejoin="round" fill="rgb(238, 67, 38)"/>
+            <path d="M100 45 C95 35, 86 33, 82 38" stroke="rgb(184, 35, 12)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        </g>
+
+        <!-- 纯黑极简双耳（无内耳廓杂线） -->
+        <path d="M62 85 L56 36 C56 32, 62 30, 66 34 L92 62 Z" fill="#1B1B1B"/>
+        <path d="M138 85 L144 36 C144 32, 138 30, 134 34 L108 62 Z" fill="#1B1B1B"/>
+
+        <!-- 两侧胡须置于猫脸下层（被黑色猫脸自然遮挡根部，不叠在脸上） -->
+        <path d="M42 94 L58 96 M42 103 L58 103 M158 94 L142 96 M158 103 L142 103" stroke="#777777" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- 饱满椭圆猫头 -->
+        <ellipse cx="100" cy="96" rx="48" ry="40" fill="#1B1B1B"/>
+
+
+            <!-- 眯眼弯弧笑 ^ ^ -->
+            <path d="M67 99 Q80 86 93 99" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M107 99 Q120 86 133 99" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <!-- 暖粉腮红 -->
+            <g class="svg-cheek-pulse">
+                <ellipse cx="62" cy="106" rx="6" ry="3.2" fill="#FF8A65" opacity="0.82"/>
+                <ellipse cx="138" cy="106" rx="6" ry="3.2" fill="#FF8A65" opacity="0.82"/>
+            </g>
+            <!-- 吐舌与 W 猫嘴无缝衔接 -->
+            <path d="M96.2 112.5 C96.2 118.5, 103.8 118.5, 103.8 112.5 Z" fill="#FF8A65"/>
+            <path d="M92 111 Q96 115 100 111 Q104 115 108 111" stroke="#555555" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+
+        <!-- 5 颗错峰深浅呼吸的暖红爱心 -->
+        <g class="svg-heart-1">
+            <path d="M34 36 C34 30.5, 26 28, 23 32.5 C20 37, 25.5 45, 34 49.5 C42.5 45, 48 37, 45 32.5 C42 28, 34 30.5, 34 36 Z" fill="#E04F33" transform="rotate(-15 34 40)"/>
+        </g>
+        <g class="svg-heart-2">
+            <path d="M43 59 C43 56, 38 54, 36 56.8 C34 59.5, 38 64.5, 43 67.2 C48 64.5, 52 59.5, 50 56.8 C48 54, 43 56, 43 59 Z" fill="#E04F33" transform="rotate(-8 43 61)"/>
+        </g>
+        <g class="svg-heart-3">
+            <path d="M45 120 C45 116, 38.5 113.5, 36 117.2 C33.5 121, 38.5 127.5, 45 131 C51.5 127.5, 56.5 121, 54 117.2 C51.5 113.5, 45 116, 45 120 Z" fill="#E04F33" transform="rotate(-18 45 123)"/>
+        </g>
+        <g class="svg-heart-4">
+            <path d="M158 54 C158 49, 150.5 46.5, 148 50.8 C145.5 55, 150.5 62.5, 158 67 C165.5 62.5, 170.5 55, 168 50.8 C165.5 46.5, 158 49, 158 54 Z" fill="#E04F33" transform="rotate(16 158 58)"/>
+        </g>
+        <g class="svg-heart-5">
+            <path d="M160 78 C160 75.2, 156 73.8, 154.5 76.2 C153 78.5, 156 82.8, 160 85 C164 82.8, 167 78.5, 165.5 76.2 C164 73.8, 160 75.2, 160 78 Z" fill="#E04F33" transform="rotate(12 160 81)"/>
+        </g>
+</svg>

@@ -5,6 +5,7 @@ import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,16 +55,21 @@ fun BookCover(book: Book, modifier: Modifier = Modifier, titleSize: TextUnit = 1
     val bmp by produceState<ImageBitmap?>(null, book.id, book.hasCover) {
         if (book.hasCover) value = withContext(Dispatchers.IO) { Covers.load(book.id) }
     }
-    Box(modifier.aspectRatio(0.72f).clip(SmoothShape(12.dp))) {
-        val img = bmp
-        if (img != null) Image(img, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        else GeneratedCover(book, titleSize)
-        Box(Modifier.fillMaxHeight().width(5.dp).background(Color.Black.copy(alpha = 0.08f)))
+    // 书架上的封面大约 108dp 宽；时间轴里只有 38dp，圆角、边距、格式标签和小猫都按宽度等比缩小，
+    // 不然“TXT”会挤成两行、压到猫身上，圆角也显得太大
+    BoxWithConstraints(modifier.aspectRatio(0.72f)) {
+        val k = (maxWidth / 108.dp).coerceIn(0.3f, 1.5f)
+        Box(Modifier.fillMaxSize().clip(SmoothShape(12.dp * k))) {
+            val img = bmp
+            if (img != null) Image(img, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            else GeneratedCover(book, titleSize, k)
+            Box(Modifier.fillMaxHeight().width(5.dp * k).background(Color.Black.copy(alpha = 0.08f)))
+        }
     }
 }
 
 @Composable
-private fun GeneratedCover(book: Book, titleSize: TextUnit) {
+private fun GeneratedCover(book: Book, titleSize: TextUnit, k: Float) {
     val c = K.c
     val styles = if (!c.dark) listOf(
         Triple(Color(0xFF1F1F1F), Color.White, Color.White),
@@ -81,15 +87,15 @@ private fun GeneratedCover(book: Book, titleSize: TextUnit) {
         Modifier
             .fillMaxSize()
             .background(bg)
-            .padding(start = 13.dp, end = 10.dp, top = 12.dp, bottom = 9.dp),
+            .padding(start = 13.dp * k, end = 10.dp * k, top = 12.dp * k, bottom = 9.dp * k),
     ) {
         T(book.title, titleSize, tc, FontWeight.Bold, maxLines = 4, lineHeight = titleSize * 1.3f)
-        T(book.format.uppercase(), 9.sp, tc.copy(alpha = 0.5f), FontWeight.Bold, Modifier.align(Alignment.BottomStart), spacing = 1.sp)
+        T(book.format.uppercase(), 9.sp * k, tc.copy(alpha = 0.5f), FontWeight.Bold, Modifier.align(Alignment.BottomStart), maxLines = 1, spacing = 1.sp * k)
         CatMascot(
             Modifier
                 .align(Alignment.BottomEnd)
-                .offset(x = 6.dp, y = 8.dp),
-            size = 38.dp, color = cat, eye = bg, shadow = false, pose = CatPose.LOAF, sleep = true,
+                .offset(x = 6.dp * k, y = 8.dp * k),
+            size = 38.dp * k, color = cat, eye = bg, shadow = false, pose = CatPose.LOAF, sleep = true,
         )
     }
 }

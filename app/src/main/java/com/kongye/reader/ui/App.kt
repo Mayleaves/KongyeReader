@@ -3,6 +3,12 @@ package com.kongye.reader.ui
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.kongye.reader.data.Profiles
+import com.kongye.reader.ui.components.Toast
+import com.kongye.reader.ui.screens.ShopScreen
+import com.kongye.reader.ui.screens.DressScreen
+import com.kongye.reader.ui.screens.AchievementsScreen
+import com.kongye.reader.ui.screens.BackupScreen
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
@@ -103,6 +109,12 @@ fun App(showSplash: Boolean = false) {
         LaunchedEffect(launcher) {
             Nav.pickFiles = { launcher.launch(arrayOf("text/plain", "application/epub+zip", "application/octet-stream")) }
         }
+        // 新达成的成就：底部弹一句，奖励的叶子已经到账
+        LaunchedEffect(Unit) {
+            Profiles.unlocked.collect { a ->
+                Toast.show(if (a.reward > 0) "解锁成就「${a.title}」，叶子 +${a.reward}" else "解锁成就「${a.title}」")
+            }
+        }
         // 最先注册，优先级最低：页面里的弹层、阅读菜单会先拦截返回键
         BackHandler(Nav.stack.size > 1) { Nav.pop() }
         Box(Modifier.fillMaxSize().background(K.c.bg)) {
@@ -131,7 +143,12 @@ fun App(showSplash: Boolean = false) {
                         Screen.Stats -> StatsScreen()
                         Screen.Timeline -> TimelineScreen()
                         Screen.Garden -> GardenScreen()
+                        is Screen.GardenPreview -> GardenScreen(preview = s.item)
                         Screen.Prefs -> PrefsScreen()
+                        Screen.Shop -> ShopScreen()
+                        Screen.Dress -> DressScreen()
+                        Screen.Achievements -> AchievementsScreen()
+                        Screen.Backup -> BackupScreen()
                     }
                 }
                 ImportBusy()
@@ -149,6 +166,8 @@ fun App(showSplash: Boolean = false) {
                     ReadingSplash(
                         onFinished = { splashFinishing = true },
                         onSkip = { splashVisible = false },
+                        // 桌面图标选了极简款，开屏也换成极简猫
+                        minimal = Profiles.value.icon in setOf("minimal", "minlight"),
                     )
                 }
             }

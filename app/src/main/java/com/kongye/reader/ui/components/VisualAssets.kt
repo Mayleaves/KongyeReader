@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kongye.reader.data.Shop
 import com.kongye.reader.ui.theme.K
 import kotlinx.coroutines.delay
 import kotlin.math.PI
@@ -53,14 +54,21 @@ internal fun assetTime(stopAt: Float = Float.POSITIVE_INFINITY): Float {
     return elapsed
 }
 
-/** The supplied 240×260 homepage drawing, with its original animated parts. */
+/**
+ * The supplied 240×260 homepage drawing, with its original animated parts.
+ * minimal：换成极简猫（200x220），同样三种状态、眼睛跟手指，身上戴着装扮里给它的饰品。
+ * leaf：当天读满半小时才在头顶长出红叶子。
+ */
 @Composable
 fun DashboardCat(
     modifier: Modifier = Modifier, size: Dp = 210.dp, petSignal: Int = 0,
     leaf: Boolean = false, gaze: Offset = Offset.Zero,
     sleeping: Boolean = false,
+    minimal: Boolean = false,
 ) {
     val dark = K.c.dark
+    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else null
+    val pieces = if (minCat != null) outfitPieces(minCat) else emptyList()
     val time = assetTime()
     var happy by remember { mutableStateOf(false) }
     LaunchedEffect(petSignal) {
@@ -74,6 +82,19 @@ fun DashboardCat(
     Canvas(modifier.size(size).semantics {
         contentDescription = if (sleeping) "小憩黑猫，轻触唤醒" else "空叶黑猫，轻触摸摸头"
     }) {
+        if (minimal) {
+            val (k, ox, oy) = minimalFrame()
+            if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = true)
+            withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
+                when {
+                    sleeping -> drawMinimalSleep(dark, time, leaf)
+                    happy -> drawMinimalHappy(dark, time, leaf)
+                    else -> drawMinimalFocus(dark, time, leaf, gaze)
+                }
+            }
+            if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = false)
+            return@Canvas
+        }
         // Crop only the workbench's empty outer margin; keep the existing home layout.
         val s = this.size.minDimension / 210f
         withTransform({
@@ -81,8 +102,8 @@ fun DashboardCat(
             scale(s, s, pivot = Offset.Zero)
         }) {
             when {
-                sleeping -> drawImportedSleep(dark, time)
-                happy -> drawImportedHappy(dark, time)
+                sleeping -> drawImportedSleep(dark, time, leaf)
+                happy -> drawImportedHappy(dark, time, leaf)
                 // Use the latest pointer position directly; no tween trails the finger.
                 else -> drawImportedFocus(dark, time, leaf, gaze)
             }
@@ -97,9 +118,9 @@ internal fun catGazeAt(pointer: Offset?, eyeCenter: Offset, radius: Float): Offs
     return delta / (radius + delta.getDistance())
 }
 
-/** Full-screen cold-start animation. SVG coordinates/timing come from the workbench. */
+/** Full-screen cold-start animation. SVG coordinates/timing come from the workbench. minimal：桌面图标选了极简款时用极简猫 */
 @Composable
-fun ReadingSplash(onFinished: () -> Unit, onSkip: () -> Unit) {
+fun ReadingSplash(onFinished: () -> Unit, onSkip: () -> Unit, minimal: Boolean = false) {
     val dark = K.c.dark
     val bg = if (dark) Color(0xFF121214) else Color.White
     val time = assetTime(2.65f)
@@ -117,12 +138,21 @@ fun ReadingSplash(onFinished: () -> Unit, onSkip: () -> Unit) {
         withTransform({
             translate((size.width - 375f * s) / 2f, (size.height - 812f * s) / 2f)
             scale(s, s, pivot = Offset.Zero)
-        }) { drawImportedSplash(dark, time) }
+        }) { if (minimal) drawMinimalSplash(dark, time) else drawImportedSplash(dark, time) }
     }
 }
 
 private val settle = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
 private val bouncy = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
+
+/** 极简猫和经典猫同名的动画组，在极简猫 200x220 坐标里的转动中心 */
+private val minimalPivot = mapOf(
+    "splash-ear-l" to Offset(74f, 70f), "splash-ear-r" to Offset(126f, 70f), "splash-eyes" to Offset(100f, 98f),
+    "head-sprout" to Offset(100f, 45f), "head-sprout-float" to Offset(100f, 45f), "svg-cheek-pulse" to Offset(100f, 106f),
+    "svg-zzz-1" to Offset(148f, 68f), "svg-zzz-2" to Offset(160f, 49f),
+    "svg-heart-1" to Offset(34f, 40f), "svg-heart-2" to Offset(43f, 61f), "svg-heart-3" to Offset(45f, 123f),
+    "svg-heart-4" to Offset(158f, 58f), "svg-heart-5" to Offset(160f, 81f),
+)
 
 internal fun splashProgress(time: Float, delay: Float, duration: Float): Float =
     ((time - delay) / duration).coerceIn(0f, 1f)
@@ -141,11 +171,25 @@ private fun keys(time: Float, period: Float, vararg points: Pair<Float, Float>):
 }
 
 /** Apply the HTML's CSS group animations in native canvas coordinates. */
-internal fun DrawScope.assetGroup(name: String, time: Float, block: DrawScope.() -> Unit) {
+internal fun DrawScope.assetGroup(group: String, time: Float, block: DrawScope.() -> Unit) {
     var alpha = 1f
     var tx = 0f; var ty = 0f; var sx = 1f; var sy = 1f; var angle = 0f
     var pivot = Offset.Zero
+    // 极简猫的组名带 m- 前缀：动画和经典猫一样，只是转动中心在 200x220 的坐标里
+    val name = group.removePrefix("m-")
     when (name) {
+        "min-head" -> ty = -2.8f * wave(time, 3.6f)
+        "min-head-loaf-wrap" -> ty = -2f * wave(time, 3.8f)
+        "min-body" -> { sy += 0.018f * wave(time, 3.6f); pivot = Offset(100f, 195f) }
+        "min-body-loaf" -> { sy += 0.022f * wave(time, 3.8f); pivot = Offset(120f, 189f) }
+        "min-tail" -> { angle = 9f * wave(time, 3.1f); pivot = Offset(126f, 188f) }
+        "min-tail-sleep" -> { angle = 2f * wave(time, 4.5f); pivot = Offset(124f, 186f) }
+        "min-leaf" -> { angle = -4f + 10f * wave(time, 3.4f); pivot = Offset(100f, 45f) }
+        "min-eye-blink" -> {
+            sy = keys(time, 5.4f, 0f to 1f, 0.45f to 1f, 0.47f to 0.06f, 0.49f to 1f,
+                0.94f to 1f, 0.96f to 0.06f, 0.98f to 1f, 1f to 1f)
+            pivot = Offset(100f, 98f)
+        }
         "svg-cat-breathe" -> {
             val p = wave(time, 3.8f); sy += 0.018f * p; ty = -1.8f * p; pivot = Offset(120f, 232f)
         }
@@ -233,6 +277,7 @@ internal fun DrawScope.assetGroup(name: String, time: Float, block: DrawScope.()
             ty = 3f-9f*p; sx = 0.86f+0.22f*p; sy = sx; alpha = 0.12f+0.88f*p
         }
     }
+    if (group.startsWith("m-")) minimalPivot[name]?.let { pivot = it }
     if (alpha <= 0f) return
     val layered = alpha < 1f
     if (layered) drawContext.canvas.saveLayer(Rect(-1000f, -1000f, 2000f, 2000f), Paint().apply { this.alpha = alpha.coerceIn(0f,1f) })

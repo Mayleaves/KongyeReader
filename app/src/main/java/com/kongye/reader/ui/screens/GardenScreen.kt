@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -42,17 +44,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Session
+import com.kongye.reader.data.Shop
 import com.kongye.reader.data.Stats
 import com.kongye.reader.ui.Fmt
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.components.CatMascot
 import com.kongye.reader.ui.components.CatPose
+import com.kongye.reader.ui.components.Creature
+import com.kongye.reader.ui.components.GardenBackdrop
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.IconBtn
 import com.kongye.reader.ui.components.Signpost
 import com.kongye.reader.ui.components.SmoothShape
 import com.kongye.reader.ui.components.T
+import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
 import kotlin.math.ceil
@@ -86,9 +93,9 @@ private fun placeSpots(sessions: List<Session>, w: Float, h: Float, seed: Long):
     }
 }
 
-/** 一周猫园：参考“一周农场”，这周每读一次书就来一只猫 */
+/** 一周猫园：参考“一周农场”，这周每读一次书就来一只猫。preview 是商城里点进来试看的背景或挂件 */
 @Composable
-fun GardenScreen() {
+fun GardenScreen(preview: String? = null) {
     val c = K.c
     val sessions by Stats.sessions.collectAsState()
     var weeksBack by remember { mutableIntStateOf(0) }
@@ -100,9 +107,18 @@ fun GardenScreen() {
     val totalCats = remember(sessions) { sessions.count { Stats.isCat(it) } }
     var picked by remember(weeksBack) { mutableStateOf<Int?>(null) }
     val ground = if (c.dark) Color(0xFF141415) else Color(0xFFF6F6F6)
+    val profile by Profiles.state.collectAsState()
+    // 猫园里来的动物按装扮里选的顺序轮着来；看板猫还是原来的彩色小猫
+    val cast = profile.gardenAnimals.filter { it == Shop.MASCOT || profile.has(it) }.ifEmpty { listOf(Shop.MASCOT) }
 
     Box(Modifier.fillMaxSize().background(ground)) {
-        Scenery(Modifier.fillMaxSize())
+        val tryBg = preview?.let { Shop.background(it) }
+        val tryOrn = preview?.let { Shop.ornament(it) }
+        val bg = tryBg
+            ?: Shop.background(profile.gardenBg)?.takeIf { profile.has(it.id) }
+            ?: Shop.background(Shop.DEFAULT_BG)
+        val scene = profile.scene.filterValues { profile.has(it) } + listOfNotNull(tryOrn?.let { it.slot to it.id })
+        if (bg != null) GardenBackdrop(bg, profile.signText, scene, Modifier.fillMaxSize()) else Scenery(Modifier.fillMaxSize())
         BoxWithConstraints(
             Modifier
                 .fillMaxSize()
@@ -112,7 +128,9 @@ fun GardenScreen() {
         ) {
             val spots = remember(week, maxWidth, maxHeight) { placeSpots(week, maxWidth.value, maxHeight.value, monday.toEpochDay()) }
             week.forEachIndexed { i, s ->
-                GardenCat(s, spots[i], picked == i) { picked = if (picked == i) null else i }
+                val who = cast[i % cast.size]
+                if (who == Shop.MASCOT || who == Shop.MINCAT) GardenCat(s, spots[i], picked == i, minimal = who == Shop.MINCAT) { picked = if (picked == i) null else i }
+                else GardenCreature(who, s, spots[i], picked == i) { picked = if (picked == i) null else i }
             }
             if (week.isEmpty()) {
                 T(
@@ -128,17 +146,21 @@ fun GardenScreen() {
                 .padding(start = 12.dp, top = 8.dp)
                 .background(c.card, CircleShape),
         ) { Nav.pop() }
-        Signpost(
-            "一周猫园",
-            Modifier
-                .statusBarsPadding()
-                .padding(start = 72.dp, top = 112.dp)
-                .size(118.dp, 66.dp),
-            dark = true,
-            pointLeft = false,
-        )
-        // 小屋上的数字：一共来过多少只猫
-        Box(
+        if (tryBg != null) PreviewBar(tryBg.id, tryBg.name, tryBg.price, Modifier.align(Alignment.TopEnd))
+        if (tryOrn != null) PreviewBar(tryOrn.id, tryOrn.name, tryOrn.price, Modifier.align(Alignment.TopEnd))
+        if (bg == null) {
+            Signpost(
+                profile.signText,
+                Modifier
+                    .statusBarsPadding()
+                    .padding(start = 72.dp, top = 112.dp)
+                    .size(118.dp, 66.dp),
+                dark = true,
+                pointLeft = false,
+            )
+        }
+        // 小屋上的数字：一共来过多少只猫（试看背景时让位给上面的预览条）
+        if (preview == null) Box(
             Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
@@ -168,7 +190,7 @@ fun GardenScreen() {
 }
 
 @Composable
-private fun GardenCat(s: Session, spot: Spot, selected: Boolean, onClick: () -> Unit) {
+private fun GardenCat(s: Session, spot: Spot, selected: Boolean, minimal: Boolean = false, onClick: () -> Unit) {
     val c = K.c
     val color = when {
         s.finished -> c.accent
@@ -193,6 +215,7 @@ private fun GardenCat(s: Session, spot: Spot, selected: Boolean, onClick: () -> 
             pose = if (spot.loaf) CatPose.LOAF else CatPose.SIT,
             sleep = spot.loaf,
             blink = !spot.loaf,
+            minimal = minimal,
         )
         if (selected) {
             Column(
@@ -212,7 +235,88 @@ private fun GardenCat(s: Session, spot: Spot, selected: Boolean, onClick: () -> 
     }
 }
 
-/** 背景：太阳、云、小屋、几块灰色空地 */
+@Composable
+private fun GardenCreature(id: String, s: Session, spot: Spot, selected: Boolean, onClick: () -> Unit) {
+    val c = K.c
+    val bob by rememberInfiniteTransition(label = "bob").animateFloat(
+        0f, 1f, infiniteRepeatable(tween(1300 + spot.phase), RepeatMode.Reverse), label = "bob",
+    )
+    // 动物的 SVG 四周留白比猫多，画大一点看起来才一样大
+    val size = spot.size * 1.3f
+    Box(Modifier.offset((spot.x - (size - spot.size) / 2).dp, (spot.y - (size - spot.size)).dp)) {
+        Creature(
+            id,
+            Modifier
+                .graphicsLayer { translationY = -bob * 3.dp.toPx() }
+                .press(scaleTo = 0.9f, onClick = onClick),
+            size = size.dp,
+            flip = spot.flip,
+        )
+        if (selected) {
+            Column(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-34).dp)
+                    .wrapContentSize(unbounded = true)
+                    .widthIn(max = 180.dp)
+                    .background(c.ink, SmoothShape(12.dp))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                T(s.title, 12.sp, c.onInk, FontWeight.Bold, maxLines = 1)
+                T("${Fmt.weekday(Stats.date(s.start))} · ${Fmt.cn(s.millis)}", 11.sp, c.onInk.copy(alpha = 0.75f))
+            }
+        }
+    }
+}
+
+/** 试看背景或挂件时右上角的条：名字，换取或者直接用上 */
+@Composable
+private fun PreviewBar(id: String, name: String, price: Int, modifier: Modifier) {
+    val c = K.c
+    val profile by Profiles.state.collectAsState()
+    val orn = Shop.ornament(id)
+    val owned = profile.has(id)
+    val using = owned && (if (orn != null) profile.scene[orn.slot] == id else profile.gardenBg == id)
+    fun use() {
+        if (orn != null) Profiles.hang(orn.slot, id) else Profiles.update { it.copy(gardenBg = id) }
+    }
+    Row(
+        modifier
+            .statusBarsPadding()
+            .padding(top = 8.dp, end = 12.dp)
+            .background(c.card, SmoothShape(20.dp))
+            .padding(start = 14.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        T("试看 · $name", 13.sp, c.ink, FontWeight.SemiBold, maxLines = 1, modifier = Modifier.widthIn(max = 150.dp))
+        Spacer(Modifier.width(10.dp))
+        val label = when {
+            using -> if (orn != null) "挂着呢" else "正在用"
+            owned -> if (orn != null) "挂上" else "用这张"
+            else -> "$price 叶换取"
+        }
+        val enabled = !using && (owned || profile.leaves >= price)
+        Box(
+            Modifier
+                .background(if (enabled) c.ink else c.chip, SmoothShape(16.dp))
+                .press(scaleTo = 0.94f) {
+                    when {
+                        using -> Unit
+                        owned -> use().also { Toast.show(if (orn != null) "「$name」挂上了" else "猫园换上了「$name」") }
+                        profile.leaves < price -> Toast.show("叶子还差 ${price - profile.leaves} 片")
+                        Profiles.buy(id) -> {
+                            use()
+                            Toast.show(if (orn != null) "换到了「$name」，已经挂上" else "换到了「$name」，猫园已经换上")
+                        }
+                    }
+                }
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+        ) { T(label, 13.sp, if (enabled) c.onInk else c.text2, FontWeight.SemiBold) }
+    }
+}
+
+/** 背景：太阳、云、小屋、几块灰色空地（商城背景读不出来时用） */
 @Composable
 private fun Scenery(modifier: Modifier) {
     val c = K.c

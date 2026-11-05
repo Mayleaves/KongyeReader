@@ -14,9 +14,13 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import com.kongye.reader.data.AppIcon
+import com.kongye.reader.data.Backup
 import com.kongye.reader.data.Importer
 import com.kongye.reader.data.Library
+import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Settings
+import com.kongye.reader.data.Store
 import com.kongye.reader.ui.App
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.theme.AppTheme
@@ -68,9 +72,27 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
     }
 
+    /** 用户自己离开（Home、最近任务）时为 true；打开文件选择器之类不算 */
+    private var userLeaving = false
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        userLeaving = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userLeaving = false
+    }
+
     override fun onStop() {
         super.onStop()
+        // 开了 WebDAV 自动备份、距上次超过一天：离开时悄悄传一份
+        Store.io.launch { Backup.autoIfDue() }
         Library.flush()
+        Profiles.flush()
+        // 换桌面图标会让系统结束这次的任务，所以等用户离开时才换
+        if (userLeaving || isFinishing) AppIcon.sync(this)
     }
 
     /** 文件管理器“打开方式”、其他应用“分享到”；返回是否开始了导入 */

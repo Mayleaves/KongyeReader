@@ -567,8 +567,14 @@ fun Signpost(text: String, modifier: Modifier = Modifier, dark: Boolean = false,
             drawPath(path, board)
             drawPath(path, board, style = Stroke(6.dp.toPx(), join = StrokeJoin.Round))
         }
+        // 路牌上的字可以自己改：字多了缩小一点，最多六个字也放得下
+        val fs = when {
+            text.length <= 2 -> 15.sp
+            text.length <= 4 -> 13.sp
+            else -> 11.sp
+        }
         T(
-            text, 15.sp, tc, FontWeight.Bold,
+            text, fs, tc, FontWeight.Bold,
             Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 13.dp, start = if (pointLeft) 10.dp else 0.dp, end = if (pointLeft) 0.dp else 10.dp),
@@ -639,9 +645,11 @@ fun ValueRow(title: String, value: String, color: Color = K.c.ink, chevron: Bool
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        T(title, 16.sp, color)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            T(value, 14.sp, K.c.text2)
+        // 标题不让位：右边的值再长也只是自己换行，不会把标题挤成一列
+        T(title, 16.sp, color, maxLines = 1)
+        Spacer(Modifier.width(16.dp))
+        Row(Modifier.weight(1f, fill = false), verticalAlignment = Alignment.CenterVertically) {
+            T(value, 14.sp, K.c.text2, modifier = Modifier.weight(1f, fill = false), align = TextAlign.End, lineHeight = 19.sp)
             if (chevron) Icon(Ico.CHEVRON_RIGHT, size = 16.dp, color = K.c.text3)
         }
     }

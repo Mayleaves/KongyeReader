@@ -9,3 +9,6 @@ dist/
 
 # 字体不进仓库，见 README 和 tools/subset_fonts.py
 app/src/main/assets/fonts/
+
+# 小马宝莉素材不进仓库，见 README 和 tools/import_shop_assets.py
+app/src/main/res-private/

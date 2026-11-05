@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成：tools/import_shop_assets.py -->
+<resources>
+    <color name="ic_launcher_bg_sunset">#FAF8F5</color>
+    <color name="ic_launcher_bg_minimal">#FAF8F5</color>
+    <color name="ic_launcher_bg_minlight">#FFFFFF</color>
+</resources>

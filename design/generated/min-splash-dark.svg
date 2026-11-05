@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="100%" height="100%">
+  <defs>
+    <style>
+      .splash-bg { fill: #121214; }
+
+      /* 1. 核心右侧空心叶：从上方竖直状态顺时针旋转下落，直接成为右侧书页（全程不消失） */
+      .hero-right-leaf {
+        transform-origin: 187.5px 386px;
+        animation: leaf-spin-settle calc(1.25s * var(--speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      /* 叶片外轮廓与叶脉的描边生长动画 */
+      .hero-leaf-outline {
+        stroke-dasharray: 220;
+        stroke-dashoffset: 220;
+        fill: #121214;
+        fill-opacity: 0;
+        animation:
+          outline-draw calc(0.55s * var(--speed, 1)) cubic-bezier(0.4, 0, 0.2, 1) forwards,
+          leaf-fill-solid calc(0.3s * var(--speed, 1)) ease calc(0.85s * var(--speed, 1)) forwards;
+      }
+      .hero-leaf-vein {
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+        animation: vein-draw calc(0.4s * var(--speed, 1)) ease-out calc(0.25s * var(--speed, 1)) forwards;
+      }
+
+      /* 2. 左侧实心黑叶：当右叶旋转到位时，从书脊中心向左镜像展开 */
+      .left-solid-leaf {
+        opacity: 0;
+        transform-origin: 187.5px 386px;
+        transform: scale(0.2) rotate(35deg);
+        animation: left-leaf-unfold calc(0.65s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(0.98s * var(--speed, 1)) forwards;
+      }
+
+      /* 书卷底部白色柔和衬底（隔开猫身与叶片交界） */
+      .book-base-mask {
+        opacity: 0;
+        animation: simple-fade calc(0.3s * var(--speed, 1)) ease calc(1.05s * var(--speed, 1)) forwards;
+      }
+
+      /* 3. 看板猫猫：从合拢的叶片书卷后方探出头来 */
+      .splash-cat {
+        opacity: 0;
+        transform: translateY(38px) scale(0.9);
+        transform-origin: 187.5px 355px;
+        animation: cat-peek-up calc(0.8s * var(--speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) calc(1.08s * var(--speed, 1)) forwards;
+      }
+
+      /* 搭在两片叶子上的小猫爪 */
+      .cat-paws {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.7);
+        transform-origin: 187.5px 355px;
+        animation: paws-drop calc(0.5s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(1.32s * var(--speed, 1)) forwards;
+      }
+
+      /* 猫猫眨眼、动耳与头顶小芽（基于极简猫头 100,96 局部坐标系） */
+      .splash-eyes {
+        transform-origin: 100px 98px;
+        animation: splash-blink 2.8s infinite calc(1.85s * var(--speed, 1));
+      }
+      .head-sprout {
+        opacity: 0;
+        transform: scale(0) rotate(-25deg);
+        transform-origin: 100px 45px;
+        animation: sprout-pop calc(0.55s * var(--speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) calc(1.45s * var(--speed, 1)) forwards;
+      }
+      .head-sprout-float {
+        transform-origin: 100px 45px;
+        animation: leaf-float 3.4s ease-in-out infinite 2s;
+      }
+      .splash-ear-l {
+        transform-origin: 74px 70px;
+        animation: ear-twitch-l 6.5s ease-in-out infinite 2s;
+      }
+      .splash-ear-r {
+        transform-origin: 126px 70px;
+        animation: ear-twitch-r 7.8s ease-in-out infinite 2s;
+      }
+
+      /* 4. 底部品牌名与Slogan */
+      .brand-title {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: fade-up calc(0.75s * var(--speed, 1)) ease-out calc(1.4s * var(--speed, 1)) forwards;
+      }
+      .brand-sub {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fade-up calc(0.75s * var(--speed, 1)) ease-out calc(1.58s * var(--speed, 1)) forwards;
+      }
+
+      /* 关键帧：图1竖直微倾 -> 顺时针旋转下落 -> 图2右叶原位重合 */
+      @keyframes leaf-spin-settle {
+        0% {
+          transform: translate(-18px, -72px) rotate(-54deg) scale(1.06);
+        }
+        42% {
+          transform: translate(-14px, -64px) rotate(-48deg) scale(1.06);
+        }
+        100% {
+          transform: translate(0px, 0px) rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes outline-draw {
+        0% { stroke-dashoffset: 220; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes leaf-fill-solid {
+        to { fill-opacity: 1; }
+      }
+      @keyframes vein-draw {
+        0% { stroke-dashoffset: 60; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes left-leaf-unfold {
+        0% { opacity: 0; transform: scale(0.25) rotate(32deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      }
+      @keyframes simple-fade {
+        to { opacity: 1; }
+      }
+      @keyframes cat-peek-up {
+        0% { opacity: 0; transform: translateY(38px) scale(0.9); }
+        100% { opacity: 1; transform: translateY(0px) scale(1); }
+      }
+      @keyframes paws-drop {
+        0% { opacity: 0; transform: translateY(-8px) scale(0.7); }
+        100% { opacity: 1; transform: translateY(0px) scale(1); }
+      }
+      @keyframes sprout-pop {
+        0% { opacity: 0; transform: scale(0) rotate(-25deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      }
+      @keyframes splash-blink {
+        0%, 16%, 24%, 100% { transform: scaleY(1); }
+        20% { transform: scaleY(0.08); }
+      }
+      @keyframes leaf-float {
+        0%, 100% { transform: rotate(-4deg) translateY(0px); }
+        50% { transform: rotate(6deg) translateY(-2px); }
+      }
+      @keyframes ear-twitch-l {
+        0%, 84%, 100% { transform: rotate(0deg); }
+        88% { transform: rotate(-4.5deg); }
+        93% { transform: rotate(1.5deg); }
+      }
+      @keyframes ear-twitch-r {
+        0%, 60%, 100% { transform: rotate(0deg); }
+        64% { transform: rotate(4.5deg); }
+        68% { transform: rotate(0deg); }
+      }
+      @keyframes fade-up {
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  </defs>
+
+  <!-- 纯白背景 -->
+  <rect class="splash-bg" width="375" height="812" />
+
+  <!-- 后景图层：探头猫猫（支持极简悬浮风 / 经典细节风切换） -->
+  <g class="splash-cat">
+    <g transform="translate(187.5, 316) scale(1.22) translate(-100, -96)">
+      <!-- 头顶粗线「空叶」呆毛与小分枝 -->
+      <g class="head-sprout" style="transform-origin: 100px 45px;">
+        <g class="head-sprout-float" style="transform-origin: 100px 45px;">
+          <path d="M100 45 C100 28, 118 22, 122 32 C118 42, 105 45, 100 45 Z" stroke="#F4F4F5" stroke-width="4" stroke-linejoin="round" fill="#121214"/>
+          <path d="M100 45 C95 35, 86 33, 82 38" stroke="#F4F4F5" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        </g>
+      </g>
+
+      <!-- 纯黑极简左耳与右耳 (无内耳廓杂线) -->
+      <path class="splash-ear-l" style="transform-origin: 74px 70px;" d="M62 85 L56 36 C56 32, 62 30, 66 34 L92 62 Z" fill="#232329"/>
+      <path class="splash-ear-r" style="transform-origin: 126px 70px;" d="M138 85 L144 36 C144 32, 138 30, 134 34 L108 62 Z" fill="#232329"/>
+
+      <!-- 两侧胡须置于猫脸下层（被黑色猫脸自然遮挡根部，不叠在脸上） -->
+      <path d="M42 94 L58 96 M42 103 L58 103 M158 94 L142 96 M158 103 L142 103" stroke="#71717A" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- 圆润饱满椭圆猫头 -->
+      <ellipse cx="100" cy="96" rx="48" ry="40" fill="#232329"/>
+
+      <!-- 极简正圆大眼 (居中瞳孔，带自然眨眼动画) -->
+      <g class="splash-eyes" style="transform-origin: 100px 98px;">
+        <circle cx="80" cy="98" r="14" fill="#FFFFFF"/>
+        <circle cx="80" cy="98" r="6.5" fill="#1B1B1B"/>
+        <circle cx="120" cy="98" r="14" fill="#FFFFFF"/>
+        <circle cx="120" cy="98" r="6.5" fill="#1B1B1B"/>
+      </g>
+
+      <!-- W 猫猫嘴 -->
+      <path d="M93 111 Q96.5 115 100 111 Q103.5 115 107 111" stroke="#555555" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- 中景遮罩：书卷白色外衬底，确保叶片与黑猫身体形成干净边界 -->
+  <path class="book-base-mask" d="M 106 352 C 142 352, 170 364, 187.5 384 C 205 364, 233 352, 269 352 C 269 388, 236 406, 187.5 406 C 139 406, 106 388, 106 352 Z" fill="#121214" />
+
+  <!-- 前景左叶：左半边实心黑叶（右叶旋转归位时同步展开） -->
+  <g class="left-solid-leaf">
+    <path d="M 110 354 C 144 354, 172 366, 187.5 386 C 166 402, 125 398, 110 354 Z" fill="#F4F4F5" />
+  </g>
+
+  <!-- 前景核心右叶（主角）：从图1竖直位置顺时针旋转，直接重合为图2右侧空心叶 -->
+  <g class="hero-right-leaf">
+    <path class="hero-leaf-outline" d="M 187.5 386 C 203 366, 231 354, 265 354 C 250 398, 209 402, 187.5 386 Z" stroke="#F4F4F5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="hero-leaf-vein" d="M 202 380 Q 226 375 245 364" fill="none" stroke="#F4F4F5" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- 最前景：搭在左右叶片上方的小猫爪（对应图2红框上沿的猫爪遮挡关系） -->
+  <g class="cat-paws">
+    <ellipse cx="150" cy="355" rx="10" ry="6.5" fill="#232329" stroke="#121214" stroke-width="2.5" />
+    <ellipse cx="225" cy="355" rx="10" ry="6.5" fill="#232329" stroke="#121214" stroke-width="2.5" />
+  </g>
+
+  <!-- 底部品牌标识 -->
+  <g class="brand-title">
+    <text x="182" y="690" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="24" font-weight="700" fill="#F4F4F5" letter-spacing="2">空叶阅读</text>
+    <line x1="238" y1="671" x2="243" y2="664" stroke="#F4F4F5" stroke-width="2.8" stroke-linecap="round" />
+    <line x1="244" y1="674" x2="249" y2="667" stroke="#F4F4F5" stroke-width="2.8" stroke-linecap="round" />
+  </g>
+
+  <g class="brand-sub">
+    <text x="187.5" y="718" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif" font-size="12" font-weight="400" fill="#A1A1AA" letter-spacing="4">一叶知秋 · 静享阅读</text>
+    <!-- 保留最底部的猫爪印记 -->
+    <circle cx="187.5" cy="756" r="3.5" fill="#A1A1AA" opacity="0.42" />
+    <circle cx="181.5" cy="750" r="1.8" fill="#A1A1AA" opacity="0.42" />
+    <circle cx="187.5" cy="748" r="1.8" fill="#A1A1AA" opacity="0.42" />
+    <circle cx="193.5" cy="750" r="1.8" fill="#A1A1AA" opacity="0.42" />
+  </g>
+</svg>

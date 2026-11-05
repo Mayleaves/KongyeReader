@@ -67,13 +67,13 @@
         </g>
 
         <!-- 饱满圆润猫头 (无异色描边，与双耳同色一体融合) -->
-        <ellipse cx="120" cy="121" rx="46" ry="41" fill="#1E1E22"/>
-
         <!-- 两侧灵动小胡须 -->
         <line x1="66" y1="124" x2="75" y2="126" stroke="#47474E" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         <line x1="68" y1="133" x2="76" y2="133" stroke="#47474E" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         <line x1="174" y1="124" x2="165" y2="126" stroke="#47474E" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         <line x1="172" y1="133" x2="164" y2="133" stroke="#47474E" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <ellipse cx="120" cy="121" rx="46" ry="41" fill="#1E1E22"/>
+
 
 
                     <!-- 图3同款：白色微垂闭眼弧线 -->

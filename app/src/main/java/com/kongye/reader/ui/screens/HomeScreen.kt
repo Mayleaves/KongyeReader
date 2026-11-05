@@ -1,9 +1,9 @@
 package com.kongye.reader.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -37,10 +37,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -50,29 +50,32 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kongye.reader.data.Library
 import com.kongye.reader.data.CatRest
 import com.kongye.reader.data.CatRestPolicy
+import com.kongye.reader.data.Library
+import com.kongye.reader.data.Profiles
+import com.kongye.reader.data.Shop
 import com.kongye.reader.data.Stats
 import com.kongye.reader.ui.Fmt
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
-import com.kongye.reader.ui.components.DashboardCat
 import com.kongye.reader.ui.components.CatSpeechBubble
-import com.kongye.reader.ui.components.catGazeAt
 import com.kongye.reader.ui.components.Chip
+import com.kongye.reader.ui.components.Creature
+import com.kongye.reader.ui.components.DashboardCat
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.IconBtn
 import com.kongye.reader.ui.components.InkButton
 import com.kongye.reader.ui.components.Logo
 import com.kongye.reader.ui.components.Signpost
 import com.kongye.reader.ui.components.T
+import com.kongye.reader.ui.components.catGazeAt
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val quotes = listOf(
     "喵，今天读点什么？",
@@ -103,6 +106,11 @@ fun HomeScreen() {
     val today = remember(sessions, now.toLocalDate()) { Stats.todayMillis(sessions) }
     val totalRead = remember(sessions) { sessions.sumOf { it.millis } }
     val sleeping = CatRestPolicy.sleeping(today, totalRead, now, wakeMemory)
+    val profile by Profiles.state.collectAsState()
+    // 首页可以换成商城里领养的动物；没领养（或彩蛋之后又清了数据）就还是看板猫
+    val homeAnimal = profile.homeAnimal.takeIf { it != Shop.MASCOT && profile.has(it) && Shop.animal(it) != null }
+    // 极简猫和看板猫一样：会睡、会开心、眼睛跟手指，只是画法不同
+    val minimal = homeAnimal == Shop.MINCAT
     val scope = rememberCoroutineScope()
     val hop = remember { Animatable(0f) }
     var petSignal by remember { mutableIntStateOf(0) }
@@ -168,6 +176,7 @@ fun HomeScreen() {
             ) {
                 Logo()
                 Spacer(Modifier.weight(1f))
+                IconBtn(Ico.BAG, Modifier.excludeFromGaze("shop")) { Nav.push(Screen.Shop) }
                 IconBtn(Ico.LIST, Modifier.excludeFromGaze("shelf")) { Nav.push(Screen.Shelf) }
                 IconBtn(Ico.RING, Modifier.excludeFromGaze("prefs")) { Nav.push(Screen.Prefs) }
             }
@@ -176,11 +185,28 @@ fun HomeScreen() {
             Box(Modifier.size(210.dp).onGloballyPositioned {
                 catHeadTop = it.positionInRoot().y + headInset
             }) {
-                DashboardCat(
+                if (homeAnimal != null && !minimal) {
+                    Creature(
+                        homeAnimal,
+                        Modifier
+                            .offset { IntOffset(0, hop.value.roundToInt()) }
+                            .press(scaleTo = 0.97f) {
+                                speech = quotes.random()
+                                scope.launch {
+                                    hop.animateTo(-hopPx, tween(140))
+                                    hop.animateTo(0f, spring(dampingRatio = 0.4f, stiffness = 500f))
+                                }
+                                speechSignal++
+                            },
+                        size = 210.dp,
+                    )
+                } else DashboardCat(
                     Modifier
                         .offset { IntOffset(0, hop.value.roundToInt()) }
                         .onGloballyPositioned {
-                            catEyeCenter = it.positionInRoot() + Offset(it.size.width / 2f, it.size.height * (91f / 210f))
+                            // 眼睛在画布里的高度：经典猫 126，极简猫 98+36（取景对齐到经典猫的坐标）
+                            val eyeY = if (minimal) 99f else 91f
+                            catEyeCenter = it.positionInRoot() + Offset(it.size.width / 2f, it.size.height * (eyeY / 210f))
                         }
                         .press(scaleTo = 0.97f) {
                             if (sleeping) {
@@ -201,6 +227,7 @@ fun HomeScreen() {
                     leaf = today >= 30 * 60_000,
                     gaze = catGazeAt(fingerPosition?.plus(homeOrigin), catEyeCenter, gazeRadius),
                     sleeping = sleeping,
+                    minimal = minimal,
                 )
             }
             Spacer(Modifier.height(12.dp))
@@ -243,7 +270,7 @@ fun HomeScreen() {
             Spacer(Modifier.height(72.dp))
         }
         Signpost(
-            "猫园",
+            profile.signText,
             Modifier
                 .align(Alignment.BottomStart)
                 .navigationBarsPadding()

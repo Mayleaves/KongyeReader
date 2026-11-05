@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%" fill="none">
+    <style>
+        @keyframes minHeadFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2px); } }
+        @keyframes minBodyBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.022); } }
+        @keyframes minLeafSway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(6deg); } }
+        .min-head-loaf-wrap { animation: minHeadFloat 3.8s ease-in-out infinite; }
+        .min-body-loaf { animation: minBodyBreathe 3.8s ease-in-out infinite; transform-origin: 120px 189px; }
+        .min-leaf { animation: minLeafSway 3.4s ease-in-out infinite; transform-origin: 100px 45px; }
+    </style>
+
+    <!-- 底部椭圆柔和阴影 -->
+    <ellipse cx="118" cy="191" rx="60" ry="4.5" fill="rgba(0,0,0,0.45)"/>
+
+    <!-- 极简纯黑流线趴卧身体 + 前绕猫尾（1:1 像素级对齐参考图的拱背、水平脊背与前绕猫尾） -->
+    <g class="min-body-loaf">
+        <path d="M 65 189 C 66 159, 80 143, 98 143 C 114 141.5, 134 141.5, 148 144 C 166 148, 178 164, 178 183 C 178 193, 168 199, 148 199.5 C 130 200, 115 199.8, 106 202.8 C 102 204, 99.5 201.5, 100 198 C 100.5 194.8, 103.5 194, 107.5 193.2 C 118 191, 134 191.5, 150 191 C 160 190.5, 166 189.8, 168 189 L 65 189 Z" fill="#232329"/>
+    </g>
+
+    <!-- 悬浮极简猫头（1:1 对齐参考图的头部中心 (91, 103) 与缩放比例 scale(0.78)，下巴底边 y=134 与背部 y=142 形成精准留白） -->
+    <g class="min-head-loaf-wrap">
+        <g transform="translate(91, 103) scale(0.78) translate(-100, -96)">
+            <!-- 头顶粗线空心叶呆毛 -->
+            <g class="min-leaf">
+                <path d="M100 45 C100 28, 118 22, 122 32 C118 42, 105 45, 100 45 Z" stroke="#E4E4E7" stroke-width="4" stroke-linejoin="round" fill="#121214"/>
+                <path d="M100 45 C95 35, 86 33, 82 38" stroke="#E4E4E7" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            </g>
+            <!-- 纯黑极简尖耳（无内耳杂线） -->
+            <path d="M62 85 L56 36 C56 32, 62 30, 66 34 L92 62 Z" fill="#232329"/>
+            <path d="M138 85 L144 36 C144 32, 138 30, 134 34 L108 62 Z" fill="#232329"/>
+            <!-- 两侧胡须置于猫脸下层（被黑色猫脸自然遮挡根部，不叠在脸上） -->
+            <path d="M42 94 L58 96 M42 103 L58 103 M158 94 L142 96 M158 103 L142 103" stroke="#777777" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- 饱满椭圆猫头 -->
+            <ellipse cx="100" cy="96" rx="48" ry="40" fill="#232329"/>
+            <!-- 安详向下弯弧闭眼 (U U) -->
+            <path d="M68 98 Q80 105 92 98" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M108 98 Q120 105 132 98" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <!-- W 猫嘴 -->
+            <path d="M93 111 Q96.5 115 100 111 Q103.5 115 107 111" stroke="#555555" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+    </g>
+</svg>

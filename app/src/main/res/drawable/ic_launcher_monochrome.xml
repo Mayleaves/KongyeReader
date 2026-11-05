@@ -9,11 +9,11 @@
         <path android:pathData="M156 89 L153 69 L142 83" android:strokeColor="#1E1E22" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" />
         <path android:pathData="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" android:strokeColor="#1E1E22" android:strokeWidth="2.5" android:strokeLineCap="butt" android:strokeLineJoin="round" />
         <path android:pathData="M120 79 C117 70, 111 65, 107 67" android:strokeColor="#1E1E22" android:strokeWidth="2.1" android:strokeLineCap="round" android:strokeLineJoin="miter" />
-        <path android:pathData="M74 121a46 41 0 1 0 92 0a46 41 0 1 0 -92 0ZM84.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0ZM126.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillColor="#1E1E22" android:fillType="evenOdd" />
         <path android:pathData="M65 124L75 126" android:strokeColor="#1E1E22" android:strokeWidth="2.2" android:strokeLineCap="round" android:strokeLineJoin="miter" />
         <path android:pathData="M67 133L76 133" android:strokeColor="#1E1E22" android:strokeWidth="2.2" android:strokeLineCap="round" android:strokeLineJoin="miter" />
         <path android:pathData="M175 124L165 126" android:strokeColor="#1E1E22" android:strokeWidth="2.2" android:strokeLineCap="round" android:strokeLineJoin="miter" />
         <path android:pathData="M173 133L164 133" android:strokeColor="#1E1E22" android:strokeWidth="2.2" android:strokeLineCap="round" android:strokeLineJoin="miter" />
+        <path android:pathData="M74 121a46 41 0 1 0 92 0a46 41 0 1 0 -92 0ZM84.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0ZM126.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillColor="#1E1E22" android:fillType="evenOdd" />
         <path android:pathData="M84.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillAlpha="0" android:fillColor="#1E1E22" />
         <path android:pathData="M126.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillAlpha="0" android:fillColor="#1E1E22" />
         <path android:pathData="M94.2 126a6.8 6.8 0 1 0 13.6 0a6.8 6.8 0 1 0 -13.6 0ZM101.8 122.5a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0Z" android:fillColor="#1E1E22" android:fillType="evenOdd" />

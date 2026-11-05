@@ -10,13 +10,11 @@
     <path android:pathData="M84 89 L87 69 L98 83" android:strokeColor="#3A3A40" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" />
     <path android:pathData="M165.6 116 C165.6 98, 161 74, 158 59 C156.8 53.5, 150 52.5, 145.8 57.5 L124 86 L132 118 Z" android:fillColor="#232329" />
     <path android:pathData="M156 89 L153 69 L142 83" android:strokeColor="#3A3A40" android:strokeWidth="3" android:strokeLineCap="round" android:strokeLineJoin="round" />
-    <path android:pathData="M120 79 C120 66, 128 53, 138 56 C138 67, 129 76, 120 79 Z" android:strokeColor="#E4E4E7" android:strokeWidth="2.4" android:strokeLineCap="butt" android:strokeLineJoin="round" />
-    <path android:pathData="M120 79 C117 70, 111 65, 107 67" android:strokeColor="#E4E4E7" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="miter" />
-    <path android:pathData="M74 121a46 41 0 1 0 92 0a46 41 0 1 0 -92 0Z" android:fillColor="#232329" />
     <path android:pathData="M66 124L75 126" android:strokeColor="#47474E" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="miter" android:fillAlpha="0.6" android:strokeAlpha="0.6" />
     <path android:pathData="M68 133L76 133" android:strokeColor="#47474E" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="miter" android:fillAlpha="0.6" android:strokeAlpha="0.6" />
     <path android:pathData="M174 124L165 126" android:strokeColor="#47474E" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="miter" android:fillAlpha="0.6" android:strokeAlpha="0.6" />
     <path android:pathData="M172 133L164 133" android:strokeColor="#47474E" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="miter" android:fillAlpha="0.6" android:strokeAlpha="0.6" />
+    <path android:pathData="M74 121a46 41 0 1 0 92 0a46 41 0 1 0 -92 0Z" android:fillColor="#232329" />
     <path android:pathData="M84.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillColor="#FFFFFF" />
     <path android:pathData="M126.5 126a14.5 14.5 0 1 0 29 0a14.5 14.5 0 1 0 -29 0Z" android:fillColor="#FFFFFF" />
     <path android:pathData="M94.2 126a6.8 6.8 0 1 0 13.6 0a6.8 6.8 0 1 0 -13.6 0Z" android:fillColor="#18181B" />

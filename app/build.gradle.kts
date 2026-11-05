@@ -12,8 +12,8 @@ android {
         applicationId = "com.kongye.reader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.2.12"
+        versionCode = 19
+        versionName = "2.0.3"
         testInstrumentationRunner = "com.kongye.reader.VisualRegression"
     }
 
@@ -28,6 +28,11 @@ android {
             // 本地使用：沿用 debug 签名，生成的 release APK 可直接安装
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    sourceSets {
+        // 小马宝莉是孩之宝的形象，图不进仓库：本机运行 tools/import_shop_assets.py 时生成在这里
+        getByName("main").res.srcDir("src/main/res-private")
     }
 
     compileOptions {

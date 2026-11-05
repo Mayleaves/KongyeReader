@@ -13,7 +13,13 @@ sealed class Screen(val key: String) {
     data object Stats : Screen("stats")
     data object Timeline : Screen("timeline")
     data object Garden : Screen("garden")
+    /** 商城里看背景或挂件：在猫园里铺上、挂上试试 */
+    data class GardenPreview(val item: String) : Screen("garden-preview/$item")
     data object Prefs : Screen("prefs")
+    data object Shop : Screen("shop")
+    data object Dress : Screen("dress")
+    data object Achievements : Screen("achievements")
+    data object Backup : Screen("backup")
 }
 
 /** 简单的页面栈：首页在最底下，返回键逐层退出 */
@@ -35,6 +41,13 @@ object Nav {
         forward = false
         stack.removeAt(stack.lastIndex)
         return true
+    }
+
+    /** 回到首页：首页上面的页面全部关掉 */
+    fun home() {
+        if (stack.size <= 1) return
+        forward = false
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
     fun openBook(id: String) {

@@ -104,6 +104,7 @@ import com.kongye.reader.data.Book
 import com.kongye.reader.data.BookContent
 import com.kongye.reader.data.Dict
 import com.kongye.reader.data.Library
+import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Session
 import com.kongye.reader.data.Settings
 import com.kongye.reader.data.Stats
@@ -606,6 +607,7 @@ private fun Reader(
             entries = null
             scope.launch {
                 val res = withContext(Dispatchers.IO) { Dict.select(text, pos) { s -> countIn(content.text, s) } }
+                Profiles.count("dict")
                 val cur = sel ?: return@launch
                 if (!cur.on(cp, pageIdx)) return@launch
                 val s = res.start.coerceIn(r.start, r.end - 1)
@@ -867,6 +869,7 @@ private fun Reader(
                         saving = false
                         if (ok) {
                             Toast.show("已保存")
+                            Profiles.count("edit")
                             editing = false
                             onEdited(false)
                         } else {

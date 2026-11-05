@@ -51,19 +51,38 @@ fun CatMascot(
     pose: CatPose = CatPose.SIT,
     flip: Boolean = false,
     look: Float = 1f,
+    /** 极简猫（200x220 的画稿），取景和经典猫一样，同样大小一样大 */
+    minimal: Boolean = false,
 ) {
     val c = K.c
     val time = if (blink || pose == CatPose.LOAF) assetTime() else 0f
     val bodyColor = color.takeIf { it != c.ink }
     Canvas(modifier.size(size)) {
-        if (pose == CatPose.SIT) {
+        if (minimal) {
+            val (k, ox, oy) = if (pose == CatPose.SIT) minimalFrame() else {
+                // 趴着：和经典趴姿一样的取景（200 宽的格子，脚踩同一条线）
+                val s = this.size.minDimension / 200f
+                Triple(s, -18f * s, -15f * s)
+            }
+            withTransform({
+                if (flip) scale(-1f, 1f, pivot = center)
+                translate(ox, oy)
+                scale(k, k, pivot = Offset.Zero)
+            }) {
+                when {
+                    pose == CatPose.LOAF -> drawMinimalLoaf(c.dark, time, bodyColor, if (bodyColor != null) eye else null, shadow)
+                    sleep -> drawMinimalSleep(c.dark, time, bodyColor = bodyColor, shadow = shadow)
+                    else -> drawMinimalFocus(c.dark, time, bodyColor = bodyColor, shadow = shadow)
+                }
+            }
+        } else if (pose == CatPose.SIT) {
             val s = this.size.minDimension / 210f
             withTransform({
                 if (flip) scale(-1f, 1f, pivot = center)
                 translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
                 scale(s, s, pivot = Offset.Zero)
             }) {
-                if (sleep) drawImportedSleep(c.dark, time, bodyColor, detail, shadow)
+                if (sleep) drawImportedSleep(c.dark, time, bodyColor = bodyColor, detailColor = detail, shadow = shadow)
                 else drawImportedFocus(c.dark, time, accent, Offset.Zero, bodyColor, detail, shadow)
             }
         } else {

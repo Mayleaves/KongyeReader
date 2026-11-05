@@ -27,13 +27,13 @@
         <path d="M120 79 C117 70, 111 65, 107 67" stroke="#1E1E22" stroke-width="2.1" stroke-linecap="round" fill="none"/>
 
         <!-- 圆润猫头 -->
-        <ellipse cx="120" cy="121" rx="46" ry="41" fill="#1E1E22"/>
-
         <!-- 两侧胡须 -->
         <line x1="65" y1="124" x2="75" y2="126" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"/>
         <line x1="67" y1="133" x2="76" y2="133" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"/>
         <line x1="175" y1="124" x2="165" y2="126" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"/>
         <line x1="173" y1="133" x2="164" y2="133" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"/>
+        <ellipse cx="120" cy="121" rx="46" ry="41" fill="#1E1E22"/>
+
 
         <!-- 呆萌大眼睛 -->
         <circle cx="99" cy="126" r="14.5" fill="#FFFFFF"/>

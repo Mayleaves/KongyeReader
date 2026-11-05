@@ -185,13 +185,13 @@
       </g>
 
       <!-- 圆润饱满猫头 (与 App 图标完全一致的 ellipse 造型) -->
-      <ellipse cx="120" cy="121" rx="46" ry="41" fill="#232329"/>
-
       <!-- 两侧胡须 -->
       <line x1="65" y1="124" x2="75" y2="126" stroke="#71717A" stroke-width="2.2" stroke-linecap="round"/>
       <line x1="67" y1="133" x2="76" y2="133" stroke="#71717A" stroke-width="2.2" stroke-linecap="round"/>
       <line x1="175" y1="124" x2="165" y2="126" stroke="#71717A" stroke-width="2.2" stroke-linecap="round"/>
       <line x1="173" y1="133" x2="164" y2="133" stroke="#71717A" stroke-width="2.2" stroke-linecap="round"/>
+      <ellipse cx="120" cy="121" rx="46" ry="41" fill="#232329"/>
+
 
       <!-- 呆萌大眼睛 (带自然眨眼动画) -->
       <g class="splash-eyes">
