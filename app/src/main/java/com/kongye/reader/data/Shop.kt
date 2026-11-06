@@ -26,7 +26,7 @@ data class ShopAnimal(
     val id: String,
     val name: String,
     val price: Int,
-    /** 商城里的分组：treasure 镇店之宝、kongye 空叶自己的猫、animal 小动物、pony 小马宝莉、emoji 表情 */
+    /** 商城里的分组：kongye 空叶自己的猫和镇店之宝、animal 小动物、pony 小马宝莉、emoji 表情 */
     val group: String = "animal",
     val res: String,
     val private: Boolean = false,
@@ -97,8 +97,7 @@ object Shop {
 
     /** 商城动物分组的标题和小字 */
     val animalGroups = linkedMapOf(
-        "treasure" to ("镇店之宝" to "带回家就送 8 件神装"),
-        "kongye" to ("空叶" to "空叶阅读自己的猫"),
+        "kongye" to ("空叶" to "空叶阅读自己的猫，还有镇店之宝"),
         "animal" to ("小动物" to "原本就有的农场伙伴"),
         "emoji" to ("表情" to "从表情包里跑出来的"),
         "pony" to ("小马宝莉" to "小马国的朋友"),

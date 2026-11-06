@@ -186,6 +186,19 @@ STYLE_ORDER = ['classic', 'nightcity',
                'arasaka', 'militech', 'kangtao', 'kiroshi', 'trauma',
                'tyger', 'valentinos', 'maelstrom', 'sixthstreet', 'voodooboys', 'wraiths', 'mox', 'scavengers']
 order = STYLE_ORDER + [k for k in data['factions'] if k not in STYLE_ORDER]
+# 设计稿里创伤小组、虎爪帮、清道夫都是霓虹绿配红，排在一起分不出来，这里换掉：
+# 创伤小组留医疗绿、副色换白金银；虎爪帮用霓虹紫配虎纹琥珀；清道夫用铁锈配血红
+FACTION_OVERRIDES = {
+    'trauma': {'pri': '#00D68F', 'sec': '#A7B4BC', 'acc': '#FF3B4E', 'plate': '#0E1E1A', 'sub': '#17302A',
+               'paper': '#FFFFFF', 'card': '#10211C', 'lockProg': '#00A874'},
+    'tyger': {'pri': '#B44CFF', 'sec': '#FF9F1C', 'acc': '#FFE066', 'plate': '#170F20', 'sub': '#251831',
+              'paper': '#FFFFFF', 'card': '#1A1024', 'lockProg': '#9333EA'},
+    'scavengers': {'pri': '#A0522D', 'sec': '#DC2626', 'acc': '#D4D4D8', 'plate': '#1A1412', 'sub': '#2A201C',
+                   'paper': '#F5F1EE', 'card': '#1C1513', 'lockProg': '#8B4513'},
+}
+for k, v in FACTION_OVERRIDES.items():
+    if k in data['factions']:
+        data['factions'][k].update(v)
 
 
 def spaced(name):

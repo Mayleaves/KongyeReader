@@ -407,10 +407,10 @@ catalog['animals'].insert(1, {'id': 'goldcat', 'name': '鎏金看板猫', 'price
                               'dual': arch['dualEyes'], 'flip': arch['facingLeft'], 'slots': gold_slots,
                               'poses': {k: v for k, v in gold_res.items() if k != 'focus'}})
 
-# 镇店之宝：至尊金猪皇（9999 叶子）排在动物最前面，8 件神装由成就 c0 解锁（tools/treasure.py）
+# 镇店之宝：至尊金猪皇（9999 叶子）放在空叶组最后，8 件神装由成就 c0 解锁（tools/treasure.py）
 import treasure  # noqa: E402
 _pig, _pig_accs, _pig_jobs = treasure.entries()
-catalog['animals'].insert(0, _pig)
+catalog['animals'].insert(max(i + 1 for i, a in enumerate(catalog['animals']) if a['group'] == 'kongye'), _pig)
 catalog['accessories'] += _pig_accs
 jobs += _pig_jobs
 

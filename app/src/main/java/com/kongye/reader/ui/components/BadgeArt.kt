@@ -25,15 +25,15 @@ val badgeStyles = listOf(
     BadgeStyle("militech", "军用科技", "MILITECH // TAC-OPS", Color(0xFFF5A623), Color(0xFF6E825B), Color(0xFFD4E157), Color(0xFF181C16), Color(0xFF242B22), Color(0xFFF4F6F0), Color(0xFF1A1F18), Color(0xFF6E825B)),
     BadgeStyle("kangtao", "康陶重工", "KANG TAO // SMART-SYS", Color(0xFFFF6B00), Color(0xFF00B8D4), Color(0xFFFFD166), Color(0xFF101820), Color(0xFF1B2836), Color(0xFFFFFFFF), Color(0xFF111B24), Color(0xFF0097B2)),
     BadgeStyle("kiroshi", "歧路司光学", "KIROSHI // OPTICS-MK.5", Color(0xFF00D8FF), Color(0xFFFF5500), Color(0xFFE0F7FA), Color(0xFF0C1622), Color(0xFF152538), Color(0xFFFFFFFF), Color(0xFF0E1926), Color(0xFF009EC2)),
-    BadgeStyle("trauma", "创伤小组", "TRAUMA TEAM // PLATINUM", Color(0xFF00E676), Color(0xFFFF2A4B), Color(0xFFFFFFFF), Color(0xFF101E1A), Color(0xFF1A2E28), Color(0xFFFFFFFF), Color(0xFF11211C), Color(0xFF00B85C)),
-    BadgeStyle("tyger", "虎爪帮", "TYGER CLAWS // JAPANTON", Color(0xFF00E5A3), Color(0xFFFF2E4C), Color(0xFFFFD54F), Color(0xFF111B18), Color(0xFF1C2B27), Color(0xFFFFFFFF), Color(0xFF131E1B), Color(0xFF00B37E)),
+    BadgeStyle("trauma", "创伤小组", "TRAUMA TEAM // PLATINUM", Color(0xFF00D68F), Color(0xFFA7B4BC), Color(0xFFFF3B4E), Color(0xFF0E1E1A), Color(0xFF17302A), Color(0xFFFFFFFF), Color(0xFF10211C), Color(0xFF00A874)),
+    BadgeStyle("tyger", "虎爪帮", "TYGER CLAWS // JAPANTON", Color(0xFFB44CFF), Color(0xFFFF9F1C), Color(0xFFFFE066), Color(0xFF170F20), Color(0xFF251831), Color(0xFFFFFFFF), Color(0xFF1A1024), Color(0xFF9333EA)),
     BadgeStyle("valentinos", "瓦伦蒂诺帮", "VALENTINOS // HEYWOOD-GOLD", Color(0xFFFFD700), Color(0xFFC8102E), Color(0xFFFFF3B0), Color(0xFF1F0F16), Color(0xFF331824), Color(0xFFFFFDF7), Color(0xFF231119), Color(0xFFCA8A04)),
     BadgeStyle("maelstrom", "漩涡帮", "MAELSTROM // TOTENTANZ", Color(0xFFFF002B), Color(0xFF52525B), Color(0xFFFF6D00), Color(0xFF0B0B0D), Color(0xFF17171C), Color(0xFFF4F4F6), Color(0xFF0D0D10), Color(0xFFDC2626)),
     BadgeStyle("sixthstreet", "六街帮", "6TH STREET // PATRIOT-66", Color(0xFFFF8C00), Color(0xFF2563EB), Color(0xFFEF4444), Color(0xFF121926), Color(0xFF1E293B), Color(0xFFFAF8F5), Color(0xFF141C2B), Color(0xFFD97706)),
     BadgeStyle("voodooboys", "巫毒帮", "VOODOO BOYS // BLACKWALL", Color(0xFF00F5D4), Color(0xFF9B5DE5), Color(0xFFF15BB5), Color(0xFF0F1020), Color(0xFF1C1E38), Color(0xFFFFFFFF), Color(0xFF111224), Color(0xFF00BB9E)),
     BadgeStyle("wraiths", "夜游鬼", "WRAITHS // BADLANDS-RAID", Color(0xFFC6FF00), Color(0xFFD97736), Color(0xFFFFF59D), Color(0xFF1B1A16), Color(0xFF2A2721), Color(0xFFF7F5F0), Color(0xFF1D1B17), Color(0xFF8EBA00)),
     BadgeStyle("mox", "莫克斯帮", "THE MOX // LIZZIE-BAR", Color(0xFFFF2A85), Color(0xFF00F0FF), Color(0xFFFFE600), Color(0xFF1E1024), Color(0xFF2D1936), Color(0xFFFFFFFF), Color(0xFF201126), Color(0xFFD91C6B)),
-    BadgeStyle("scavengers", "清道夫", "SCAVENGERS // CHOP-SHOP", Color(0xFF39FF14), Color(0xFFE11D48), Color(0xFFFDE047), Color(0xFF141715), Color(0xFF202622), Color(0xFFF4F6F4), Color(0xFF161A17), Color(0xFF22C55E)),
+    BadgeStyle("scavengers", "清道夫", "SCAVENGERS // CHOP-SHOP", Color(0xFFA0522D), Color(0xFFDC2626), Color(0xFFD4D4D8), Color(0xFF1A1412), Color(0xFF2A201C), Color(0xFFF5F1EE), Color(0xFF1C1513), Color(0xFF8B4513)),
 )
 
 private object BadgePaths {

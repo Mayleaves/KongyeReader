@@ -182,7 +182,8 @@ object Achievements {
         Achievement("edit_1", "explore", "动笔", "编辑并保存一章", 80, "铜", "pen-nib", "编辑") { Pair(it.count("edit"), 1) },
         Achievement("rename", "explore", "改个名字", "改一次路牌上的字", 80, "铜", "cyber-key", "个性化") { flag(it.profile.signText != Profile.DEFAULT_SIGN) },
         Achievement("backup_1", "explore", "有备无患", "第一次备份", 150, "铜", "cloud-shield", "备份") { Pair(it.count("backup"), 1) },
-        Achievement("egg", "explore", "空叶里的秘密", "在“关于”里找到彩蛋", 250, "紫晶", "secret-box", "隐藏彩蛋", hidden = true) { Pair(it.count("egg"), 1) },
+        // 奖励不是叶子：找到彩蛋就解锁全商城（Profiles.unlockEverything 打开彩蛋开关）
+        Achievement("egg", "explore", "空叶里的秘密", "在“关于”里找到彩蛋", 0, "紫晶", "secret-box", "解锁全商城", item = "全商城所有物品", hidden = true) { Pair(it.count("egg"), 1) },
         Achievement("e7", "explore", "暗金浮雕", "累计阅读满 20 小时", 0, "金", "app-icon-gold", "桌面图标", item = "暗金浮雕图标") { it.hours(20) },
         Achievement("e8", "explore", "霓虹幻彩", "点亮 25 枚成就", 0, "紫晶", "app-icon-cyber", "桌面图标", item = "霓虹幻彩图标") { Pair(it.lit, 25) },
         Achievement("e9", "explore", "像素复古", "连续 14 天都读了书", 0, "银", "app-icon-pixel", "桌面图标", item = "像素复古图标") { Pair(it.longestStreak.toLong(), 14) },

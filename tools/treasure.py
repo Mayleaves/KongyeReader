@@ -34,7 +34,7 @@ SVG_NS = 'http://www.w3.org/2000/svg'
 PIG_ID, PIG_NAME, PIG_PRICE, LOCK = 'goldpig', '至尊金猪皇', 9999, 'c0'
 SIZE, FEET = 160, 0.84
 DUAL_SHIFT = 17
-GROUP = 'treasure'
+GROUP = 'kongye'  # 放在空叶组里，排在鎏金看板猫后面
 
 
 def parse():
@@ -199,7 +199,9 @@ if __name__ == '__main__':
     animal, accs, jobs = entries()
     convert(jobs)
     cat = json.loads(SHOP.read_text(encoding='utf-8'))
-    cat['animals'] = [animal] + [a for a in cat['animals'] if a['id'] != PIG_ID]
+    rest = [a for a in cat['animals'] if a['id'] != PIG_ID]
+    at = max((i + 1 for i, a in enumerate(rest) if a.get('group') == GROUP), default=0)
+    cat['animals'] = rest[:at] + [animal] + rest[at:]
     ids = {a['id'] for a in accs}
     cat['accessories'] = [a for a in cat['accessories'] if a['id'] not in ids] + accs
     SHOP.write_text(json.dumps(cat, ensure_ascii=False, indent=1), encoding='utf-8')
