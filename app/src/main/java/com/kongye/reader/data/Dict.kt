@@ -183,10 +183,28 @@ object Dict {
             if (i + l > win.length) continue
             val s = win.substring(i, i + l)
             if (s in found || s[0] !in SURNAMES || s[1] in NOT_GIVEN) continue
+            // “阮阮说 / 阮阮的 / 吴玫问” may repeat often, but the final
+            // speech verb or particle is not part of a newly inferred name.
+            // Known dictionary names are left to the dictionary above.
+            if (l == 3 && s.last() in "说道问答的了着吗呢吧啊") {
+                val prefixCount = countInBook(s.take(2))
+                // 道 can also be a genuine final name character (e.g. 玄道).
+                // In that case require evidence that the shorter name is used
+                // independently; repeated two-character names are unambiguous.
+                val boundary = s.last() != '道' || s[0] == s[1] || countInBook(s) < prefixCount * 0.8
+                if (prefixCount >= 3 && boundary) continue
+            }
             val n = countInBook(s)
             if (n >= (if (l == 3) 3 else 8)) names[s] = n
         }
-        // 三字名要比它的前两个字出现得差不多多，才说明后面总跟着同一个字
+        // 长候选如果只是高频短姓名偶尔接上的一个字，就不能参与分词。
+        // 否则即使“阮阮让”只有四次，少切一个词的概率仍可能压过“阮阮 + 让”。
+        names.keys.filter { it.length == 3 }.toList().forEach { three ->
+            val prefix = three.take(2)
+            val shortCount = countInBook(prefix)
+            if (shortCount >= 8 && names.getValue(three) < shortCount * 0.6) names.remove(three)
+        }
+        // 前缀几乎总是带着第三个字出现，才把它作为完整的三字名。
         names.keys.filter { it.length == 2 }.forEach { two ->
             val three = names.keys.firstOrNull { it.length == 3 && it.startsWith(two) }
             if (three != null && names[three]!! >= names[two]!! * 0.6) names.remove(two)

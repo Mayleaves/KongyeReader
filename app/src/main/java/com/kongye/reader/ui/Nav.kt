@@ -22,6 +22,7 @@ sealed class Screen(val key: String) {
     data object Dress : Screen("dress")
     data object Achievements : Screen("achievements")
     data object Backup : Screen("backup")
+    data object About : Screen("about")
 }
 
 /** 简单的页面栈：首页在最底下，返回键逐层退出 */
@@ -61,10 +62,17 @@ object Nav {
 
     /** 装扮停在哪一页（0 首页、1 猫园、2 饰品、3 图标）。放在这里，去猫园试看背景再回来还是那一页 */
     var dressTab by mutableIntStateOf(0)
+    var dressItem by mutableStateOf<String?>(null)
+        private set
+    var dressRequest by mutableIntStateOf(0)
+        private set
 
-    /** 打开装扮的某一页；装扮已经在栈里（比如 装扮→商城→去装扮）就退回到它，不叠两层 */
-    fun dress(tab: Int) {
+    /** 从商城进入时保留商城，让返回仍落在刚才浏览的商品位置。 */
+    fun dress(tab: Int, item: String? = null) {
         dressTab = tab
+        dressItem = item
+        dressRequest++
+        if (top == Screen.Shop) return push(Screen.Dress)
         val i = stack.indexOfLast { it == Screen.Dress }
         if (i < 0 || i == stack.lastIndex) return push(Screen.Dress)
         forward = false

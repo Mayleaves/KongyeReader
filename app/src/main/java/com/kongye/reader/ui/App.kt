@@ -8,6 +8,7 @@ import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.screens.ShopScreen
 import com.kongye.reader.ui.screens.DressScreen
 import com.kongye.reader.ui.screens.AchievementsScreen
+import com.kongye.reader.ui.screens.AboutScreen
 import com.kongye.reader.ui.screens.BackupScreen
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -155,6 +156,7 @@ fun App(showSplash: Boolean = false) {
                         Screen.Dress -> DressScreen()
                         Screen.Achievements -> AchievementsScreen()
                         Screen.Backup -> BackupScreen()
+                        Screen.About -> AboutScreen()
                     }
                 }
                 ImportBusy()

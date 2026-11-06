@@ -148,12 +148,6 @@ fun GardenScreen(preview: String? = null) {
                     onLift = { picked = null },
                 )
             }
-            if (week.isEmpty()) {
-                T(
-                    if (weeksBack == 0) "这周的猫园还空着\n读够 3 分钟，就会来一只猫" else "那一周没有猫来过",
-                    15.sp, c.text2, modifier = Modifier.align(Alignment.Center), align = TextAlign.Center, lineHeight = 24.sp,
-                )
-            }
         }
         IconBtn(
             Ico.BACK,
@@ -184,6 +178,23 @@ fun GardenScreen(preview: String? = null) {
                 .background(c.ink, SmoothShape(12.dp))
                 .padding(horizontal = 10.dp, vertical = 4.dp),
         ) { T("$totalCats", 16.sp, c.onInk, FontWeight.Black) }
+        // 这一周没有猫：路牌和第一块空地之间放一张小卡片，趴着睡觉的猫 + 两行字（不压在空地和池塘上）
+        if (week.isEmpty()) Row(
+            Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(top = 162.dp)
+                .background(c.card, SmoothShape(18.dp))
+                .padding(start = 10.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CatMascot(size = 40.dp, pose = CatPose.LOAF, sleep = true, shadow = false)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                T(if (weeksBack == 0) "猫园还空着" else "那一周没有猫来", 14.sp, c.ink, FontWeight.SemiBold)
+                T(if (weeksBack == 0) "读够 3 分钟，就会来一只猫" else "往右翻，回到这一周看看", 12.sp, c.text2)
+            }
+        }
         Row(
             Modifier
                 .align(Alignment.BottomCenter)

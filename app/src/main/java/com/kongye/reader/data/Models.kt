@@ -27,6 +27,8 @@ data class Book(
     val tags: List<String> = emptyList(),
     /** 1.2.0 之前导入的书没有简介，启动时从正文开头补一次，补过就不再找 */
     val metaScanned: Boolean = false,
+    /** 原始文件名用于重新识别，独立于用户修改后的书名。 */
+    val sourceName: String = "",
 )
 
 @Serializable

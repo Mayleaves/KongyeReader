@@ -31,6 +31,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -76,7 +78,7 @@ import com.kongye.reader.ui.theme.K
 
 private val tabs = listOf("动物", "背景", "饰品", "挂件", "图标")
 
-/** 去猫园试看前记下停在哪个分类、滚到哪，回来接着看 */
+/** 离开商城时保留分类和滚动位置，所有入口共用。 */
 private object ShopResume {
     var state: Triple<Int, Int, Int>? = null
 }
@@ -98,10 +100,14 @@ private val slotHint = mapOf(
 fun ShopScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
-    val resume = remember { ShopResume.state.also { ShopResume.state = null } }
+    val resume = remember { ShopResume.state }
     var tab by rememberSaveable { mutableIntStateOf(resume?.first ?: 0) }
     var picked by remember { mutableStateOf<String?>(null) }
     val grid = rememberLazyGridState(resume?.second ?: 0, resume?.third ?: 0)
+    LaunchedEffect(grid) {
+        snapshotFlow { Triple(tab, grid.firstVisibleItemIndex, grid.firstVisibleItemScrollOffset) }
+            .collect { ShopResume.state = it }
+    }
     val tryOn: (String) -> Unit = { id ->
         ShopResume.state = Triple(tab, grid.firstVisibleItemIndex, grid.firstVisibleItemScrollOffset)
         picked = null
@@ -357,7 +363,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             }
             owned -> InkButton("去装扮", Modifier.fillMaxWidth(), height = 52.dp) {
                 onDismiss()
-                Nav.dress(Nav.dressTabFor(item))
+                Nav.dress(Nav.dressTabFor(item), item)
             }
             lock != null -> InkButton("去看成就", Modifier.fillMaxWidth(), height = 52.dp) {
                 onDismiss()

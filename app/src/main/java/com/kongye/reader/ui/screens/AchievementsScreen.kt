@@ -1,6 +1,5 @@
 package com.kongye.reader.ui.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -230,7 +229,6 @@ fun AchievementsScreen() {
     // 试看：没换到的配色点一下，整页先换成它看看；底下一条可以换取或者退出试看
     var preview by remember { mutableStateOf<BadgeStyle?>(null) }
     val style = preview ?: using
-    BackHandler(preview != null) { preview = null }
     val navPad = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val done = Achievements.all.count { it.id in profile.achievements }
     val earned = Achievements.all.filter { it.id in profile.achievements }.sumOf { it.reward }

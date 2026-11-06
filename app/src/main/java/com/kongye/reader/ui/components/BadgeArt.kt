@@ -19,8 +19,8 @@ data class BadgeStyle(
 
 val badgeStyles = listOf(
     BadgeStyle("classic", "原版黑金", "CLASSIC // ARCHIVE-01", Color(0xFFD89B3C), Color(0xFFB86B35), Color(0xFFF7D279), Color(0xFF17171B), Color(0xFF23242B), Color(0xFFFAF8F5), Color(0xFF1D1D22), Color(0xFF9A7438)),
-    BadgeStyle("nightcity", "2077 夜之城", "NC-2077 // MERCENARY", Color(0xFFFCEE09), Color(0xFF00F0FF), Color(0xFFFF003C), Color(0xFF111318), Color(0xFF1D212A), Color(0xFFFFFFFF), Color(0xFF12141B), Color(0xFF00A8B5)),
-    BadgeStyle("ncpd", "NCPD 警局", "NCPD // NIGHT-CITY-PD", Color(0xFF00A8FF), Color(0xFFFACC15), Color(0xFFFF2A4B), Color(0xFF0E1726), Color(0xFF192740), Color(0xFFFFFFFF), Color(0xFF101A2B), Color(0xFF0284C7)),
+    BadgeStyle("nightcity", "夜之城", "NC-2077 // MERCENARY", Color(0xFFFCEE09), Color(0xFF00F0FF), Color(0xFFFF003C), Color(0xFF111318), Color(0xFF1D212A), Color(0xFFFFFFFF), Color(0xFF12141B), Color(0xFF00A8B5)),
+    BadgeStyle("ncpd", "NCPD", "NCPD // NIGHT-CITY-PD", Color(0xFF00A8FF), Color(0xFFFACC15), Color(0xFFFF2A4B), Color(0xFF0E1726), Color(0xFF192740), Color(0xFFFFFFFF), Color(0xFF101A2B), Color(0xFF0284C7)),
     BadgeStyle("arasaka", "荒坂集团", "ARASAKA // CORP-SEC", Color(0xFFFF1E27), Color(0xFFD4D4D8), Color(0xFFFF5258), Color(0xFF0E0E11), Color(0xFF1C1C21), Color(0xFFFFFFFF), Color(0xFF111115), Color(0xFFC81E25)),
     BadgeStyle("militech", "军用科技", "MILITECH // TAC-OPS", Color(0xFFF5A623), Color(0xFF6E825B), Color(0xFFD4E157), Color(0xFF181C16), Color(0xFF242B22), Color(0xFFF4F6F0), Color(0xFF1A1F18), Color(0xFF6E825B)),
     BadgeStyle("kangtao", "康陶重工", "KANG TAO // SMART-SYS", Color(0xFFFF6B00), Color(0xFF00B8D4), Color(0xFFFFD166), Color(0xFF101820), Color(0xFF1B2836), Color(0xFFFFFFFF), Color(0xFF111B24), Color(0xFF0097B2)),

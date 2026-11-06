@@ -288,14 +288,13 @@ private fun Tags(tags: List<String>) {
     }
 }
 
-/** 改书名、作者、简介、标签；TXT 还可以按新规则重新分章 */
+/** 改书名、作者、简介、标签，并重新识别书籍。 */
 @Composable
 private fun BookInfoSheet(id: String?, onDismiss: () -> Unit) {
     val c = K.c
     val scope = rememberCoroutineScope()
     val last = remember { arrayOfNulls<Book>(1) }
     id?.let { Library.get(it) }?.let { last[0] = it }
-    var redetecting by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     Sheet(visible = id != null, onDismiss = onDismiss) {
         val b = last[0] ?: return@Sheet
@@ -322,33 +321,28 @@ private fun BookInfoSheet(id: String?, onDismiss: () -> Unit) {
                 onDismiss()
                 Toast.show("已保存")
             }
-            if (b.format == "txt") {
-                Spacer(Modifier.height(4.dp))
-                GhostButton(if (busy) "正在识别…" else "重新识别章节", Ico.TOC, Modifier.align(Alignment.CenterHorizontally)) {
-                    if (!busy) redetecting = true
+            Spacer(Modifier.height(4.dp))
+            GhostButton(if (busy) "正在识别…" else "重新识别书籍", Ico.TOC, Modifier.align(Alignment.CenterHorizontally)) {
+                if (!busy) {
+                    busy = true
+                    scope.launch {
+                        val found = withContext(Dispatchers.IO) { Library.recognize(b.id) }
+                        busy = false
+                        if (found != null) {
+                            fun fill(field: TextFieldState, value: String) {
+                                field.edit { replace(0, length, value) }
+                            }
+                            fill(title, found.title)
+                            fill(author, found.author)
+                            fill(tags, found.tags.joinToString(" "))
+                            fill(intro, found.intro)
+                        }
+                        Toast.show(if (found == null) "识别失败" else "已识别书籍信息，共 ${found.chapterCount} 章")
+                    }
                 }
             }
         }
     }
-    val book = last[0]
-    ConfirmDialog(
-        visible = redetecting,
-        title = "重新识别章节？",
-        message = "按新的规则把《${book?.title.orEmpty()}》重新分章，读到的位置和书签会尽量保留",
-        confirm = "重新识别",
-        ico = Ico.TOC,
-        onConfirm = {
-            redetecting = false
-            val bid = book?.id ?: return@ConfirmDialog
-            busy = true
-            scope.launch {
-                val n = withContext(Dispatchers.IO) { Library.redetect(bid) }
-                busy = false
-                Toast.show(if (n < 0) "识别失败" else "识别出 $n 章")
-            }
-        },
-        onDismiss = { redetecting = false },
-    )
 }
 
 @Composable

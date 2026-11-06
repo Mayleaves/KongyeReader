@@ -307,7 +307,7 @@ private fun pageKey(ch: Int, page: Int): Long = (ch.toLong() shl 32) or page.toL
 private fun countIn(text: String, w: String): Int {
     var n = 0
     var i = text.indexOf(w)
-    while (i >= 0 && n < 60) {
+    while (i >= 0) {
         n++
         i = text.indexOf(w, i + w.length)
     }
@@ -345,6 +345,7 @@ private fun Reader(
     var menu by remember { mutableStateOf(false) }
     var panel by remember { mutableIntStateOf(0) }
     var toc by remember { mutableStateOf(false) }
+    var searching by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(false) }
     // 重新打开编辑页时光标放在这里（章节刚拆开或合并，阅读页这时还没排好版）
     var editAt by remember { mutableStateOf<Int?>(null) }
@@ -392,10 +393,10 @@ private fun Reader(
 
     // —— 沉浸式：菜单收起时隐藏状态栏和导航栏 ——
     val window = (context as Activity).window
-    DisposableEffect(menu, toc, editing, night) {
+    DisposableEffect(menu, toc, editing, searching, night) {
         val ctl = WindowCompat.getInsetsController(window, view)
         ctl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        if (menu || toc || editing) ctl.show(WindowInsetsCompat.Type.systemBars()) else ctl.hide(WindowInsetsCompat.Type.systemBars())
+        if (menu || toc || editing || searching) ctl.show(WindowInsetsCompat.Type.systemBars()) else ctl.hide(WindowInsetsCompat.Type.systemBars())
         ctl.isAppearanceLightStatusBars = !night
         ctl.isAppearanceLightNavigationBars = !night
         onDispose {}
@@ -571,7 +572,6 @@ private fun Reader(
 
         // —— 长按选字 ——
         fun longPress(p: Offset) {
-            if (menu) return
             val hit: Triple<ChapterPages, Int, Float> = if (scrollMode) {
                 val info = listState.layoutInfo.visibleItemsInfo.firstOrNull {
                     val top = geo.textTopPx + it.offset
@@ -599,6 +599,8 @@ private fun Reader(
             if (pos !in r.start until r.end) return
             val text = content.body(cp.index)
             if (text[pos].isWhitespace()) return
+            menu = false
+            panel = 0
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             tracker.touch()
             job[0]?.cancel()
@@ -778,6 +780,10 @@ private fun Reader(
                 menu = false
                 editing = true
             },
+            onSearch = {
+                menu = false
+                searching = true
+            },
             onBookmark = {
                 val r = state.currentRef()
                 val cp = state.current()
@@ -826,6 +832,18 @@ private fun Reader(
             )
         }
 
+        BackHandler(searching) { searching = false }
+        AnimatedVisibility(searching, enter = slideInVertically(tween(240)) { it / 6 } + fadeIn(), exit = fadeOut(tween(180))) {
+            SearchPage(
+                content = content,
+                onClose = { searching = false },
+                onJump = { ch, off ->
+                    state.jump(ch, off)
+                    searching = false
+                },
+            )
+        }
+
         BackHandler(finishedShown) { finishedShown = false }
         AnimatedVisibility(finishedShown, enter = fadeIn(), exit = fadeOut()) {
             FinishPage(live, tracker.active) { finishedShown = false }
@@ -848,7 +866,7 @@ private fun Reader(
                     }
                 }
             }
-            EditPage(
+            key(ch) { EditPage(
                 spec = spec,
                 textColor = paper.text,
                 textLeft = geo.marginPx,
@@ -883,7 +901,30 @@ private fun Reader(
                 onDemote = { t, b ->
                     restructure(if (ch == 0) "标题放回了正文" else "这一章并进了上一章") { Library.demoteTitle(book.id, ch, t, b) }
                 },
-            )
+                chapter = ch,
+                chapters = content.chapters.map { it.title },
+                // 换一章编辑：改过的先存，存好后整本重新载入，编辑页停在那一章开头；没改过直接换
+                onSwitch = { target, save ->
+                    if (save == null) {
+                        editAt = 0
+                        state.jump(target, 0)
+                    } else {
+                        saving = true
+                        scope.launch {
+                            val ok = withContext(Dispatchers.IO) { Library.saveChapter(book.id, ch, save.first, save.second, -1) }
+                            saving = false
+                            if (ok) {
+                                Profiles.count("edit")
+                                Library.update(book.id) { it.copy(chapter = target, offset = 0) }
+                                Toast.show("已保存")
+                                onEdited(true)
+                            } else {
+                                Toast.show("保存失败")
+                            }
+                        }
+                    }
+                },
+            ) }
         }
     }
 }

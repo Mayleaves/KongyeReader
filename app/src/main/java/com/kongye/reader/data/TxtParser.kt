@@ -67,16 +67,18 @@ object TxtParser {
     private const val CN = "零〇一二两三四五六七八九十百千"
 
     // 明确的标题：第X章、卷X、序章楔子尾声、Chapter N
-    private val chapterRe = Regex("^第\\s*([$NUMS]{1,9})\\s*[章节回卷集部篇幕话](?:[\\s　:：·、.．\\-—]*.{0,30})?$")
-    private val volumeRe = Regex("^卷\\s*[$NUMS]{1,5}(?:[\\s　:：·、\\-—]*.{0,30})?$")
-    private val specialRe = Regex("^(序章|序言|序|楔子|引子|引言|前言|后记|尾声|终章|番外|外传|完本感言|作者的话|写在前面)[$NUMS]{0,4}([\\s　：:·、\\-—].{0,30})?$")
-    private val englishRe = Regex("^(?:Chapter|CHAPTER|Part|PART)\\s*([0-9]{1,4}|[IVXLCivxlc]{1,8})\\b.{0,30}$")
-    private val englishSpecial = Regex("^(?:Prologue|PROLOGUE|Epilogue|EPILOGUE)\\b.{0,30}$")
+    private val chapterRe = Regex("^第\\s*([$NUMS]{1,9})\\s*[章节節回卷巻集部篇幕话話](?:[\\s　:：·、.．\\-—]*.{0,30})?$")
+    private val volumeRe = Regex("^[卷巻]\\s*[$NUMS]{1,5}(?:[\\s　:：·、\\-—]*.{0,30})?$")
+    private val specialRe = Regex("^(序章|序言|序|楔子|引子|引言|前言|后记|尾声|终章|番外|外传|完本感言|写在前面)[$NUMS]{0,4}([\\s　：:·、\\-—].{0,30})?$")
+    private val englishRe = Regex("^(?:Chapter|Part|Volume|Vol\\.?|Book)\\s*([0-9]{1,4}|[IVXLCDM]{1,8})\\b.{0,30}$", RegexOption.IGNORE_CASE)
+    private val englishSpecial = Regex("^(?:Prologue|Epilogue)\\b.{0,30}$", RegexOption.IGNORE_CASE)
+    private val koreanRe = Regex("^제\\s*([${NUMS}일이삼사오육칠팔구십백천만]{1,9})\\s*[장화권부편절](?:[\\s　:：·、.．\\-—]*.{0,30})?$")
 
     // 作者没写“第X章”时才看的几种写法
-    private val numDotRe = Regex("^(?:([0-9０-９]{1,4})[、.．:：]|([$CN]{1,6})[、.．:：]|[（(]([0-9０-９]{1,4}|[$CN]{1,6})[)）])(?![0-9０-９])\\s*(.{0,25})$")
+    private val numDotRe = Regex("^(?:第?\\s*([0-9０-９]{1,4})[、.．:：]|第?\\s*([$CN]{1,6})[、.．:：]|[（(]([0-9０-９]{1,4}|[$CN]{1,6})[)）])(?![0-9０-９])\\s*(.{0,25})$")
     private val numPlainRe = Regex("^([0-9０-９]{1,4})(?:[\\s　]+(.{1,25}))?$")
-    private val bracketRe = Regex("^[【〔\\[［「『](.{1,24})[】〕\\]］」』]$")
+    private val bracketRe = Regex("^(?:【(.{1,30})】|〔(.{1,30})〕|\\[(.{1,30})\\]|［(.{1,30})］|「(.{1,30})」|『(.{1,30})』|<(.{1,30})>|〈(.{1,30})〉|《(.{1,30})》)$")
+    private val symbolRe = Regex("^[☆★◆◇●○◎※■□▶▷✦✧]+[\\s　、:：.．·\\-—]*(.{1,30})$")
     private val ruler = Regex("^[=\\-*_~—·.。]{3,}$")
 
     private const val CH = 0
@@ -85,6 +87,7 @@ object TxtParser {
     private const val NUM_PLAIN = 3
     private const val BRACKET = 4
     private const val SHORT = 5
+    private const val SYMBOL = 6
 
     private class Kind(val kind: Int, val num: Int = -1)
 
@@ -176,7 +179,7 @@ object TxtParser {
                 val gaps = idx.zipWithNext { a, b -> pos[b] - pos[a] }
                 val minGap = when (kind) {
                     NUM, NUM_PLAIN -> 500
-                    BRACKET -> 800
+                    BRACKET, SYMBOL -> 800
                     else -> 1500
                 }
                 if (gaps.average() < minGap) return false
@@ -191,8 +194,8 @@ object TxtParser {
                 }
                 return true
             }
-            chosen = listOf(NUM, NUM_PLAIN).filter(::ok).maxByOrNull { k -> kinds.count { it?.kind == k } }
-                ?: listOf(BRACKET, SHORT).firstOrNull(::ok) ?: -1
+            chosen = listOf(NUM, NUM_PLAIN, BRACKET, SYMBOL, SHORT).filter(::ok)
+                .maxByOrNull { k -> kinds.count { it?.kind == k } } ?: -1
         }
         for (k in 0 until n) {
             val kd = kinds[k]?.kind ?: continue
@@ -207,8 +210,9 @@ object TxtParser {
         if (volumeRe.matches(line)) return Kind(CH)
         if (specialRe.matches(line) || englishSpecial.matches(line)) return Kind(SPECIAL)
         englishRe.matchEntire(line)?.let { return Kind(CH, number(it.groupValues[1])) }
+        koreanRe.matchEntire(line)?.let { return Kind(CH, number(it.groupValues[1])) }
         bracketRe.matchEntire(line)?.let { m ->
-            val inner = m.groupValues[1].trim()
+            val inner = m.groupValues.drop(1).first { it.isNotEmpty() }.trim()
             classify(inner, false)?.let { if (it.kind == CH || it.kind == SPECIAL) return it }
             return if (titleLike(inner, strict = false)) Kind(BRACKET) else null
         }
@@ -220,6 +224,15 @@ object TxtParser {
         numPlainRe.matchEntire(line)?.let { m ->
             val rest = m.groupValues[2].trim()
             return if (rest.isEmpty() || titleLike(rest, strict = false)) Kind(NUM_PLAIN, number(m.groupValues[1])) else null
+        }
+        symbolRe.matchEntire(line)?.let { m ->
+            val inner = m.groupValues[1].trim()
+            // Strip decorations before checking explicit chapter numbering.
+            // A plain bullet still needs the density checks used for bracket titles.
+            if (inner.isNotEmpty() && inner.first() !in "☆★◆◇●○◎※■□▶▷✦✧") {
+                classify(inner, false)?.let { if (it.kind in listOf(CH, SPECIAL, NUM, NUM_PLAIN)) return it }
+            }
+            return if (titleLike(inner, strict = true)) Kind(SYMBOL) else null
         }
         if (alone && line.length in 2..16 && titleLike(line, strict = true)) return Kind(SHORT)
         return null
@@ -237,9 +250,15 @@ object TxtParser {
     /** 阿拉伯、全角、中文、罗马数字都认；认不出返回 -1 */
     fun number(s: String): Int {
         if (s.isEmpty()) return -1
-        val ascii = buildString { for (c in s) append(if (c in '０'..'９') '0' + (c - '０') else c) }
+        val korean = "영일이삼사오육칠팔구십백천만"
+        val chinese = "零一二三四五六七八九十百千万"
+        val ascii = buildString { for (c in s) append(when {
+            c in '０'..'９' -> '0' + (c - '０')
+            c in korean -> chinese[korean.indexOf(c)]
+            else -> c
+        }) }
         ascii.toIntOrNull()?.let { return it }
-        val roman = mapOf('I' to 1, 'V' to 5, 'X' to 10, 'L' to 50, 'C' to 100)
+        val roman = mapOf('I' to 1, 'V' to 5, 'X' to 10, 'L' to 50, 'C' to 100, 'D' to 500, 'M' to 1000)
         if (ascii.uppercase().all { it in roman }) {
             val v = ascii.uppercase().map { roman[it]!! }
             return v.indices.sumOf { k -> if (k + 1 < v.size && v[k] < v[k + 1]) -v[k] else v[k] }
@@ -250,11 +269,11 @@ object TxtParser {
             '八' to 8, '捌' to 8, '九' to 9, '玖' to 9,
         )
         val unit = mapOf('十' to 10, '拾' to 10, '百' to 100, '佰' to 100, '千' to 1000, '仟' to 1000)
-        if (s.length > 1 && s.all { it in digit }) return s.fold(0) { acc, c -> acc * 10 + digit[c]!! }
+        if (ascii.length > 1 && ascii.all { it in digit }) return ascii.fold(0) { acc, c -> acc * 10 + digit[c]!! }
         var total = 0
         var section = 0
         var cur = 0
-        for (c in s) {
+        for (c in ascii) {
             when (c) {
                 in digit -> cur = digit[c]!!
                 in unit -> {
@@ -272,9 +291,20 @@ object TxtParser {
         return total + section + cur
     }
 
-    private val metaLine = Regex("^([【\\[]?)(作\\s*者|简\\s*介|内容简介|作品简介|内容介绍|文案|标\\s*签|类\\s*型|分\\s*类|题\\s*材|Tags?|TAGS?)([】\\]]?)\\s*([:：]?)\\s*(.*)$")
+    private val metaLine = Regex("^([【\\[]?)(作\\s*者|简\\s*介|内容简介|作品简介|内容介绍|文案|内容标签|作品标签|文章标签|标\\s*签|类\\s*型|分\\s*类|题\\s*材|Tags?|TAGS?)([】\\]]?)\\s*([:：]?)\\s*(.*)$")
     private val introKeys = setOf("简介", "内容简介", "作品简介", "内容介绍", "文案")
-    private val tagKeys = setOf("标签", "类型", "分类", "题材", "Tag", "Tags", "TAG", "TAGS")
+    private val tagKeys = setOf("标签", "内容标签", "作品标签", "文章标签", "类型", "分类", "题材", "Tag", "Tags", "TAG", "TAGS")
+
+    /** 一行里任何位置的“标签：”（比如“类型：言情 标签：娱乐圈 甜文”），值到下一个“xx：”或行尾 */
+    private val tagAnywhere = Regex("(?:内容标签|作品标签|文章标签|标签|类型|分类|题材|Tags?|TAGS?)[】\\]]?\\s*[:：]\\s*([^:：]*?)(?=\\s*[\\s┃|｜]\\s*[\\p{IsHan}A-Za-z]{1,6}\\s*[:：]|$)")
+    private val hashLine = Regex("^(?:#[^#\\s]{1,12}[\\s　]*){2,}$")
+    private val tagSplit = Regex("[\\s　,，、/|｜；;#┃·]+")
+
+    private fun addTags(value: String, tags: MutableSet<String>) {
+        value.split(tagSplit).map { it.trim('【', '】', '[', ']', '（', '）', '(', ')') }
+            .filter { it.length in 1..12 && ':' !in it && '：' !in it }
+            .forEach { tags += it }
+    }
 
     /**
      * 从开头（第一章之前）找“作者：”“简介：”“标签：”。简介可以有好几段，
@@ -298,11 +328,25 @@ object TxtParser {
             if (k > 0 && (chapterRe.matches(line) || volumeRe.matches(line))) break
             val kv = keyOf(line)
             k++
-            if (kv == null) continue
+            if (kv == null) {
+                // “作者：xx 标签：yy”这样标签不在行首，或者一行 #话题 标签
+                if (hashLine.matches(line)) addTags(line, tags)
+                else tagAnywhere.findAll(line).forEach { addTags(it.groupValues[1], tags) }
+                continue
+            }
             val (key, value) = kv
             when (key) {
-                "作者" -> if (author.isEmpty()) author = value.take(30)
-                in tagKeys -> value.split(Regex("[\\s,，、/|；;#]+")).filter { it.length in 1..12 }.forEach { tags += it }
+                "作者" -> {
+                    // “作者：xx 标签：yy”：作者只取到下一个“xx：”之前，后面的标签照收
+                    if (author.isEmpty()) author = value.split(Regex("[\\s┃|｜]+(?=[\\p{IsHan}A-Za-z]{1,6}\\s*[:：])")).first().take(30)
+                    tagAnywhere.findAll(line).forEach { addTags(it.groupValues[1], tags) }
+                }
+                in tagKeys -> {
+                    // 同一行后面可能还跟着别的“xx：”，只取到那里；冒号后面空着就看下一行
+                    val v = tagAnywhere.find(line)?.groupValues?.get(1)?.takeIf { it.isNotBlank() } ?: value
+                    if (v.isNotBlank()) addTags(v, tags)
+                    else lines.drop(k).firstOrNull { it.isNotEmpty() }?.takeIf { keyOf(it) == null }?.let { addTags(it, tags) }
+                }
                 in introKeys -> if (intro.isEmpty()) {
                     if (value.isNotEmpty()) intro += value
                     var blanks = 0
@@ -327,14 +371,16 @@ object TxtParser {
     private val synthetic = Regex("^(开篇|正文|第 \\d+ 节)$")
 
     /** 已经导入的书重新分章：把原来的标题放回正文再认一遍（自动起的“开篇”“第 N 节”不放） */
-    fun reparse(old: BookContent): Parsed {
+    fun restoreTitles(old: BookContent): String {
         val sb = StringBuilder(old.text.length + old.chapters.size * 24)
         for (c in old.chapters) {
             if (!synthetic.matches(c.title)) sb.append(c.title).append("\n\n")
             sb.append(old.text, c.start, c.end).append("\n\n")
         }
-        return parse(sb.toString())
+        return sb.toString()
     }
+
+    fun reparse(old: BookContent): Parsed = parse(restoreTitles(old))
 
     /** 没识别出章节时，按段落把全文切成大约一万字一节，方便跳转 */
     private fun splitEven(content: String): ArrayList<Chapter> {
@@ -361,12 +407,17 @@ object TxtParser {
     /** 从文件名和开头几行猜书名、作者 */
     fun guessTitle(fileName: String, text: String): Pair<String, String> {
         val base = fileName.substringBeforeLast('.').trim()
-        val title = Regex("《(.+?)》").find(base)?.groupValues?.get(1)
+        val headLines = text.take(2000).lineSequence().map { it.trim { c -> isSpace(c) } }.filter { it.isNotEmpty() }.take(8).toList()
+        val explicit = headLines.firstNotNullOfOrNull { Regex("^(?:书名|書名|作品名|名称)\\s*[:：]\\s*(.{1,80})$").matchEntire(it)?.groupValues?.get(1)?.trim('《', '》') }
+        val coverTitle = headLines.firstOrNull()?.takeIf { line ->
+            line.length in 1..40 && !line.contains(Regex("[：:。！？!?]")) &&
+                headLines.drop(1).take(2).any { it.startsWith("作者") } &&
+                !chapterRe.matches(line)
+        }?.trim('《', '》')
+        val title = explicit ?: coverTitle ?: Regex("《(.+?)》").find(base)?.groupValues?.get(1)
             ?: base.substringBefore("作者").trim().trimEnd('_', '-', ' ', '(', '（').ifEmpty { base }
-        var author = Regex("作者[:：\\s]*([^\\s_\\-()（）.]+)").find(base)?.groupValues?.get(1).orEmpty()
-        if (author.isEmpty()) {
-            val head = text.take(2000)
-            author = Regex("作者[:：]\\s*([^\\s\\n]{1,20})").find(head)?.groupValues?.get(1).orEmpty()
+        val author = meta(text).author.ifEmpty {
+            Regex("作者[:：\\s]*([^\\s_\\-()（）.]+)").find(base)?.groupValues?.get(1).orEmpty()
         }
         return title.ifEmpty { "未命名" } to author
     }

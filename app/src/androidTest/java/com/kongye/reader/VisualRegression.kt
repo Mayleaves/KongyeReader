@@ -43,6 +43,7 @@ class VisualRegression : Instrumentation() {
     private var gazeOnly = false
     private var controlsOnly = false
     private var loafOnly = false
+    private var readerUpdateOnly = false
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
@@ -50,12 +51,18 @@ class VisualRegression : Instrumentation() {
         gazeOnly = arguments?.getString("check") == "gaze-distance"
         controlsOnly = arguments?.getString("check") == "home-controls"
         loafOnly = arguments?.getString("check") == "loaf"
+        readerUpdateOnly = arguments?.getString("check") == "reader-update"
         start()
     }
 
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (readerUpdateOnly) {
+                ReaderUpdateChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: TXT rules; character selection; book recognition; shop category/scroll restoration; achievement preview back; long press with reader bars; dress and settings") })
+                return
+            }
             if (loafOnly) {
                 checkLoaf()
                 finish(0, Bundle().apply { putString("result", "PASS: supplied loaf artwork renders in both themes, full tail stays in bounds throughout breathing; empty shelf/stats/timeline captured") })

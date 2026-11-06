@@ -213,7 +213,8 @@ for k in order:
     if f is None:
         continue
     cols = ', '.join(f'Color(0xFF{f[n][1:].upper()})' for n in ('pri', 'sec', 'acc', 'plate', 'sub', 'paper', 'card', 'lockProg'))
-    factions.append(f'    BadgeStyle({json.dumps(k)}, {json.dumps(spaced(f["name"]), ensure_ascii=False)}, {json.dumps(f["code"])}, {cols}),')
+    label = {'nightcity': '夜之城', 'ncpd': 'NCPD'}.get(k, spaced(f['name']))
+    factions.append(f'    BadgeStyle({json.dumps(k)}, {json.dumps(label, ensure_ascii=False)}, {json.dumps(f["code"])}, {cols}),')
 
 kt = f'''// 生成：tools/import_achievements.py（来自成就设计 HTML 的 renderCenterGraphic 和 FACTIONS）
 package com.kongye.reader.ui.components

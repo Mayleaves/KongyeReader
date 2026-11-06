@@ -205,6 +205,43 @@ object Library {
         p.chapters.size
     }.getOrDefault(-1)
 
+    /** 重新识别现有正文和原始文件信息；正文编辑、进度、书签均继续保留。 */
+    fun recognize(id: String): Book? = runCatching {
+        val book = get(id) ?: return null
+        val old = loadContent(id) ?: return null
+        val original = runCatching {
+            Store.json.decodeFromString(Book.serializer(), File(dir(id), "recognized.json").readText())
+        }.getOrNull()
+        var title: String
+        var author: String
+        var intro: String
+        var tags: List<String>
+        if (book.format == "txt") {
+            val name = book.sourceName.ifBlank { original?.sourceName.orEmpty() }.ifBlank { "${book.title}.txt" }
+            val text = TxtParser.restoreTitles(old)
+            val guessed = TxtParser.guessTitle(name, text)
+            val meta = TxtParser.meta(text)
+            title = guessed.first
+            author = guessed.second
+            intro = meta.intro
+            tags = meta.tags
+            if (redetect(id) < 0) return null
+        } else {
+            // EPUB 的目录来自导航文档，不能把其正文再按 TXT 规则切章。
+            val source = File(dir(id), "source.epub")
+            val ep = if (source.exists()) Epub.parse(source) else null
+            title = ep?.title.orEmpty()
+            author = ep?.author.orEmpty()
+            intro = ep?.intro.orEmpty()
+            tags = ep?.tags.orEmpty()
+        }
+        updateInfo(id, title.ifBlank { original?.title ?: book.title },
+            author.ifBlank { original?.author ?: book.author },
+            intro.ifBlank { original?.intro ?: book.intro },
+            tags.ifEmpty { original?.tags ?: book.tags })
+        get(id)
+    }.getOrNull()
+
     /**
      * 把从 from 开始的 count 章换成 parts（标题, 正文），后面各章整体平移。
      * 阅读位置和书签：落在被换掉的章里的交给 move 换算，之后的章号跟着增减；at 给了就用它当新的阅读位置

@@ -1,5 +1,12 @@
 package com.kongye.reader.ui.reader
 
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.kongye.reader.ui.components.Icon
+import com.kongye.reader.ui.components.Sheet
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.LazyColumn
 import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -115,6 +122,11 @@ fun EditPage(
     onSave: (title: String, body: String, cursor: Int) -> Unit,
     onPromote: (title: String, body: String, paraStart: Int, paraEnd: Int) -> Unit,
     onDemote: (title: String, body: String) -> Unit,
+    /** 这一章是第几章、全书的章名；点左上角章名可以换一章编辑 */
+    chapter: Int = 0,
+    chapters: List<String> = emptyList(),
+    /** 换到 target 章：save 不为空就是先把这一章存下（标题, 正文） */
+    onSwitch: (target: Int, save: Pair<String, String>?) -> Unit = { _, _ -> },
 ) {
     val c = K.c
     val density = LocalDensity.current
@@ -123,6 +135,9 @@ fun EditPage(
     val query = rememberTextFieldState()
     val replacement = rememberTextFieldState()
     var confirm by remember { mutableStateOf(false) }
+    var picking by remember { mutableStateOf(false) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    var switchTo by remember { mutableStateOf<Int?>(null) }
     var finding by remember { mutableStateOf(false) }
     // 设为标题的那一段太长时先问一句
     var longPara by remember { mutableStateOf(false) }
@@ -315,14 +330,23 @@ fun EditPage(
             ) {
                 Row(
                     Modifier
+                        .press(scaleTo = 0.95f, enabled = !saving && chapters.size > 1) {
+                            // 先收起键盘，章节列表才不会被挡住
+                            keyboard?.hide()
+                            picking = true
+                        }
                         .background(c.chip, SmoothShape(12.dp))
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                        .padding(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     T(doc.title.text.toString().ifBlank { "无标题" }, 13.sp, c.ink, FontWeight.Medium, Modifier.weight(1f, fill = false), maxLines = 1)
                     if (changed) {
                         Spacer(Modifier.width(7.dp))
                         Box(Modifier.size(7.dp).background(c.accent, CircleShape))
+                    }
+                    if (chapters.size > 1) {
+                        Spacer(Modifier.width(2.dp))
+                        Icon(Ico.CHEVRON_DOWN, size = 14.dp, color = c.text2)
                     }
                 }
             }
@@ -434,6 +458,24 @@ fun EditPage(
             onClose()
         },
         onDismiss = { confirm = false },
+    )
+    ChapterPicker(picking, chapters, chapter, onDismiss = { picking = false }) { target ->
+        picking = false
+        if (target == chapter) return@ChapterPicker
+        if (changed) switchTo = target else onSwitch(target, null)
+    }
+    ConfirmDialog(
+        visible = switchTo != null,
+        title = "先保存这一章？",
+        message = "这一章改过还没保存，保存后再换到「${switchTo?.let { chapters.getOrNull(it) } ?: ""}」",
+        confirm = "保存并切换",
+        ico = Ico.EDIT,
+        onConfirm = {
+            val t = switchTo
+            switchTo = null
+            if (t != null) onSwitch(t, doc.title.text.toString() to doc.joined())
+        },
+        onDismiss = { switchTo = null },
     )
     ConfirmDialog(
         visible = longPara,
@@ -818,5 +860,34 @@ private fun StatusBar(doc: EditDoc, changed: Boolean) {
         T("共 $total 字", 11.sp, c.text2, maxLines = 1)
         Spacer(Modifier.width(14.dp))
         T(if (changed) "已修改" else "未修改", 11.sp, if (changed) c.accent else c.text3, FontWeight.Medium, maxLines = 1)
+    }
+}
+
+/** 换章：从底下升起的章节列表，当前章打点，打开时滚到当前章附近 */
+@Composable
+private fun ChapterPicker(visible: Boolean, chapters: List<String>, current: Int, onDismiss: () -> Unit, onPick: (Int) -> Unit) {
+    val c = K.c
+    Sheet(visible = visible, onDismiss = onDismiss) {
+        T("换一章编辑", 17.sp, c.ink, FontWeight.Bold, Modifier.padding(start = 4.dp, bottom = 10.dp))
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = (current - 3).coerceAtLeast(0))
+        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 420.dp), state = listState) {
+            itemsIndexed(chapters) { i, title ->
+                val cur = i == current
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .press(scaleTo = 0.98f) { onPick(i) }
+                        .background(if (cur) c.chip else Color.Transparent, SmoothShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (cur) {
+                        Box(Modifier.size(7.dp).background(c.accent, CircleShape))
+                        Spacer(Modifier.width(10.dp))
+                    }
+                    T(title.ifBlank { "无标题" }, 15.sp, c.ink, if (cur) FontWeight.Bold else FontWeight.Normal, Modifier.weight(1f), maxLines = 1)
+                }
+            }
+        }
     }
 }

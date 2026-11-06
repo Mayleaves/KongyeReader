@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -27,6 +29,8 @@ import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -87,21 +93,23 @@ fun DressScreen() {
         }
         Segmented(tabs, tab, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Nav.dressTab = it }
         Spacer(Modifier.height(16.dp))
-        Column(
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .imePadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp),
-        ) {
-            when (tab) {
-                0 -> HomeTab(profile, animals)
-                1 -> GardenTab(profile, animals)
-                2 -> OutfitTab(profile, animals)
-                else -> IconTab(profile)
+        key(tab) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp),
+            ) {
+                when (tab) {
+                    0 -> HomeTab(profile, animals)
+                    1 -> GardenTab(profile, animals)
+                    2 -> OutfitTab(profile, animals)
+                    else -> IconTab(profile)
+                }
+                Spacer(Modifier.height(36.dp))
             }
-            Spacer(Modifier.height(36.dp))
         }
     }
 }
@@ -125,24 +133,20 @@ private fun GardenTab(profile: Profile, animals: List<ShopAnimal>) {
     val c = K.c
     Group("背景") {
         Pad {
-            val bgs = Shop.catalog.backgrounds
+            val bgs = Shop.catalog.backgrounds.filter { profile.has(it.id) }
             Grid(bgs, cols = 3, collapsedRows = 2, selected = { it.id == profile.gardenBg }) { b, m ->
-                val has = profile.has(b.id)
                 Pick(
                     on = profile.gardenBg == b.id,
-                    label = if (has) b.name else if (b.lock != null) "${b.name} · 成就" else "${b.name} · ${b.price}叶",
-                    locked = !has,
-                    modifier = m,
+                    label = b.name,
+                    modifier = m.semantics { contentDescription = "猫园背景：${b.name}" },
                     ratio = 0.68f,
                     onClick = {
-                        if (has) Profiles.update { it.copy(gardenBg = b.id) } else Nav.push(Screen.GardenPreview(b.id))
+                        Profiles.update { it.copy(gardenBg = b.id) }
                     },
                 ) {
                     Image(painterResource(Shop.drawable(b.res)), b.name, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
                 }
             }
-            Spacer(Modifier.height(4.dp))
-            T("灰色的还没换到，点一下可以在猫园里试看", 12.sp, c.text3)
         }
     }
     Spacer(Modifier.height(20.dp))
@@ -273,17 +277,24 @@ private fun IconTab(profile: Profile) {
     val c = K.c
     Group("桌面图标") {
         Pad {
-            Grid(Shop.catalog.icons, cols = 3, collapsedRows = 9) { i, m ->
-                val has = profile.has("icon_${i.id}")
+            val icons = Shop.catalog.icons.filter { profile.has("icon_${it.id}") }
+            val focus = Nav.dressItem?.removePrefix("icon_")
+            Grid(icons, cols = 3, collapsedRows = 9, selected = { it.id == focus || it.id == profile.icon }) { i, m ->
+                val requester = remember(i.id) { BringIntoViewRequester() }
+                LaunchedEffect(Nav.dressRequest, focus) {
+                    if (i.id == focus) {
+                        androidx.compose.runtime.withFrameNanos { }
+                        requester.bringIntoView()
+                    }
+                }
                 Pick(
                     on = profile.icon == i.id,
-                    label = if (has) i.name else if (i.lock != null) "${i.name} · 成就" else "${i.name} · ${i.price}叶",
-                    locked = !has,
-                    modifier = m,
+                    label = i.name,
+                    modifier = m.bringIntoViewRequester(requester)
+                        .then(if (i.id == focus) Modifier.border(1.5.dp, c.accent, SmoothShape(16.dp)) else Modifier)
+                        .semantics { contentDescription = "桌面图标：${i.name}" },
                     onClick = {
-                        if (!has) {
-                            Toast.show("在商城里换到才能用")
-                        } else if (profile.icon != i.id) {
+                        if (profile.icon != i.id) {
                             Profiles.update { it.copy(icon = i.id) }
                             Toast.show("离开空叶阅读后，桌面图标就会换好")
                         }

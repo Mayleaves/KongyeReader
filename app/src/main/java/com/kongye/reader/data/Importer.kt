@@ -103,7 +103,10 @@ object Importer {
             val id = newId()
             val dir = Library.dir(id).apply { mkdirs() }
             try {
-                val book = if (zip) importEpub(tmp, dir, id, name, fp) else importTxt(tmp, dir, id, name, fp)
+                val book = (if (zip) importEpub(tmp, dir, id, name, fp) else importTxt(tmp, dir, id, name, fp))
+                    .copy(sourceName = name)
+                File(dir, "recognized.json").writeText(Store.json.encodeToString(Book.serializer(), book))
+                if (zip) tmp.copyTo(File(dir, "source.epub"), overwrite = true)
                 Library.add(book)
                 return book to false
             } catch (e: Throwable) {

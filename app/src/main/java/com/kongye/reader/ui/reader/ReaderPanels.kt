@@ -1,5 +1,18 @@
 package com.kongye.reader.ui.reader
 
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.foundation.layout.imePadding
+import kotlinx.coroutines.delay
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -104,6 +117,7 @@ fun ReaderMenu(
     night: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onSearch: () -> Unit,
     onBookmark: () -> Unit,
     onJumpChapter: (Int) -> Unit,
     onToc: () -> Unit,
@@ -133,6 +147,7 @@ fun ReaderMenu(
             ) {
                 IconBtn(Ico.BACK, onClick = onBack)
                 T(title, 16.sp, c.ink, FontWeight.SemiBold, Modifier.weight(1f), maxLines = 1)
+                IconBtn(Ico.SEARCH, onClick = onSearch)
                 IconBtn(Ico.EDIT, onClick = onEdit)
                 IconBtn(if (marked) Ico.BOOKMARK_ON else Ico.BOOKMARK, color = if (marked) c.accent else c.ink, onClick = onBookmark)
             }
@@ -500,6 +515,7 @@ private fun MorePanel(onBack: () -> Unit) {
     Column {
         PanelHeader("阅读设置", onBack)
         Column {
+            SwitchRow("启动时继续上次阅读", s.resumeLast, "打开应用直接回到上次读的那一页") { v -> Settings.update { it.copy(resumeLast = v) } }
             SwitchRow("音量键翻页", s.volumeKeys) { v -> Settings.update { it.copy(volumeKeys = v) } }
             SwitchRow("屏幕常亮", s.keepScreenOn) { v -> Settings.update { it.copy(keepScreenOn = v) } }
             SwitchRow("点左边也翻下一页", s.tapLeftNext, "单手拿手机时更顺手") { v -> Settings.update { it.copy(tapLeftNext = v) } }
@@ -589,6 +605,111 @@ fun TocPage(book: Book, content: BookContent, current: Int, onClose: () -> Unit,
                         }
                         IconBtn(Ico.CLOSE, size = 16.dp, color = c.text3) {
                             Library.update(book.id) { b -> b.copy(bookmarks = b.bookmarks.filterNot { it.createdAt == bm.createdAt }) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 全书搜索的一条结果：第几章、章内位置、前后几个字 */
+private class Hit(val chapter: Int, val offset: Int, val before: String, val word: String, val after: String)
+
+/** 全书搜索：输入关键字，列出每一处（最多 500 处），点一下跳过去 */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SearchPage(content: BookContent, onClose: () -> Unit, onJump: (Int, Int) -> Unit) {
+    val c = K.c
+    val navPad = WindowInsets.navigationBarsIgnoringVisibility.asPaddingValues().calculateBottomPadding()
+    val query = rememberTextFieldState()
+    val focus = remember { FocusRequester() }
+    var hits by remember { mutableStateOf<List<Hit>?>(null) }
+    var more by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+    LaunchedEffect(query.text) {
+        val q = query.text.toString().trim()
+        if (q.isEmpty()) {
+            hits = null
+            return@LaunchedEffect
+        }
+        delay(250)
+        val found = withContext(Dispatchers.Default) {
+            val out = ArrayList<Hit>()
+            for ((i, ch) in content.chapters.withIndex()) {
+                val body = content.text.substring(ch.start, ch.end)
+                var at = body.indexOf(q, ignoreCase = true)
+                while (at >= 0 && out.size <= 500) {
+                    val from = (at - 14).coerceAtLeast(0)
+                    val to = (at + q.length + 26).coerceAtMost(body.length)
+                    out += Hit(i, at, body.substring(from, at).replace('\n', ' ').trimStart(), body.substring(at, at + q.length),
+                        body.substring(at + q.length, to).replace('\n', ' '))
+                    at = body.indexOf(q, at + q.length, ignoreCase = true)
+                }
+                if (out.size > 500) break
+            }
+            out
+        }
+        more = found.size > 500
+        hits = found.take(500)
+    }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(c.bg)
+            .blockTouches()
+            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
+            .imePadding(),
+    ) {
+        Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 6.dp, end = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconBtn(Ico.CLOSE, onClick = onClose)
+            Row(
+                Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .background(c.chip, SmoothShape(14.dp))
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Ico.SEARCH, size = 18.dp, color = c.text2)
+                Spacer(Modifier.width(8.dp))
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    if (query.text.isEmpty()) T("搜索全书", 15.sp, c.text3)
+                    BasicTextField(
+                        query,
+                        Modifier.fillMaxWidth().focusRequester(focus),
+                        textStyle = TextStyle(color = c.ink, fontSize = 15.sp),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        cursorBrush = SolidColor(c.accent),
+                    )
+                }
+                if (query.text.isNotEmpty()) IconBtn(Ico.CLOSE, size = 16.dp, color = c.text2) { query.clearText() }
+            }
+        }
+        val list = hits
+        when {
+            list == null -> T("输入书里的字词，找出每一处", 13.sp, c.text3, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
+            list.isEmpty() -> T("没有找到", 13.sp, c.text3, modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
+            else -> {
+                T(if (more) "找到 500 多处，只列前 500 处" else "找到 ${list.size} 处", 12.sp, c.text3, modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp))
+                LazyColumn(contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = navPad + 20.dp)) {
+                    items(list) { h ->
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .press(scaleTo = 0.98f) { onJump(h.chapter, h.offset) }
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                        ) {
+                            T(content.chapters[h.chapter].title, 12.sp, c.text3, maxLines = 1)
+                            Spacer(Modifier.height(3.dp))
+                            T(
+                                buildAnnotatedString {
+                                    append(h.before)
+                                    withStyle(SpanStyle(color = c.accent, fontWeight = FontWeight.Bold)) { append(h.word) }
+                                    append(h.after)
+                                },
+                                15.sp, c.ink, maxLines = 2,
+                            )
                         }
                     }
                 }
