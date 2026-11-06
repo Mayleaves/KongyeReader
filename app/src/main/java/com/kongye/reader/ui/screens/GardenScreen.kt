@@ -1,6 +1,20 @@
 package com.kongye.reader.ui.screens
 
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
+import androidx.compose.foundation.gestures.drag
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.zIndex
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -128,11 +142,11 @@ fun GardenScreen(preview: String? = null) {
         ) {
             val spots = remember(week, maxWidth, maxHeight) { placeSpots(week, maxWidth.value, maxHeight.value, monday.toEpochDay()) }
             week.forEachIndexed { i, s ->
-                val who = cast[i % cast.size]
-                if (who == Shop.MASCOT || who == Shop.MINCAT || who == Shop.GOLDCAT) {
-                    GardenCat(s, spots[i], picked == i, minimal = who == Shop.MINCAT, gold = who == Shop.GOLDCAT) { picked = if (picked == i) null else i }
-                }
-                else GardenCreature(who, s, spots[i], picked == i) { picked = if (picked == i) null else i }
+                GardenAnimal(
+                    cast[i % cast.size], s, spots[i], maxWidth.value, maxHeight.value, picked == i,
+                    onTap = { picked = if (picked == i) null else i },
+                    onLift = { picked = null },
+                )
             }
             if (week.isEmpty()) {
                 T(
@@ -191,75 +205,118 @@ fun GardenScreen(preview: String? = null) {
     }
 }
 
+/**
+ * 猫园里的一只：点一下看是哪次阅读；长按提起来（变大、离地，地上留一块影子），拖到别处松手放下。
+ * 挪过的位置按那次阅读记在 Profile.gardenSpots（占院子宽、高的比例），下次进来还在那儿
+ */
 @Composable
-private fun GardenCat(s: Session, spot: Spot, selected: Boolean, minimal: Boolean = false, gold: Boolean = false, onClick: () -> Unit) {
+private fun GardenAnimal(
+    who: String,
+    s: Session,
+    spot: Spot,
+    w: Float,
+    h: Float,
+    selected: Boolean,
+    onTap: () -> Unit,
+    onLift: () -> Unit,
+) {
     val c = K.c
-    val color = when {
-        s.finished -> c.accent
-        s.millis >= 90 * 60_000 -> Color(0xFFF2A541)
-        s.millis >= 45 * 60_000 -> Color(0xFF8E8E93)
-        else -> c.ink
-    }
-    val colored = color != c.ink
+    val profile by Profiles.state.collectAsState()
+    val key = s.start.toString()
+    fun clamp(x: Float, y: Float) = Offset(x.coerceIn(0f, max(0f, w - spot.size)), y.coerceIn(0f, max(0f, h - spot.size)))
+    val saved = profile.gardenSpots[key]
+    val home = if (saved != null && saved.size == 2) clamp(saved[0] * w, saved[1] * h) else Offset(spot.x, spot.y)
+    val homeNow by rememberUpdatedState(home)
+    val onTapNow by rememberUpdatedState(onTap)
+    val onLiftNow by rememberUpdatedState(onLift)
+    // 提在手里时的位置（dp）；放下后清掉，回到 home（已经存好的新位置）
+    var held by remember(key) { mutableStateOf<Offset?>(null) }
+    var pressed by remember { mutableStateOf(false) }
+    val lift by animateFloatAsState(if (held != null) 1f else 0f, spring(dampingRatio = 0.55f, stiffness = 600f), label = "lift")
+    val squeeze by animateFloatAsState(if (pressed) 0.9f else 1f, spring(stiffness = 900f), label = "press")
     val bob by rememberInfiniteTransition(label = "bob").animateFloat(
         0f, 1f, infiniteRepeatable(tween(1300 + spot.phase), RepeatMode.Reverse), label = "bob",
     )
-    Box(Modifier.offset(spot.x.dp, spot.y.dp)) {
-        CatMascot(
-            Modifier
-                .graphicsLayer { translationY = -bob * 3.dp.toPx() }
-                .press(scaleTo = 0.9f, onClick = onClick),
-            size = spot.size.dp,
-            color = color,
-            eye = if (colored) Color.White else c.eye,
-            detail = if (colored) lerp(color, Color.Black, 0.25f) else null,
-            flip = spot.flip,
-            pose = if (spot.loaf) CatPose.LOAF else CatPose.SIT,
-            sleep = spot.loaf,
-            blink = !spot.loaf,
-            minimal = minimal,
-            gold = gold,
-        )
-        if (selected) {
-            Column(
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-46).dp)
-                    .wrapContentSize(unbounded = true)
-                    .widthIn(max = 180.dp)
-                    .background(c.ink, SmoothShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                T(s.title, 12.sp, c.onInk, FontWeight.Bold, maxLines = 1)
-                T("${Fmt.weekday(Stats.date(s.start))} · ${Fmt.cn(s.millis)}", 11.sp, c.onInk.copy(alpha = 0.75f))
+    val haptic = LocalHapticFeedback.current
+    val gesture = Modifier.pointerInput(key, w, h) {
+        awaitEachGesture {
+            val down = awaitFirstDown()
+            pressed = true
+            val longPress = awaitLongPressOrCancellation(down.id)
+            pressed = false
+            if (longPress == null) {
+                // 没按够就松手：当作点一下（滑出去再松手不算）
+                if (currentEvent.changes.any { it.id == down.id && it.changedToUp() }) onTapNow()
+                return@awaitEachGesture
             }
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            onLiftNow()
+            var p = homeNow
+            held = p
+            longPress.consume()
+            drag(longPress.id) { change ->
+                val d = change.positionChange()
+                p = clamp(p.x + d.x / density, p.y + d.y / density)
+                held = p
+                change.consume()
+            }
+            Profiles.update { it.copy(gardenSpots = it.gardenSpots + (key to listOf(p.x / w, p.y / h))) }
+            held = null
         }
     }
-}
-
-@Composable
-private fun GardenCreature(id: String, s: Session, spot: Spot, selected: Boolean, onClick: () -> Unit) {
-    val c = K.c
-    val bob by rememberInfiniteTransition(label = "bob").animateFloat(
-        0f, 1f, infiniteRepeatable(tween(1300 + spot.phase), RepeatMode.Reverse), label = "bob",
-    )
-    // 动物的 SVG 四周留白比猫多，画大一点看起来才一样大
-    val size = spot.size * 1.3f
-    Box(Modifier.offset((spot.x - (size - spot.size) / 2).dp, (spot.y - (size - spot.size)).dp)) {
-        Creature(
-            id,
-            Modifier
-                .graphicsLayer { translationY = -bob * 3.dp.toPx() }
-                .press(scaleTo = 0.9f, onClick = onClick),
-            size = size.dp,
-            flip = spot.flip,
-        )
+    val pos = held ?: home
+    val cat = who == Shop.MASCOT || who == Shop.MINCAT || who == Shop.GOLDCAT
+    // 动物的 SVG 四周留白比猫多，画大一点看起来才一样大；脚落在格子里的高度也不一样
+    val size = if (cat) spot.size else spot.size * 1.3f
+    val feet = if (cat) 0.9f else 0.86f
+    Box(Modifier.offset((pos.x - (size - spot.size) / 2).dp, (pos.y - (size - spot.size)).dp).zIndex(if (held != null) 1f else 0f)) {
+        Box(Modifier.size(size.dp).then(gesture)) {
+            // 提起来以后地上的影子
+            if (lift > 0.01f) Canvas(Modifier.matchParentSize()) {
+                val sw = this.size.width * 0.5f * (1f - 0.15f * lift)
+                val sh = this.size.width * 0.09f
+                drawOval(
+                    Color.Black.copy(alpha = (if (c.dark) 0.35f else 0.14f) * lift.coerceIn(0f, 1f)),
+                    Offset((this.size.width - sw) / 2f, this.size.height * feet - sh / 2f),
+                    Size(sw, sh),
+                )
+            }
+            val body = Modifier.matchParentSize().graphicsLayer {
+                val k = squeeze * (1f + 0.12f * lift)
+                scaleX = k
+                scaleY = k
+                transformOrigin = TransformOrigin(0.5f, feet)
+                translationY = -bob * 3.dp.toPx() * (1f - lift.coerceIn(0f, 1f)) - lift * 14.dp.toPx()
+            }
+            if (cat) {
+                val color = when {
+                    s.finished -> c.accent
+                    s.millis >= 90 * 60_000 -> Color(0xFFF2A541)
+                    s.millis >= 45 * 60_000 -> Color(0xFF8E8E93)
+                    else -> c.ink
+                }
+                val colored = color != c.ink
+                CatMascot(
+                    body,
+                    size = size.dp,
+                    color = color,
+                    eye = if (colored) Color.White else c.eye,
+                    detail = if (colored) lerp(color, Color.Black, 0.25f) else null,
+                    shadow = lift < 0.01f,
+                    flip = spot.flip,
+                    pose = if (spot.loaf) CatPose.LOAF else CatPose.SIT,
+                    sleep = spot.loaf,
+                    blink = !spot.loaf,
+                    minimal = who == Shop.MINCAT,
+                    gold = who == Shop.GOLDCAT,
+                )
+            } else Creature(who, body, size = size.dp, flip = spot.flip, shadow = lift < 0.01f)
+        }
         if (selected) {
             Column(
                 Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = (-34).dp)
+                    .offset(y = (if (cat) -46 else -34).dp)
                     .wrapContentSize(unbounded = true)
                     .widthIn(max = 180.dp)
                     .background(c.ink, SmoothShape(12.dp))

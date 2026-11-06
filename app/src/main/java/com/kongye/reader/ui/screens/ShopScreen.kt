@@ -114,7 +114,8 @@ fun ShopScreen() {
         Column(Modifier.fillMaxSize()) {
             TopBar("商城", onBack = { Nav.pop() }) {
                 IconBtn(Ico.TROPHY) { Nav.push(Screen.Achievements) }
-                IconBtn(Ico.HANGER) { Nav.push(Screen.Dress) }
+                // 衣架：按正在看的分类进装扮的那一页（动物→首页、背景和挂件→猫园、饰品→饰品、图标→图标）
+                IconBtn(Ico.HANGER) { Nav.dress(listOf(0, 1, 2, 1, 3)[tab]) }
             }
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
@@ -137,13 +138,13 @@ fun ShopScreen() {
                         val list = cat.animals.filter { it.group == group }
                         if (list.isEmpty()) continue
                         item(key = "group-$group", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(title.first, title.second) }
-                        // 空叶组：看板猫打头（本来就有），极简猫和它一样大
+                        // 空叶组：看板猫打头（本来就有），极简猫和它一样大；三只猫头上都顶着叶子
                         if (group == "kongye") item(key = Shop.MASCOT) {
-                            ItemCard("看板猫", Shop.MASCOT, 0, profile, onClick = { picked = Shop.MASCOT }) { CatMascot(size = 76.dp) }
+                            ItemCard("看板猫", Shop.MASCOT, 0, profile, onClick = { picked = Shop.MASCOT }) { Creature(Shop.MASCOT, size = 76.dp, leaf = true) }
                         }
                         items(list, key = { it.id }) { a ->
                             ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
-                                if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, size = 76.dp)
+                                if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, size = 76.dp, leaf = true)
                                 else Creature(a.id, Modifier.fillMaxSize().padding(6.dp), faceLeft = true)
                             }
                         }
@@ -309,8 +310,8 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             contentAlignment = Alignment.Center,
         ) {
             when {
-                item == Shop.MASCOT -> CatMascot(size = 180.dp, blink = true)
-                animal != null -> Creature(animal.id, size = 190.dp, faceLeft = true)
+                item == Shop.MASCOT -> Creature(Shop.MASCOT, size = 190.dp, leaf = true, animate = true)
+                animal != null -> Creature(animal.id, size = 190.dp, faceLeft = true, leaf = animal.id in Shop.kongyeCats, animate = true)
                 bg != null -> Image(painterResource(Shop.drawable(bg.res)), bg.name, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
                 // 挂件：挂在自己猫园的背景上，只看挂的那一块
                 orn != null -> {
@@ -338,6 +339,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             lock != null -> "成就「${lock.title}」的奖励"
             item == Shop.MASCOT -> "空叶阅读自己的猫，一开始就陪着你，首页和猫园默认都是它"
             item == "icon_minlight" -> "极简猫的浅色桌面图标，选了它开屏也换成极简猫"
+            item == Shop.TREASURE -> "24K 纯金的至尊金猪皇。带回家就点亮成就「镇店之宝」，送 8 件所有动物都能戴的神装"
             animal != null -> "领养后可以放到首页，也能请它来猫园"
             bg != null -> "猫园背景，路牌上写你起的名字"
             acc != null -> "戴在动物的${Shop.slotNames[acc.slot]}，每只动物各戴各的"
@@ -355,7 +357,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             }
             owned -> InkButton("去装扮", Modifier.fillMaxWidth(), height = 52.dp) {
                 onDismiss()
-                Nav.push(Screen.Dress)
+                Nav.dress(Nav.dressTabFor(item))
             }
             lock != null -> InkButton("去看成就", Modifier.fillMaxWidth(), height = 52.dp) {
                 onDismiss()

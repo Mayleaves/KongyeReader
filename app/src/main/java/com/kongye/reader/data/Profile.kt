@@ -36,6 +36,8 @@ data class Profile(
     val egg: Boolean? = null,
     /** 成就页的配色方案（BadgeArt.badgeStyles 的编号） */
     val badgeStyle: String = "classic",
+    /** 猫园里自己挪过位置的动物：那次阅读的开始时间 → 左上角在院子里的位置（占宽、高的比例） */
+    val gardenSpots: Map<String, List<Float>> = emptyMap(),
 ) {
     /** 能不能用：彩蛋开着、买到了、免费的；成就奖励要点亮对应成就 */
     fun has(id: String): Boolean {
@@ -92,7 +94,7 @@ class AchieveCtx(val sessions: List<Session>, val books: List<Book>, val profile
     fun hours(h: Long) = Pair(totalMinutes, h * 60)
     fun minutes(m: Long) = Pair(totalMinutes, m)
     fun count(key: String) = (profile.counters[key] ?: 0).toLong()
-    val adoptable by lazy { Shop.catalog.animals.filter { it.price > 0 } }
+    val adoptable by lazy { Shop.catalog.animals.filter { it.price > 0 && it.id != Shop.TREASURE } }
     val ownedAnimals by lazy { adoptable.count { it.id in profile.owned }.toLong() }  // 彩蛋送的不算
     val ownedBgs by lazy { Shop.catalog.backgrounds.count { it.lock == null && profile.has(it.id) }.toLong() }
     val ownedAcc by lazy { Shop.catalog.accessories.count { it.id in profile.owned }.toLong() }
@@ -151,13 +153,14 @@ object Achievements {
         Achievement("finish_5", "bookshelf", "五本", "读完 5 本书", 220, "银", "star-five", "完本") { Pair(it.finished, 5) },
         Achievement("finish_10", "bookshelf", "十本", "读完 10 本书", 360, "金", "crown-ten", "完本殿堂") { Pair(it.finished, 10) },
 
+        Achievement("c0", "companions", "镇店之宝", "花费 9999 叶子迎回商城镇店之宝", 0, "金", "crown-grand", "9999神兽", item = "8 件神装") { flag(Shop.TREASURE in it.profile.owned) },
         Achievement("animal_1", "companions", "新朋友", "在商城领养第一只动物", 100, "铜", "paw-single", "领养动物") { Pair(it.ownedAnimals, 1) },
         Achievement("animal_5", "companions", "小小动物园", "领养 5 只动物", 160, "银", "paw-array", "领养动物") { Pair(it.ownedAnimals, 5) },
         Achievement("animal_all", "companions", "全员到齐", "领养商城里所有的动物", 260, "金", "crown-grand", "全图鉴") { Pair(it.ownedAnimals, it.adoptable.size.toLong().coerceAtLeast(1)) },
         Achievement("bg_3", "companions", "换个背景", "拥有 3 张猫园背景", 120, "银", "sprout-horizon", "猫园背景") { Pair(it.ownedBgs, 3) },
         Achievement("acc_10", "companions", "衣帽间", "收集 10 件饰品", 120, "银", "hanger-basic", "动物配饰") { Pair(it.ownedAcc, 10) },
         Achievement("dress_1", "companions", "打扮一下", "给动物戴上一件饰品", 120, "铜", "hanger-bowtie", "动物配饰") { flag(it.profile.outfits.values.any { o -> o.isNotEmpty() }) },
-        Achievement("c7", "companions", "看板猫猫", "在首页连着摸看板猫？下", 0, "银", "cyber-cat", "鎏金看板猫", item = "鎏金看板猫") { Pair(minOf(it.count("pet20"), 1), 1) },
+        Achievement("c7", "companions", "看板猫猫", "在首页连着摸看板猫 ? 下", 0, "银", "cyber-cat", "鎏金看板猫", item = "鎏金看板猫") { Pair(minOf(it.count("pet20"), 1), 1) },
         Achievement("c8", "companions", "橘猫驾到", "累计阅读满 300 分钟", 180, "银", "fox-spirit", "稀有伙伴") { it.minutes(300) },
         Achievement("c9", "companions", "神秘夜行兽", "深夜（23 点以后）读 10 次书", 260, "紫晶", "owl-mecha", "夜行") { Pair(it.lateNights, 10) },
         Achievement("c10", "companions", "巫师尖帽", "读完 3 本书", 0, "银", "wizard-hat", "解锁饰品", item = "巫师尖帽") { Pair(it.finished, 3) },

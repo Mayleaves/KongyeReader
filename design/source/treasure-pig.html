@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>至尊金猪皇裸猪素体与8件神装交互调位系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+    body {
+      font-family: 'Noto Sans SC', 'Inter', sans-serif;
+      background-color: #0F172A;
+      color: #F8FAFC;
+    }
+
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -20; }
+    }
+    .anchor-dashed {
+      animation: dashFlow 1.5s linear infinite;
+    }
+    .anchor-active-ring {
+      filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1E293B; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 999px; }
+  </style>
+</head>
+<body class="min-h-screen p-3 md:p-5">
+
+  <!-- ==================== 全局 SVG 配饰定义库 (仅含至尊金猪皇专属 8 件 A~H 神装，全部以 (0,0) 为挂载原点) ==================== -->
+  <svg width="0" height="0" class="absolute pointer-events-none">
+    <defs id="pig-emperor-defs">
+      <!-- 金猪皇身体与8件神装专属流光渐变 -->
+      <linearGradient id="pigGoldBody" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FFFBEB"/>
+        <stop offset="28%" stop-color="#FDE047"/>
+        <stop offset="68%" stop-color="#F59E0B"/>
+        <stop offset="100%" stop-color="#B45309"/>
+      </linearGradient>
+      <linearGradient id="pigBackSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.65"/>
+        <stop offset="100%" stop-color="#FDE047" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="pigDeepGold" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#D97706"/>
+        <stop offset="100%" stop-color="#78350F"/>
+      </linearGradient>
+      <linearGradient id="pigRubyVelvet" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FB7185"/>
+        <stop offset="45%" stop-color="#E11D48"/>
+        <stop offset="100%" stop-color="#881337"/>
+      </linearGradient>
+      <linearGradient id="pigRoseGoldSnout" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FFE4E6"/>
+        <stop offset="45%" stop-color="#FDA4AF"/>
+        <stop offset="100%" stop-color="#E11D48"/>
+      </linearGradient>
+      <linearGradient id="pigJadeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6EE7B7"/>
+        <stop offset="55%" stop-color="#10B981"/>
+        <stop offset="100%" stop-color="#065F46"/>
+      </linearGradient>
+
+      <!-- ================= 1. [A槽位: 头顶冠冕区] 帝王紫绒钻冠 (原点0,0在帽底中心) ================= -->
+      <g id="acc-A-imperial-crown">
+        <path d="M-21 0 C-23 -19 -9 -28 0 -28 C9 -28 23 -19 21 0 Z" fill="#BE123C"/>
+        <path d="M0 -28 C9 -28 23 -19 21 0 H0 Z" fill="#9F1239"/>
+        <path d="M-22 1 L-26 -20 L-11 -7 L0 -30 L11 -7 L26 -20 L22 1 Z" fill="#F59E0B" stroke="#B45309" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M-20 1 L-24 -18 L-10 -6 L0 -28 L10 -6 L24 -18 L20 1 Z" fill="#FDE047"/>
+        <rect x="-24" y="-5.5" width="48" height="9" rx="4.5" fill="#D97706"/>
+        <rect x="-22" y="-4" width="44" height="6" rx="3" fill="#FBBF24"/>
+        <circle cx="-25" cy="-21" r="4" fill="#38BDF8"/>
+        <circle cx="0" cy="-32" r="5.2" fill="#E11D48"/>
+        <circle cx="0" cy="-32" r="2.2" fill="#FEF08A"/>
+        <circle cx="25" cy="-21" r="4" fill="#38BDF8"/>
+        <polygon points="0,-6 4.5,-1 0,4 -4.5,-1" fill="#10B981"/>
+        <circle cx="-12" cy="-1" r="2.5" fill="#FFFBEB"/>
+        <circle cx="12" cy="-1" r="2.5" fill="#FFFBEB"/>
+      </g>
+
+      <!-- ================= 2. [B槽位: 耳部耳坠区] 翠玉鎏金耳坠 (原点0,0在耳根/耳尖挂点) ================= -->
+      <g id="acc-B-jade-earring">
+        <circle cx="0" cy="0" r="7" fill="none" stroke="#F59E0B" stroke-width="4"/>
+        <circle cx="0" cy="0" r="7" fill="none" stroke="#FEF08A" stroke-width="1.5"/>
+        <circle cx="0" cy="8.5" r="3" fill="#FBBF24"/>
+        <polygon points="0,11 9,22 0,33 -9,22" fill="#059669" stroke="#FDE047" stroke-width="2" stroke-linejoin="round"/>
+        <polygon points="0,11 9,22 0,22" fill="#34D399"/>
+        <polygon points="0,16 4,22 0,28 -4,22" fill="#A7F3D0"/>
+        <circle cx="0" cy="35" r="2.2" fill="#E11D48"/>
+      </g>
+
+      <!-- ================= 3. [C槽位: 眼部眼镜区] 财阀蓝宝单片镜 (原点0,0在右眼中心) ================= -->
+      <g id="acc-C-tycoon-monocle">
+        <circle cx="-12" cy="9" r="2.2" fill="#F59E0B"/>
+        <circle cx="-14" cy="15.5" r="2.2" fill="#FBBF24"/>
+        <circle cx="-13" cy="22" r="2.2" fill="#F59E0B"/>
+        <path d="M-13 25 C-18 29 -17 36 -13 39 C-9 36 -8 29 -13 25 Z" fill="#FDE047" stroke="#B45309" stroke-width="1.5"/>
+        <circle cx="0" cy="0" r="14" fill="#38BDF8" fill-opacity="0.32"/>
+        <circle cx="0" cy="0" r="15" fill="none" stroke="#B45309" stroke-width="5"/>
+        <circle cx="0" cy="0" r="15" fill="none" stroke="#FDE047" stroke-width="2.6"/>
+        <polygon points="-6,-15 -8,-21 -3,-18 0,-23 3,-18 8,-21 6,-15" fill="#FBBF24"/>
+        <path d="M-7 -5 A8 8 0 0 1 5 -7" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round"/>
+      </g>
+
+      <!-- ================= 4. [D槽位: 嘴部叼件区] 第一版高定招财金枝红宝玫瑰 (原点0,0在嘴角叼持点) ================= -->
+      <g id="acc-D-lucky-coin" transform="rotate(12)">
+        <!-- 24K 纯金花茎与翡翠金叶 -->
+        <path d="M-16 2 Q2 -2 20 2" fill="none" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M-15 1.5 Q2 -2.5 19 1.5" fill="none" stroke="#FEF08A" stroke-width="1.6" stroke-linecap="round"/>
+        <ellipse cx="4" cy="-4.5" rx="6.5" ry="3.6" transform="rotate(-25 4 -4.5)" fill="url(#pigJadeGrad)" stroke="#FDE047" stroke-width="1.2"/>
+        <!-- 皇家绯红丝绒金边玫瑰花冠 -->
+        <circle cx="22" cy="2" r="9" fill="url(#pigRubyVelvet)" stroke="#FDE047" stroke-width="1.8"/>
+        <path d="M18.5 -2 C23 -4.5 26.5 1 21 5.5" fill="none" stroke="#FDA4AF" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="2" r="2.2" fill="#FDE047"/>
+      </g>
+
+      <!-- ================= 5. [E槽位: 颈部胸前区] 翡翠如意金铃璎珞 (已去掉9999数字标识) ================= -->
+      <g id="acc-E-9999-collar">
+        <path d="M-38 -15 C-18 2 18 2 38 -15" fill="none" stroke="#991B1B" stroke-width="9" stroke-linecap="round"/>
+        <path d="M-38 -15 C-18 2 18 2 38 -15" fill="none" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+        <path d="M-36 -14 C-17 2 17 2 36 -14" fill="none" stroke="#FDE047" stroke-width="2.2" stroke-dasharray="5 4" stroke-linecap="round"/>
+        <circle cx="-29" cy="-9.5" r="3.2" fill="#FDE047" stroke="#B45309" stroke-width="1"/>
+        <circle cx="-21" cy="-4.5" r="5.5" fill="url(#pigJadeGrad)" stroke="#FDE047" stroke-width="1.8"/>
+        <circle cx="-22.2" cy="-6" r="1.6" fill="#A7F3D0"/>
+        <circle cx="29" cy="-9.5" r="3.2" fill="#FDE047" stroke="#B45309" stroke-width="1"/>
+        <circle cx="21" cy="-4.5" r="5.5" fill="url(#pigJadeGrad)" stroke="#FDE047" stroke-width="1.8"/>
+        <circle cx="19.8" cy="-6" r="1.6" fill="#A7F3D0"/>
+        <path d="M-14 -3 C-14 -9 -5 -11 0 -7 C5 -11 14 -9 14 -3 C16 4 8 10 0 11 C-8 10 -16 4 -14 -3 Z" fill="#B45309" stroke="#FEF08A" stroke-width="1.5"/>
+        <circle cx="0" cy="4" r="12" fill="url(#pigGoldBody)" stroke="#78350F" stroke-width="2"/>
+        <rect x="-12.5" y="1.5" width="25" height="4" rx="2" fill="#F59E0B" stroke="#78350F" stroke-width="1.2"/>
+        <circle cx="0" cy="9" r="3.2" fill="#451A03"/>
+        <line x1="-6" y1="9" x2="6" y2="9" stroke="#451A03" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="-4.5" cy="-1.5" r="2.6" fill="#FFFFFF" opacity="0.9"/>
+        <circle cx="0" cy="18.5" r="3.5" fill="#E11D48" stroke="#FDE047" stroke-width="1.2"/>
+        <path d="M0 22 C-5 25 -6 31 -2 33 C0 30 0 25 0 22 Z" fill="#FDE047" stroke="#B45309" stroke-width="1"/>
+        <path d="M0 22 C5 25 6 31 2 33 C0 30 0 25 0 22 Z" fill="#FBBF24" stroke="#B45309" stroke-width="1"/>
+      </g>
+
+      <!-- ================= 6. [F槽位: 背部鞍翼区] 第一版设计：贴合猪皇背部的斜裁皇室织金云肩+虚线金边+八角翡翠元宝盘 ================= -->
+      <g id="acc-F-ingot-saddle">
+        <path d="M-24,-20.5 C-6,-22.5 12,-18.5 22,-7.5 C23,8.5 15,22.5 3,26.5 C-3,17.5 -9,24.5 -15,16.5 C-21,9.5 -23,-5.5 -24,-20.5 Z" fill="url(#pigRubyVelvet)" stroke="#FDE047" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M-19.5,-16 C-5,-17.5 9,-14 17,-5 C18,7.5 11.5,18.5 2.5,21.5 C-2.5,14 -7.5,19.5 -12,13 C-16.5,7.5 -18.5,-4 -19.5,-16 Z" fill="none" stroke="#FDE047" stroke-width="1.3" stroke-dasharray="3.2 2.4" stroke-linejoin="round"/>
+        <circle cx="3" cy="27.5" r="2.4" fill="#FDE047" stroke="#B45309" stroke-width="0.8"/>
+        <circle cx="-15" cy="17.5" r="2.2" fill="#FDE047" stroke="#B45309" stroke-width="0.8"/>
+        <polygon points="0,-9.5 8,-6.5 11,1.5 8,9.5 0,12.5 -8,9.5 -11,1.5 -8,-6.5" fill="url(#pigJadeGrad)" stroke="#FDE047" stroke-width="1.6" stroke-linejoin="round"/>
+        <g transform="translate(0, 2.5)">
+          <ellipse cx="0" cy="-3.8" rx="7" ry="3.8" fill="#FEF08A"/>
+          <path d="M-11 -3 C-8.5 6 8.5 6 11 -3 L7.5 -6.5 C3.5 -2.5 -3.5 -2.5 -7.5 -6.5 Z" fill="url(#pigGoldBody)" stroke="#78350F" stroke-width="1"/>
+          <polygon points="0,-3 2.5,0 0,3 -2.5,0" fill="#E11D48"/>
+        </g>
+      </g>
+
+      <!-- ================= 7. [G槽位: 臀尾挂件区] 第一版设计：贴合卷尾下方的弧形红绳+翡翠圆珠+金三角流苏 ================= -->
+      <g id="acc-G-jade-tassel">
+        <path d="M0,0 Q3.5,9 0,18" fill="none" stroke="#E11D48" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="0" cy="0" r="2.8" fill="#E11D48" stroke="#FDE047" stroke-width="1.2"/>
+        <circle cx="1.2" cy="9.5" r="5.2" fill="url(#pigJadeGrad)" stroke="#FDE047" stroke-width="1.6"/>
+        <circle cx="-0.4" cy="7.8" r="1.5" fill="#A7F3D0"/>
+        <polygon points="0,16 -4.5,24.5 4.5,24.5" fill="url(#pigGoldBody)" stroke="#B45309" stroke-width="1" stroke-linejoin="round"/>
+        <circle cx="0" cy="16" r="2" fill="#E11D48"/>
+      </g>
+
+      <!-- ================= 8. [H槽位: 脚下底座区] 八芒星聚宝盆法阵 (原点0,0在脚底中心) ================= -->
+      <g id="acc-H-treasure-array">
+        <ellipse cx="0" cy="3" rx="112" ry="21" fill="#78350F" opacity="0.35"/>
+        <ellipse cx="0" cy="0" rx="106" ry="18" fill="#1E1B4B" stroke="#F59E0B" stroke-width="4"/>
+        <ellipse cx="0" cy="0" rx="86" ry="13" fill="none" stroke="#FDE047" stroke-width="2" stroke-dasharray="9 6"/>
+        <g transform="translate(-82, 2) scale(1.35)">
+          <path d="M-7 0 C-5 5 5 5 7 0 L4.5 -3.5 C2 -1 -2 -1 -4.5 -3.5 Z" fill="#F59E0B" stroke="#78350F" stroke-width="0.8"/>
+          <ellipse cx="0" cy="-2.8" rx="4" ry="2.2" fill="#FEF08A"/>
+        </g>
+        <g transform="translate(82, 2) scale(1.35)">
+          <path d="M-7 0 C-5 5 5 5 7 0 L4.5 -3.5 C2 -1 -2 -1 -4.5 -3.5 Z" fill="#F59E0B" stroke="#78350F" stroke-width="0.8"/>
+          <ellipse cx="0" cy="-2.8" rx="4" ry="2.2" fill="#FEF08A"/>
+        </g>
+        <g transform="translate(-42, 11)">
+          <circle cx="0" cy="0" r="6.5" fill="#FBBF24" stroke="#92400E" stroke-width="1.2"/>
+          <rect x="-2.2" y="-2.2" width="4.4" height="4.4" fill="#1E1B4B"/>
+        </g>
+        <g transform="translate(42, 11)">
+          <circle cx="0" cy="0" r="6.5" fill="#FDE047" stroke="#92400E" stroke-width="1.2"/>
+          <rect x="-2.2" y="-2.2" width="4.4" height="4.4" fill="#1E1B4B"/>
+        </g>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- ==================== 主界面布局 ==================== -->
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+    <!-- 左侧：裸猪皇素体 + A~H 8个锚点实时拖拽/滑块调位舞台 -->
+    <div class="lg:col-span-6 bg-[#1E293B] rounded-3xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col">
+
+      <!-- 顶部标题栏 (已去除多余皮肤切换，仅保留猪皇素体与深浅底切换) -->
+      <div class="pt-4 pb-3 px-4 flex flex-col items-center bg-gradient-to-b from-slate-800 to-[#1E293B] border-b border-slate-700/80">
+        <div class="bg-amber-500 text-slate-950 font-black text-sm md:text-base px-6 py-2 rounded-full shadow-md tracking-wide text-center">
+          🐷 镇店之宝 · 至尊金猪皇素体 & 8件专属神装调位台
+        </div>
+        <div class="mt-2 flex items-center justify-center gap-3 text-xs">
+          <span class="text-slate-300">支持在画布上<span class="text-amber-400 font-bold">直接鼠标拖拽配饰</span>或使用底部滑块微调</span>
+          <button onclick="toggleStageBg()" class="px-2.5 py-1 rounded-xl font-semibold bg-slate-800 text-amber-300 border border-slate-700 hover:bg-slate-700 transition">
+            🌗 切换深/浅背景
+          </button>
+        </div>
+      </div>
+
+      <!-- 核心 SVG 交互舞台 -->
+      <div id="stage-wrap" class="relative flex-1 flex items-center justify-center px-2 bg-[#0F172A] transition-colors">
+        <svg id="stage-svg" viewBox="0 0 600 450" class="w-full h-auto max-h-[460px] select-none touch-none">
+          <!-- 默认地面柔和阴影 -->
+          <ellipse id="base-ground-shadow" cx="300" cy="349" rx="102" ry="15" fill="#1E293B" opacity="0.8"/>
+
+          <!-- 【H 锚点槽位：脚下底座区 (最底层)】 -->
+          <g id="slot-H" class="cursor-move" onmousedown="startDrag(event, 'H')" ontouchstart="startDrag(event, 'H')"></g>
+
+          <!-- 【纯净裸猪皇素体层 (将原图 128×128 放大 1.85 倍居中放置在舞台中央：translate(185, 135) scale(1.85))】 -->
+          <g id="naked-pig-layer" transform="translate(185, 135) scale(1.85)"></g>
+
+          <!-- 【前景置顶配饰挂件层：F, G, E, D, B, C, A 共 8 件专属神装独立可拖动】 -->
+          <g id="slot-F" class="cursor-move" onmousedown="startDrag(event, 'F')" ontouchstart="startDrag(event, 'F')"></g>
+          <g id="slot-G" class="cursor-move" onmousedown="startDrag(event, 'G')" ontouchstart="startDrag(event, 'G')"></g>
+          <g id="slot-E" class="cursor-move" onmousedown="startDrag(event, 'E')" ontouchstart="startDrag(event, 'E')"></g>
+          <g id="slot-D" class="cursor-move" onmousedown="startDrag(event, 'D')" ontouchstart="startDrag(event, 'D')"></g>
+          <g id="slot-B" class="cursor-move" onmousedown="startDrag(event, 'B')" ontouchstart="startDrag(event, 'B')"></g>
+          <g id="slot-C" class="cursor-move" onmousedown="startDrag(event, 'C')" ontouchstart="startDrag(event, 'C')"></g>
+          <g id="slot-A" class="cursor-move" onmousedown="startDrag(event, 'A')" ontouchstart="startDrag(event, 'A')"></g>
+
+          <!-- 红色虚线锚点标注层 -->
+          <g id="anchor-guides-layer"></g>
+        </svg>
+      </div>
+
+      <!-- 锚点坐标、缩放、旋转微调器 -->
+      <div class="px-4 py-3 bg-slate-900 border-t border-slate-800 flex flex-col gap-2 text-xs">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="font-bold text-amber-400" id="active-anchor-label">📍 当前选中锚点：1. A槽：头顶冠冕区</span>
+          <span class="font-mono text-[11px] text-emerald-400 bg-slate-800 px-2.5 py-0.5 rounded-md border border-slate-700" id="orig-128-coord">
+            原图128坐标系对应点：(44.9, 40.5)
+          </span>
+          <button onclick="resetAnchorOffset()" class="text-[11px] text-rose-400 hover:underline font-semibold">重置当前锚点</button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+          <label class="flex items-center justify-between bg-slate-800/90 px-2.5 py-1.5 rounded-xl border border-slate-700 text-slate-200">
+            <span>X:</span>
+            <input type="range" id="slider-x" min="-140" max="140" value="0" oninput="nudgeActiveAnchor()" class="w-16 accent-amber-400"/>
+            <span id="val-x" class="font-mono font-bold text-amber-300 w-8 text-right">268</span>
+          </label>
+          <label class="flex items-center justify-between bg-slate-800/90 px-2.5 py-1.5 rounded-xl border border-slate-700 text-slate-200">
+            <span>Y:</span>
+            <input type="range" id="slider-y" min="-140" max="140" value="0" oninput="nudgeActiveAnchor()" class="w-16 accent-amber-400"/>
+            <span id="val-y" class="font-mono font-bold text-amber-300 w-8 text-right">210</span>
+          </label>
+          <label class="flex items-center justify-between bg-slate-800/90 px-2.5 py-1.5 rounded-xl border border-slate-700 text-slate-200">
+            <span>缩放:</span>
+            <input type="range" id="slider-scale" min="35" max="220" value="100" oninput="nudgeActiveAnchor()" class="w-16 accent-amber-400"/>
+            <span id="val-scale" class="font-mono font-bold text-amber-300 w-10 text-right">105%</span>
+          </label>
+          <label class="flex items-center justify-between bg-slate-800/90 px-2.5 py-1.5 rounded-xl border border-slate-700 text-slate-200">
+            <span>旋转:</span>
+            <input type="range" id="slider-rot" min="-90" max="90" value="0" oninput="nudgeActiveAnchor()" class="w-16 accent-amber-400"/>
+            <span id="val-rot" class="font-mono font-bold text-amber-300 w-8 text-right">8°</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 底部一键穿戴/卸下/导出操作栏 -->
+      <div class="p-3.5 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+        <button onclick="toggleGuides()" id="btn-guides" class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 transition">
+          ⭕ 隐藏 A~H 锚点虚线框
+        </button>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="equipAllRoyalSet()" class="px-3.5 py-2 rounded-xl text-xs font-black bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-md transition">
+            👑 一键穿齐 8 件镇店神装
+          </button>
+          <button onclick="clearOutfit()" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition">
+            🧹 一键脱光 (纯裸猪皇)
+          </button>
+          <button onclick="openExportModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition">
+            📦 导出校准坐标 & SVG
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：仅含猪皇专属 8 件神装点击穿戴面板 -->
+    <div class="lg:col-span-6 flex flex-col gap-3.5">
+
+      <!-- 说明头 -->
+      <div class="bg-[#1E293B] rounded-2xl p-4 shadow-lg border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-black text-amber-400">
+            ✨ 至尊金猪皇 · 专属 8 件神装 (A~H)
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5">
+            仅保留猪皇与 8 件专属神装（第 5、6 件已换为你指定的花瓣元宝鞍与玉璧尾流苏），点击即可单独穿戴或卸下。
+          </p>
+        </div>
+        <span id="equipped-badge" class="shrink-0 bg-amber-500/20 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-400/30">
+          已穿戴 0 / 8 件神装
+        </span>
+      </div>
+
+      <!-- 8件专属神装分类卡片网格 -->
+      <div id="accessory-catalog" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[680px] overflow-y-auto pr-1">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 导出校准坐标 JSON & 合成 SVG 弹窗 ==================== -->
+  <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+    <div class="bg-[#1E293B] rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-700 flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-amber-400">📦 导出至尊金猪皇校准后锚点配置 (JSON) & 独立 SVG</h3>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <button onclick="switchExportTab('json')" id="exp-tab-json" class="px-3 py-1.5 rounded-lg font-bold bg-amber-500 text-slate-950">
+          1. 校准后的 A~H 锚点坐标 JSON (含600舞台与128原图双坐标)
+        </button>
+        <button onclick="switchExportTab('naked')" id="exp-tab-naked" class="px-3 py-1.5 rounded-lg font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+          2. 仅导出「纯净裸猪皇素体」SVG (128×128)
+        </button>
+        <button onclick="switchExportTab('combined')" id="exp-tab-combined" class="px-3 py-1.5 rounded-lg font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+          3. 导出「当前穿戴完整合成后」SVG
+        </button>
+      </div>
+      <textarea id="export-code-box" readonly class="w-full h-80 font-mono text-xs bg-slate-950 text-emerald-400 p-4 rounded-xl border border-slate-800 focus:outline-none"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="copyExportText()" id="btn-copy" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition">
+          一键复制代码
+        </button>
+        <button onclick="closeExportModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+          关闭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 原图 128×128 放置在 600×450 舞台上的变换基准：translate(185, 135) scale(1.85)
+    const PIG_ORIGIN_X = 185;
+    const PIG_ORIGIN_Y = 135;
+    const PIG_SCALE = 1.85;
+
+    // 精确写入用户校准好的 A~H 共 8 件专属神装锚点坐标与缩放旋转参数
+    const BASE_ANCHORS = {
+      A: { x: 268, y: 210, scale: 1.05, rotate: 8,   labelX: 255, labelY: 85,  r: 26, type: 'circle' },
+      B: { x: 317, y: 252, scale: 1.00, rotate: 0,   labelX: 465, labelY: 145, r: 22, type: 'circle' },
+      C: { x: 282, y: 258, scale: 0.95, rotate: 0,   labelX: 110, labelY: 165, r: 24, type: 'circle' },
+      D: { x: 244, y: 301, scale: 1.39, rotate: 3,   labelX: 110, labelY: 255, r: 22, type: 'circle' },
+      E: { x: 240, y: 322, scale: 0.75, rotate: 8,   labelX: 120, labelY: 345, r: 26, type: 'circle' },
+      F: { x: 362, y: 211, scale: 1.50, rotate: 8,   labelX: 465, labelY: 95,  r: 28, type: 'circle' },
+      G: { x: 403, y: 196, scale: 1.48, rotate: -32, labelX: 495, labelY: 225, r: 24, type: 'circle' },
+      H: { x: 300, y: 349, scale: 1.00, rotate: 0,   labelX: 300, labelY: 418, w: 210, h: 36, type: 'rect' }
+    };
+
+    // 仅保留镇店之宝对应的 8 件专属神装 (A~H 各一件)，不含任何其他配饰
+    const CATALOG = [
+      {
+        code: "A",
+        title: "1. A槽：头顶冠冕区",
+        desc: "已校准至 (268, 210) · 缩放 105% · 旋转 8°",
+        items: [
+          { id: "acc-A-imperial-crown", name: "👑 帝王紫绒钻冠", viewBox: "-32 -38 64 46" }
+        ]
+      },
+      {
+        code: "B",
+        title: "2. B槽：耳部耳坠区",
+        desc: "已校准至 (317, 252) · 缩放 100% · 旋转 0°",
+        items: [
+          { id: "acc-B-jade-earring", name: "💎 翠玉鎏金耳坠", viewBox: "-20 -12 40 52" }
+        ]
+      },
+      {
+        code: "C",
+        title: "3. C槽：眼部眼镜区",
+        desc: "已校准至 (282, 258) · 缩放 95% · 旋转 0°",
+        items: [
+          { id: "acc-C-tycoon-monocle", name: "🧐 财阀蓝宝单片镜", viewBox: "-24 -26 50 68" }
+        ]
+      },
+      {
+        code: "D",
+        title: "4. D槽：嘴部叼件区",
+        desc: "已校准至 (244, 301) · 缩放 139% · 旋转 3°",
+        items: [
+          { id: "acc-D-lucky-coin", name: "🌹 金枝红宝玫瑰 (第一版)", viewBox: "-22 -18 58 36" }
+        ]
+      },
+      {
+        code: "E",
+        title: "5. E槽：颈部胸前区",
+        desc: "已校准至 (240, 322) · 缩放 75% · 旋转 8°",
+        items: [
+          { id: "acc-E-9999-collar", name: "🔔 翡翠如意金铃璎珞", viewBox: "-44 -22 88 60" }
+        ]
+      },
+      {
+        code: "F",
+        title: "6. F槽：背部鞍翼区",
+        desc: "已校准至 (362, 211) · 缩放 150% · 旋转 8°",
+        items: [
+          { id: "acc-F-ingot-saddle", name: "🧧 织金云肩元宝鞍 (第一版)", viewBox: "-28 -26 56 58" }
+        ]
+      },
+      {
+        code: "G",
+        title: "7. G槽：臀尾挂件区",
+        desc: "已校准至 (403, 196) · 缩放 148% · 旋转 -32°",
+        items: [
+          { id: "acc-G-jade-tassel", name: "🎐 玉环红金尾流苏 (第一版)", viewBox: "-14 -6 28 36" }
+        ]
+      },
+      {
+        code: "H",
+        title: "8. H槽：脚下底座区",
+        desc: "已校准至 (300, 349) · 缩放 100% · 旋转 0°",
+        items: [
+          { id: "acc-H-treasure-array", name: "✨ 八芒星聚宝盆法阵", viewBox: "-116 -24 232 48" }
+        ]
+      }
+    ];
+
+    // 状态管理：固定为 24K 至尊金猪皇素体
+    let pigSkin = 'gold';
+    let darkStage = true;
+    let showGuides = true;
+    let activeAnchorCode = 'A';
+    let currentExportTab = 'json';
+
+    // 默认全部不穿（纯裸猪皇），用户可逐件点击右侧 8 件专属神装穿戴调位
+    let equipped = {
+      A: null, B: null, C: null, D: null, E: null, F: null, G: null, H: null
+    };
+
+    // 每个锚点的微调偏移量
+    const customOffsets = {
+      A: { dx: 0, dy: 0, s: 1, dr: 0 },
+      B: { dx: 0, dy: 0, s: 1, dr: 0 },
+      C: { dx: 0, dy: 0, s: 1, dr: 0 },
+      D: { dx: 0, dy: 0, s: 1, dr: 0 },
+      E: { dx: 0, dy: 0, s: 1, dr: 0 },
+      F: { dx: 0, dy: 0, s: 1, dr: 0 },
+      G: { dx: 0, dy: 0, s: 1, dr: 0 },
+      H: { dx: 0, dy: 0, s: 1, dr: 0 }
+    };
+
+    // 生成「什么都没穿的 24K 纯净裸猪皇素体」SVG (前腿已并入主躯干同一闭合路径，像最右侧后腿一样无痕一体连接)
+    function getNakedPigMarkup() {
+      return `
+        <!-- 1. 远端右后腿 (原图 path 1) -->
+        <path fill="url(#pigDeepGold)" stroke="#92400E" stroke-width="1.1" d="M70.52,93.98c0,1.5,0.44,5.26,0.44,6.76c0,1.5,0.94,4.5,5.02,4.93c6.31,0.65,7.86-2.64,8.59-6.48c0.99-5.21,0.41-11.4,0.41-11.4L70.52,93.98z"/>
+        <!-- 2. 卷尾 (原图 path 2) -->
+        <path fill="url(#pigGoldBody)" stroke="#92400E" stroke-width="1.1" d="M119.79,19.65c1.78-0.38,4.13,0.19,4.22-1.6c0.11-2.16-2.63-3.57-5.91-2.63c-3.27,0.93-4.32,3.75-4.32,3.75s-3.71-1.73-6.95,0.84c-3.66,2.91-3.94,9.01-3.94,9.01l5.16,4.97c0,0,0.13-5.76,0.94-7.88c1.03-2.72,2.82-2.25,2.82-2.25s-1.97,5.44,0.75,8.73c3.26,3.94,10.51,2.25,9.48-4.41c-0.61-3.96-4.41-6.38-4.41-6.38S118.45,19.93,119.79,19.65z M117.07,30.82c-2.99,0.34-2.06-4.88-1.5-6.38C118.01,25.47,119.51,30.53,117.07,30.82z"/>
+        <!-- 3. 主躯干与两只前脚、右后脚一体无痕连接 -->
+        <path fill="url(#pigGoldBody)" stroke="#92400E" stroke-width="1.1" d="M45.97,24.86c18.19-7.4,54.05-9.08,66.17,10.28c12.25,19.57,3.8,32.1,2.39,35.62c-2.02,5.05-3.8,11.54-4.22,14.92c-0.5,3.97-1.13,14.22-1.55,16.33c-0.42,2.11-4.08,5.21-7.88,4.93c-3.8-0.28-6.9-2.67-7.18-4.93c-0.28-2.25,0.84-7.88-1.83-9.85c-2.67-1.97-10.7-0.7-15.49,1.83c-2.6,1.37-7.65,4.1-14.12,6.05c-0.1,3.35-0.23,7.38-0.28,9.45c-0.14,5.07-0.14,8.59-0.84,9.29c-1.34,1.34-3.52,2.97-6.76,2.82c-2.96-0.14-6.34-1.23-7.04-3.1c-0.42-1.12-0.42-5.49-0.56-9.29c-0.12-3.25-0.14-6.7-0.14-8.45c-3.95,0.42-8.08,0.44-12.27,0.02c-0.19,5.32-0.51,14.47-0.8,15.65c-0.42,1.69-2.67,3.66-7.32,3.38c-3.37-0.2-5.07-1.41-5.49-3.52c-0.37-1.88-0.7-5.77-0.84-8.17c-0.11-1.9-0.31-8.55-0.39-11.28C7.05,88.25,3.4,78.5,6.4,66.2c1.2-4.9,2.6-8.7,4.1-11.22c6.2-7.04,5.49-8.45,5.49-8.45s-6.19,1.55-3.8-3.38s8.59-13.09,9.71-13.8c1.13-0.7,4.79-1.83,6.76-0.56c1.97,1.27,1.97,3.1,1.97,3.1S33.87,29.78,45.97,24.86z"/>
+        <path d="M46,27 C66,19 98,20 109,36 C96,26 66,26 44,33 Z" fill="url(#pigBackSheen)"/>
+        <!-- 4. 右耳与左耳 (原图 path 6 & 7) -->
+        <path fill="url(#pigRubyVelvet)" stroke="#FDE047" stroke-width="1" d="M62.82,43.58c-0.75-1.63-4.58,0-5.54,2.44c-1.22,3.1,0,6.1,1.78,9.48c1.22,2.31,6.76,9.48,13.14,7.98c7.42-1.75,5.35-13.33,5.07-14.64c-0.28-1.31-1.17-3.06-2.72-2.82c-1.78,0.28-0.93,3.24-0.84,5.44c0.09,2.44,0.19,6.57-2.72,7.23c-3.11,0.7-5.31-1.34-7.04-4.13c-1.69-2.72-3.66-4.79-3.1-7.32C61.2,45.68,63.38,44.8,62.82,43.58z"/>
+        <path fill="url(#pigRubyVelvet)" stroke="#FDE047" stroke-width="1" d="M24.81,40.48c-1.42-0.55-3.1,1.6-4.69,2.91s-4.5,3-5.63,1.6c-1.17-1.47,2.52-5.32,4.69-9.01c1.88-3.19,3.64-6.85,6.1-7.04c3.66-0.28,0.81-1.92-1.88-1.41c-1.97,0.38-4.69,2.16-6.19,5.16S8.57,43.3,10.92,46.77c2.7,4,8.63,2.16,11.26,0C24.81,44.61,26.5,41.14,24.81,40.48z"/>
+        <!-- 5. 猪鼻与鼻孔 (原图 path 8, 9 & ellipse 10) -->
+        <path fill="url(#pigRoseGoldSnout)" stroke="#FDE047" stroke-width="1.2" d="M29.5,69.2c-5.16-0.94-13.38,0.5-13.98,6.29c-0.47,4.5,2.44,9.95,11.92,12.01c9.48,2.06,14.17-1.5,14.64-6.57C42.55,75.87,37.2,70.61,29.5,69.2z"/>
+        <path fill="#450A0A" d="M26.22,77.27c0.2,2.27-0.42,3.91-1.78,4.04c-1.36,0.12-3.27-1.48-3.47-3.75c-0.2-2.27,0.4-4.13,2.16-4.13C24.49,73.43,26.01,75,26.22,77.27z"/>
+        <ellipse transform="matrix(0.0941 -0.9956 0.9956 0.0941 -49.2991 103.738)" fill="#450A0A" cx="32.35" cy="78.96" rx="3.94" ry="2.62"/>
+        <!-- 6. 双眼 (原图 ellipse 11 & 12) -->
+        <ellipse transform="matrix(0.0985 -0.9951 0.9951 0.0985 -18.4459 112.1081)" fill="#1E1B4B" cx="52.65" cy="66.23" rx="4.83" ry="4.1"/>
+        <ellipse transform="matrix(0.0985 -0.9951 0.9951 0.0985 -39.304 76.996)" fill="#1E1B4B" cx="22.84" cy="60.19" rx="4.78" ry="4.23"/>
+        <circle cx="51.2" cy="64.5" r="1.5" fill="#FFFFFF"/>
+        <circle cx="21.5" cy="58.5" r="1.5" fill="#FFFFFF"/>
+      `;
+    }
+
+    // 渲染主舞台
+    function renderStage() {
+      document.getElementById('naked-pig-layer').innerHTML = getNakedPigMarkup();
+
+      let count = 0;
+      CATALOG.forEach(cat => {
+        const code = cat.code;
+        const baseA = BASE_ANCHORS[code];
+        const off = customOffsets[code];
+        const finalX = Math.round(baseA.x + off.dx);
+        const finalY = Math.round(baseA.y + off.dy);
+        const finalScale = +(baseA.scale * off.s).toFixed(2);
+        const finalRot = (baseA.rotate || 0) + (off.dr || 0);
+
+        const slotEl = document.getElementById(`slot-${code}`);
+        slotEl.setAttribute(
+          'transform',
+          `translate(${finalX}, ${finalY}) scale(${finalScale}) rotate(${finalRot})`
+        );
+
+        if (equipped[code]) {
+          slotEl.innerHTML = `<use href="#${equipped[code]}" />`;
+          count++;
+        } else {
+          slotEl.innerHTML = '';
+        }
+      });
+
+      document.getElementById('equipped-badge').textContent = `已穿戴 ${count} / 8 件神装`;
+      updateSliderValueLabels();
+      renderGuides();
+      renderCatalog();
+    }
+
+    // 更新滑块数值与 128×128 原图坐标换算
+    function updateSliderValueLabels() {
+      const baseA = BASE_ANCHORS[activeAnchorCode];
+      const off = customOffsets[activeAnchorCode];
+      const finalX = Math.round(baseA.x + off.dx);
+      const finalY = Math.round(baseA.y + off.dy);
+      const scalePct = Math.round(baseA.scale * off.s * 100);
+      const finalRot = (baseA.rotate || 0) + (off.dr || 0);
+
+      document.getElementById('val-x').textContent = finalX;
+      document.getElementById('val-y').textContent = finalY;
+      document.getElementById('val-scale').textContent = `${scalePct}%`;
+      document.getElementById('val-rot').textContent = `${finalRot}°`;
+
+      // 换算回 128×128 原始 SVG 坐标系的精确位置
+      const origX = ((finalX - PIG_ORIGIN_X) / PIG_SCALE).toFixed(1);
+      const origY = ((finalY - PIG_ORIGIN_Y) / PIG_SCALE).toFixed(1);
+      document.getElementById('orig-128-coord').textContent = `原图128坐标系对应点：(${origX}, ${origY})`;
+    }
+
+    // 渲染 A~H 红色锚点虚线框（支持直接鼠标拖拽虚线框移动配饰！）
+    function renderGuides() {
+      const layer = document.getElementById('anchor-guides-layer');
+      if (!showGuides) {
+        layer.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      CATALOG.forEach(cat => {
+        const code = cat.code;
+        const baseA = BASE_ANCHORS[code];
+        const off = customOffsets[code];
+        const x = Math.round(baseA.x + off.dx);
+        const y = Math.round(baseA.y + off.dy);
+        const labelX = baseA.labelX;
+        const labelY = baseA.labelY;
+        const isSelected = activeAnchorCode === code;
+
+        html += `<line x1="${x}" y1="${y}" x2="${labelX}" y2="${labelY}" stroke="#EF4444" stroke-width="${isSelected ? '2.2' : '1.2'}" stroke-dasharray="3,3" opacity="0.8"/>`;
+
+        if (baseA.type === 'rect') {
+          html += `
+            <rect onmousedown="startDrag(event, '${code}')" ontouchstart="startDrag(event, '${code}')"
+              class="anchor-dashed cursor-move ${isSelected ? 'anchor-active-ring' : ''}"
+              x="${x - baseA.w / 2}" y="${y - baseA.h / 2}" width="${baseA.w}" height="${baseA.h}" rx="12"
+              fill="${isSelected ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.03)'}"
+              stroke="#EF4444" stroke-width="${isSelected ? '2.5' : '1.6'}" stroke-dasharray="6,5"/>
+          `;
+        } else {
+          html += `
+            <circle onmousedown="startDrag(event, '${code}')" ontouchstart="startDrag(event, '${code}')"
+              class="anchor-dashed cursor-move ${isSelected ? 'anchor-active-ring' : ''}"
+              cx="${x}" cy="${y}" r="${baseA.r}"
+              fill="${isSelected ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.03)'}"
+              stroke="#EF4444" stroke-width="${isSelected ? '2.5' : '1.6'}" stroke-dasharray="6,5"/>
+          `;
+        }
+
+        html += `
+          <circle cx="${x}" cy="${y}" r="3.2" fill="#EF4444" class="pointer-events-none"/>
+          <line x1="${x - 6}" y1="${y}" x2="${x + 6}" y2="${y}" stroke="#EF4444" stroke-width="1.5" class="pointer-events-none"/>
+          <line x1="${x}" y1="${y - 6}" x2="${x}" y2="${y + 6}" stroke="#EF4444" stroke-width="1.5" class="pointer-events-none"/>
+          <g onclick="selectAnchor('${code}')" transform="translate(${labelX}, ${labelY})" class="cursor-pointer">
+            <rect x="-66" y="-12" width="132" height="22" rx="6" fill="${isSelected ? '#EF4444' : '#0F172A'}" stroke="#EF4444" stroke-width="1.4"/>
+            <text x="0" y="3" text-anchor="middle" fill="${isSelected ? '#FFFFFF' : '#F87171'}" font-size="11.5" font-weight="800">${cat.title}</text>
+          </g>
+        `;
+      });
+
+      layer.innerHTML = html;
+    }
+
+    // 渲染右侧配饰选择面板
+    function renderCatalog() {
+      const container = document.getElementById('accessory-catalog');
+      container.innerHTML = CATALOG.map(cat => {
+        const activeId = equipped[cat.code];
+        const isCurrentAnchor = activeAnchorCode === cat.code;
+
+        return `
+          <div onclick="selectAnchor('${cat.code}')" class="bg-[#1E293B] rounded-2xl p-3.5 shadow-md border transition cursor-pointer ${
+            isCurrentAnchor ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-700 hover:border-slate-600'
+          } flex flex-col gap-2.5">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-1.5">
+              <div class="flex flex-col">
+                <span class="text-xs font-extrabold px-2 py-0.5 rounded-md w-fit ${
+                  isCurrentAnchor ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-amber-300 border border-slate-700'
+                }">${cat.title}</span>
+                <span class="text-[11px] text-slate-400 mt-1">${cat.desc}</span>
+              </div>
+              ${activeId ? `<button onclick="event.stopPropagation(); equipItem('${cat.code}', '${activeId}')" class="text-xs text-rose-400 hover:underline font-bold">卸下</button>` : ''}
+            </div>
+
+            <div class="grid grid-cols-1 gap-2">
+              ${cat.items.map(item => {
+                const selected = activeId === item.id;
+                return `
+                  <button onclick="event.stopPropagation(); equipItem('${cat.code}', '${item.id}')"
+                    class="flex items-center gap-3 p-2.5 rounded-xl border transition-all ${
+                      selected
+                        ? 'bg-amber-500/20 border-amber-400 shadow-sm scale-[1.01]'
+                        : 'bg-slate-800/90 border-slate-700/80 hover:bg-slate-800'
+                    }">
+                    <div class="w-14 h-14 shrink-0 bg-slate-900/80 rounded-lg flex items-center justify-center p-1 border border-slate-700/60">
+                      <svg viewBox="${item.viewBox}" class="w-full h-full overflow-visible">
+                        <use href="#${item.id}" />
+                        <circle cx="0" cy="0" r="2.2" fill="#EF4444" opacity="0.85"/>
+                      </svg>
+                    </div>
+                    <div class="flex flex-col items-start text-left">
+                      <span class="text-xs leading-tight ${selected ? 'font-black text-amber-300' : 'font-bold text-slate-200'}">
+                        ${item.name}
+                      </span>
+                      <span class="text-[11px] mt-1 ${selected ? 'text-emerald-400 font-semibold' : 'text-slate-400'}">
+                        ${selected ? '● 已穿戴 (可在左图拖拽微调)' : '○ 点击穿戴到此部位'}
+                      </span>
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 鼠标/触控直接在画布上拖拽配饰或红框调位置
+    let dragState = null;
+    function startDrag(evt, code) {
+      evt.stopPropagation();
+      selectAnchor(code);
+      const svg = document.getElementById('stage-svg');
+      const pt = getSvgPoint(svg, evt);
+      dragState = {
+        code,
+        startX: pt.x,
+        startY: pt.y,
+        origDx: customOffsets[code].dx,
+        origDy: customOffsets[code].dy
+      };
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', endDrag);
+    }
+
+    function onDragMove(evt) {
+      if (!dragState) return;
+      evt.preventDefault();
+      const svg = document.getElementById('stage-svg');
+      const pt = getSvgPoint(svg, evt);
+      const dx = Math.round(dragState.origDx + (pt.x - dragState.startX));
+      const dy = Math.round(dragState.origDy + (pt.y - dragState.startY));
+      customOffsets[dragState.code].dx = Math.max(-140, Math.min(140, dx));
+      customOffsets[dragState.code].dy = Math.max(-140, Math.min(140, dy));
+      document.getElementById('slider-x').value = customOffsets[dragState.code].dx;
+      document.getElementById('slider-y').value = customOffsets[dragState.code].dy;
+      renderStage();
+    }
+
+    function endDrag() {
+      dragState = null;
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', endDrag);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', endDrag);
+    }
+
+    function getSvgPoint(svg, evt) {
+      const CTM = svg.getScreenCTM();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      return {
+        x: (clientX - CTM.e) / CTM.a,
+        y: (clientY - CTM.f) / CTM.d
+      };
+    }
+
+    function selectAnchor(code) {
+      activeAnchorCode = code;
+      const cat = CATALOG.find(c => c.code === code);
+      document.getElementById('active-anchor-label').textContent = `📍 当前选中锚点：${cat.title}`;
+
+      const off = customOffsets[code];
+      document.getElementById('slider-x').value = off.dx;
+      document.getElementById('slider-y').value = off.dy;
+      document.getElementById('slider-scale').value = Math.round(off.s * 100);
+      document.getElementById('slider-rot').value = off.dr || 0;
+
+      updateSliderValueLabels();
+      renderGuides();
+      renderCatalog();
+    }
+
+    function nudgeActiveAnchor() {
+      const dx = parseInt(document.getElementById('slider-x').value, 10) || 0;
+      const dy = parseInt(document.getElementById('slider-y').value, 10) || 0;
+      const s = (parseInt(document.getElementById('slider-scale').value, 10) || 100) / 100;
+      const dr = parseInt(document.getElementById('slider-rot').value, 10) || 0;
+
+      customOffsets[activeAnchorCode] = { dx, dy, s, dr };
+      renderStage();
+    }
+
+    function resetAnchorOffset() {
+      customOffsets[activeAnchorCode] = { dx: 0, dy: 0, s: 1, dr: 0 };
+      selectAnchor(activeAnchorCode);
+      renderStage();
+    }
+
+    function equipItem(code, itemId) {
+      activeAnchorCode = code;
+      equipped[code] = equipped[code] === itemId ? null : itemId;
+      selectAnchor(code);
+      renderStage();
+    }
+
+    // 一键穿齐 8 件镇店神装
+    function equipAllRoyalSet() {
+      equipped = {
+        A: 'acc-A-imperial-crown',
+        B: 'acc-B-jade-earring',
+        C: 'acc-C-tycoon-monocle',
+        D: 'acc-D-lucky-coin',
+        E: 'acc-E-9999-collar',
+        F: 'acc-F-ingot-saddle',
+        G: 'acc-G-jade-tassel',
+        H: 'acc-H-treasure-array'
+      };
+      renderStage();
+    }
+
+    // 一键脱光回到纯裸猪皇
+    function clearOutfit() {
+      Object.keys(equipped).forEach(k => equipped[k] = null);
+      renderStage();
+    }
+
+    function toggleStageBg() {
+      darkStage = !darkStage;
+      const wrap = document.getElementById('stage-wrap');
+      wrap.className = darkStage
+        ? 'relative flex-1 flex items-center justify-center px-2 bg-[#0F172A] transition-colors'
+        : 'relative flex-1 flex items-center justify-center px-2 bg-[#F1F5F9] transition-colors';
+    }
+
+    function toggleGuides() {
+      showGuides = !showGuides;
+      document.getElementById('btn-guides').textContent = showGuides
+        ? '⭕ 隐藏 A~H 锚点虚线框'
+        : '⭕ 显示 A~H 锚点虚线框';
+      renderGuides();
+    }
+
+    // 导出配置与 SVG 弹窗
+    function openExportModal() {
+      updateExportContent();
+      const modal = document.getElementById('export-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeExportModal() {
+      const modal = document.getElementById('export-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function switchExportTab(tab) {
+      currentExportTab = tab;
+      ['json', 'naked', 'combined'].forEach(t => {
+        document.getElementById(`exp-tab-${t}`).className = t === tab
+          ? 'px-3 py-1.5 rounded-lg font-bold bg-amber-500 text-slate-950'
+          : 'px-3 py-1.5 rounded-lg font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
+      });
+      updateExportContent();
+    }
+
+    function updateExportContent() {
+      const box = document.getElementById('export-code-box');
+      if (currentExportTab === 'json') {
+        const sockets = {};
+        CATALOG.forEach(cat => {
+          const code = cat.code;
+          const baseA = BASE_ANCHORS[code];
+          const off = customOffsets[code];
+          const stageX = Math.round(baseA.x + off.dx);
+          const stageY = Math.round(baseA.y + off.dy);
+          sockets[code] = {
+            stage600_x: stageX,
+            stage600_y: stageY,
+            orig128_x: +((stageX - PIG_ORIGIN_X) / PIG_SCALE).toFixed(2),
+            orig128_y: +((stageY - PIG_ORIGIN_Y) / PIG_SCALE).toFixed(2),
+            scale: +(baseA.scale * off.s).toFixed(2),
+            rotate: (baseA.rotate || 0) + (off.dr || 0),
+            equippedItem: equipped[code]
+          };
+        });
+        box.value = JSON.stringify({
+          pigTransformIn600x450: `translate(${PIG_ORIGIN_X}, ${PIG_ORIGIN_Y}) scale(${PIG_SCALE})`,
+          anchors: sockets
+        }, null, 2);
+      } else if (currentExportTab === 'naked') {
+        const defs = document.getElementById('pig-emperor-defs').innerHTML;
+        box.value = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">\n  <defs>${defs}</defs>\n  <!-- 纯净裸猪皇素体 (什么都没穿) -->\n  ${getNakedPigMarkup().trim()}\n</svg>`;
+      } else {
+        const defs = document.getElementById('pig-emperor-defs').innerHTML;
+        let slotsMarkup = '';
+        ['H', 'F', 'G', 'E', 'D', 'B', 'C', 'A'].forEach(code => {
+          if (equipped[code]) {
+            const el = document.getElementById(`slot-${code}`);
+            slotsMarkup += `  <g transform="${el.getAttribute('transform')}">\n    <use href="#${equipped[code]}" />\n  </g>\n`;
+          }
+        });
+        box.value = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450">\n  <defs>${defs}</defs>\n  <g transform="translate(185, 135) scale(1.85)">\n    ${getNakedPigMarkup().trim()}\n  </g>\n${slotsMarkup}</svg>`;
+      }
+    }
+
+    function copyExportText() {
+      const box = document.getElementById('export-code-box');
+      box.select();
+      document.execCommand('copy');
+      const btn = document.getElementById('btn-copy');
+      btn.textContent = '✅ 已复制到剪贴板！';
+      setTimeout(() => { btn.textContent = '一键复制代码'; }, 1800);
+    }
+
+    window.onload = function () {
+      selectAnchor('A');
+      renderStage();
+    };
+  </script>
+</body>
+</html>

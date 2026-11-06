@@ -26,7 +26,7 @@ data class ShopAnimal(
     val id: String,
     val name: String,
     val price: Int,
-    /** 商城里的分组：kongye 空叶自己的猫、animal 小动物、pony 小马宝莉、emoji 表情 */
+    /** 商城里的分组：treasure 镇店之宝、kongye 空叶自己的猫、animal 小动物、pony 小马宝莉、emoji 表情 */
     val group: String = "animal",
     val res: String,
     val private: Boolean = false,
@@ -40,6 +40,8 @@ data class ShopAnimal(
     val dual: Boolean = false,
     /** 默认朝左：饰品水平翻转 */
     val flip: Boolean = false,
+    /** 饰品翻不翻，不给就跟 flip 一样（至尊金猪皇朝左，但神装是照着它不翻转调好的） */
+    val accFlip: Boolean? = null,
     val slots: Map<String, Anchor> = emptyMap(),
 )
 
@@ -87,12 +89,15 @@ object Shop {
     const val MASCOT = "mascot"
     /** 极简猫：目录里有（饰品锚点、价格），身体由 App 自己画（和看板猫一样有三种状态、眼睛跟手指） */
     const val MINCAT = "mincat"
-    /** 鎏金看板猫：成就「看板猫猫」的奖励（连着摸 20 下，页面上写成“？”下） */
+    /** 鎏金看板猫：成就「看板猫猫」的奖励（连着摸 20 下，页面上写成“ ? ”下） */
     const val GOLDCAT = "goldcat"
     const val DEFAULT_BG = "farm"
+    /** 镇店之宝：至尊金猪皇，9999 片叶子；买下点亮成就 c0「镇店之宝」，送 8 件神装 */
+    const val TREASURE = "goldpig"
 
     /** 商城动物分组的标题和小字 */
     val animalGroups = linkedMapOf(
+        "treasure" to ("镇店之宝" to "带回家就送 8 件神装"),
         "kongye" to ("空叶" to "空叶阅读自己的猫"),
         "animal" to ("小动物" to "原本就有的农场伙伴"),
         "emoji" to ("表情" to "从表情包里跑出来的"),
@@ -113,18 +118,45 @@ object Shop {
     }
 
     fun animal(id: String) = catalog.animals.firstOrNull { it.id == id }
+
+    /** 空叶自己的三只猫：头上有叶子，身体由 App 自己画 */
+    val kongyeCats = setOf(MASCOT, MINCAT, GOLDCAT)
+
+    /** 看板猫不在目录里，但和鎏金看板猫是同一套 240x260 骨架：借它的饰品位置，也能戴饰品 */
+    private val mascotWearer: ShopAnimal? by lazy {
+        animal(GOLDCAT)?.copy(id = MASCOT, name = "看板猫", price = 0, lock = null, poses = emptyMap())
+    }
+
+    /** 能戴饰品的：目录里的动物，加上看板猫 */
+    fun wearer(id: String): ShopAnimal? = if (id == MASCOT) mascotWearer else animal(id)
     fun background(id: String) = catalog.backgrounds.firstOrNull { it.id == id }
     fun accessory(id: String) = catalog.accessories.firstOrNull { it.id == id }
     fun ornament(id: String) = catalog.ornaments.firstOrNull { it.id == id }
 
-    /** 成就页配色方案：第一套免费，其余要用叶子换（编号 style_xxx） */
-    val styles = listOf("classic", "nightcity", "arasaka", "militech", "kangtao", "trauma", "mox", "tyger")
+    /**
+     * 成就页配色方案：第一套免费，其余要用叶子换（编号 style_xxx）。
+     * 和 BadgeArt.badgeStyles 同一个顺序：原版黑金，然后 2077、政府、企业、帮派，后三类按 2077 势力从高到低
+     */
+    val styles = listOf(
+        "classic", "nightcity",
+        "ncpd",
+        "arasaka", "militech", "kangtao", "kiroshi", "trauma",
+        "tyger", "valentinos", "maelstrom", "sixthstreet", "voodooboys", "wraiths", "mox", "scavengers",
+    )
     const val STYLE_PRICE = 500
 
     /** 成就奖励对应的成就编号；不是奖励就是 null */
     fun lockOf(id: String): String? =
         animal(id)?.lock ?: background(id)?.lock ?: accessory(id)?.lock ?: ornament(id)?.lock
             ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.lock
+
+    /** 成就的奖励是商城里的哪件（lock 是这个成就编号的那件），图标加 icon_ 前缀 */
+    fun rewardOf(achievement: String): String? =
+        catalog.animals.firstOrNull { it.lock == achievement }?.id
+            ?: catalog.backgrounds.firstOrNull { it.lock == achievement }?.id
+            ?: catalog.accessories.firstOrNull { it.lock == achievement }?.id
+            ?: catalog.ornaments.firstOrNull { it.lock == achievement }?.id
+            ?: catalog.icons.firstOrNull { it.lock == achievement }?.let { "icon_${it.id}" }
 
     /** 挂件在这张背景上的位置 */
     fun slotsOf(bg: ShopBackground) = bg.slots ?: catalog.ornamentSlots

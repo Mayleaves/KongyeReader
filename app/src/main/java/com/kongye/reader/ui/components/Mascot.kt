@@ -67,7 +67,7 @@ fun CatMascot(
                     if (flip) scale(-1f, 1f, pivot = center)
                     translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
                     scale(s, s, pivot = Offset.Zero)
-                }) { if (sleep) drawGoldSleep(c.dark, time, shadow = shadow) else drawGoldFocus(c.dark, time, shadow = shadow) }
+                }) { if (sleep) drawGoldSleep(c.dark, time, accent, shadow) else drawGoldFocus(c.dark, time, accent, shadow = shadow) }
             } else {
                 val s = this.size.minDimension / 200f
                 withTransform({
@@ -89,8 +89,8 @@ fun CatMascot(
             }) {
                 when {
                     pose == CatPose.LOAF -> drawMinimalLoaf(c.dark, time, bodyColor, if (bodyColor != null) eye else null, shadow)
-                    sleep -> drawMinimalSleep(c.dark, time, bodyColor = bodyColor, shadow = shadow)
-                    else -> drawMinimalFocus(c.dark, time, bodyColor = bodyColor, shadow = shadow)
+                    sleep -> drawMinimalSleep(c.dark, time, accent, bodyColor, shadow)
+                    else -> drawMinimalFocus(c.dark, time, accent, bodyColor = bodyColor, shadow = shadow)
                 }
             }
         } else if (pose == CatPose.SIT) {
@@ -100,7 +100,7 @@ fun CatMascot(
                 translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
                 scale(s, s, pivot = Offset.Zero)
             }) {
-                if (sleep) drawImportedSleep(c.dark, time, bodyColor = bodyColor, detailColor = detail, shadow = shadow)
+                if (sleep) drawImportedSleep(c.dark, time, accent, bodyColor, detail, shadow)
                 else drawImportedFocus(c.dark, time, accent, Offset.Zero, bodyColor, detail, shadow)
             }
         } else {

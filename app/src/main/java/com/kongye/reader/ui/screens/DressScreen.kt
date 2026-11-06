@@ -79,13 +79,13 @@ fun DressScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
     val animals = Shop.catalog.animals.filter { profile.has(it.id) }
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val tab = Nav.dressTab
 
     Column(Modifier.fillMaxSize().background(c.bg2)) {
         TopBar("装扮", onBack = { Nav.pop() }) {
             IconBtn(Ico.BAG) { Nav.push(Screen.Shop) }
         }
-        Segmented(tabs, tab, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { tab = it }
+        Segmented(tabs, tab, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Nav.dressTab = it }
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
@@ -110,7 +110,7 @@ fun DressScreen() {
 private fun HomeTab(profile: Profile, animals: List<ShopAnimal>) {
     Group("首页上的动物") {
         Pad {
-            AnimalGrid(animals, mascot = true, selected = { it == profile.homeAnimal }) { id ->
+            AnimalGrid(animals, mascot = true, leaf = true, selected = { it == profile.homeAnimal }) { id ->
                 Profiles.update { it.copy(homeAnimal = id) }
             }
             if (animals.isEmpty()) Hint("在商城领养动物后，可以换到首页")
@@ -217,16 +217,13 @@ private fun SceneGroup(profile: Profile) {
 @Composable
 private fun OutfitTab(profile: Profile, animals: List<ShopAnimal>) {
     val c = K.c
-    if (animals.isEmpty()) {
-        Group(null) { Pad { Hint("先在商城领养一只动物，再给它戴饰品") } }
-        return
-    }
-    var dressing by rememberSaveable { mutableStateOf(animals.first().id) }
-    val who = animals.firstOrNull { it.id == dressing } ?: animals.first()
+    // 看板猫打头（本来就有），后面是领养的动物
+    var dressing by rememberSaveable { mutableStateOf(Shop.MASCOT) }
+    val who = animals.firstOrNull { it.id == dressing } ?: Shop.wearer(Shop.MASCOT) ?: animals.firstOrNull() ?: return
     val wear = profile.outfits[who.id].orEmpty()
     Group(null) {
         Box(Modifier.fillMaxWidth().height(230.dp), contentAlignment = Alignment.Center) {
-            Creature(who.id, size = 210.dp, faceLeft = true)
+            Creature(who.id, size = 210.dp, faceLeft = true, leaf = who.id in Shop.kongyeCats, animate = true)
             if (wear.isNotEmpty()) {
                 GhostButton("全部摘下", modifier = Modifier.align(Alignment.BottomEnd)) {
                     for (slot in wear.keys) Profiles.equip(who.id, slot, null)
@@ -236,7 +233,7 @@ private fun OutfitTab(profile: Profile, animals: List<ShopAnimal>) {
         Pad(vertical = 4.dp) {
             T("给谁戴", 13.sp, c.text2)
             Spacer(Modifier.height(8.dp))
-            AnimalGrid(animals, mascot = false, selected = { it == who.id }) { dressing = it }
+            AnimalGrid(animals, mascot = true, leaf = true, selected = { it == who.id }) { dressing = it }
         }
         Spacer(Modifier.height(8.dp))
     }
@@ -337,14 +334,12 @@ private fun SignEditor(current: String) {
 
 /** 动物格子：看板猫（可选）+ 已领养的动物，一律头朝左 */
 @Composable
-private fun AnimalGrid(animals: List<ShopAnimal>, mascot: Boolean, selected: (String) -> Boolean, onPick: (String) -> Unit) {
+private fun AnimalGrid(animals: List<ShopAnimal>, mascot: Boolean, leaf: Boolean = false, selected: (String) -> Boolean, onPick: (String) -> Unit) {
     val ids = (if (mascot) listOf(Shop.MASCOT) else emptyList()) + animals.map { it.id }
     Grid(ids, cols = 4, collapsedRows = 2, selected = selected) { id, m ->
-        if (id == Shop.MASCOT) {
-            Pick(selected(id), "看板猫", modifier = m, onClick = { onPick(id) }) { CatMascot(size = 50.dp, shadow = false) }
-        } else if (id == Shop.MINCAT || id == Shop.GOLDCAT) {
-            // 极简猫、鎏金看板猫和看板猫一样大
-            Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, size = 50.dp, shadow = false) }
+        if (id in Shop.kongyeCats) {
+            // 看板猫、极简猫、鎏金看板猫一样大；leaf：头上顶着普通专注时的叶子
+            Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, size = 50.dp, shadow = false, leaf = leaf) }
         } else {
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) {
                 Creature(id, Modifier.fillMaxSize().padding(4.dp), faceLeft = true)

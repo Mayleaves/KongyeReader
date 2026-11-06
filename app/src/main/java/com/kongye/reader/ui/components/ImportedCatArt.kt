@@ -167,7 +167,7 @@ private object ImportedCatPaths {
     val p154 by lazy { svgPath("M43.71,67.15c-5.3-4.05-11.39-5.69-18.28-4.94") }
 }
 
-internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero, bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {
+internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero, bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true, plainLeaf: Boolean = false) {
     if (shadow) drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("svg-cat-tail", time) {
         assetStroke(ImportedCatPaths.p1, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1E1E22))), 11.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
@@ -189,6 +189,9 @@ internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boole
             drawPath(ImportedCatPaths.p10, Color(0xFFEE4326))
             assetStroke(ImportedCatPaths.p10, Color(0xFFB8230C), 2.4f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
             assetStroke(ImportedCatPaths.p11, Color(0xFFB8230C), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        } else if (plainLeaf) assetGroup("svg-head-leaf", time) {
+            assetStroke(ImportedCatPaths.p10, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.4f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
+            assetStroke(ImportedCatPaths.p11, (if (dark) Color(0xFFE4E4E7) else Color(0xFF27272A)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         }
         assetStroke(ImportedCatPaths.p12, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
         assetStroke(ImportedCatPaths.p13, (detailColor ?: Color(0xFF47474E)), 2.0f, StrokeCap.Round, StrokeJoin.Miter, 0.6f, 1f)
@@ -412,7 +415,7 @@ internal fun DrawScope.drawImportedLoaf(dark: Boolean, time: Float, bodyColor: C
     }
 }
 
-internal fun DrawScope.drawMinimalFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero, bodyColor: Color? = null, shadow: Boolean = true) {
+internal fun DrawScope.drawMinimalFocus(dark: Boolean, time: Float, leaf: Boolean = false, gaze: Offset = Offset.Zero, bodyColor: Color? = null, shadow: Boolean = true, plainLeaf: Boolean = false) {
     if (shadow) drawPath(ImportedCatPaths.p64, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("m-min-body", time) {
         drawPath(ImportedCatPaths.p65, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1B1B1B))), alpha = 1.0f)
@@ -425,6 +428,10 @@ internal fun DrawScope.drawMinimalFocus(dark: Boolean, time: Float, leaf: Boolea
             drawPath(ImportedCatPaths.p67, Color(0xFFEE4326), alpha = 1.0f)
             assetStroke(ImportedCatPaths.p67, Color(0xFFB8230C), 4.0f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
             assetStroke(ImportedCatPaths.p68, Color(0xFFB8230C), 3.5f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
+        } else if (plainLeaf) assetGroup("m-min-leaf", time) {
+            drawPath(ImportedCatPaths.p67, (if (dark) Color(0xFF121214) else Color(0xFFFFFFFF)), alpha = 1.0f)
+            assetStroke(ImportedCatPaths.p67, (if (dark) Color(0xFFE4E4E7) else Color(0xFF1B1B1B)), 4.0f, StrokeCap.Butt, StrokeJoin.Round, 1.0f, 1f)
+            assetStroke(ImportedCatPaths.p68, (if (dark) Color(0xFFE4E4E7) else Color(0xFF1B1B1B)), 3.5f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
         }
         drawPath(ImportedCatPaths.p69, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1B1B1B))), alpha = 1.0f)
         drawPath(ImportedCatPaths.p70, (bodyColor ?: (if (dark) Color(0xFF232329) else Color(0xFF1B1B1B))), alpha = 1.0f)

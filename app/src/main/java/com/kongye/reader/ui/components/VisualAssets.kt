@@ -69,7 +69,7 @@ fun DashboardCat(
     gold: Boolean = false,
 ) {
     val dark = K.c.dark
-    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else null
+    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else Shop.wearer(Shop.MASCOT)
     val pieces = if (minCat != null) outfitPieces(minCat) else emptyList()
     val time = assetTime()
     var happy by remember { mutableStateOf(false) }
@@ -113,8 +113,11 @@ fun DashboardCat(
             if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = false)
             return@Canvas
         }
+        val ox = (this@Canvas.size.width - 240f * s) / 2f
+        val oy = -35f * s
+        if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
         withTransform({
-            translate((this@Canvas.size.width - 240f * s) / 2f, -35f * s)
+            translate(ox, oy)
             scale(s, s, pivot = Offset.Zero)
         }) {
             when {
@@ -124,6 +127,7 @@ fun DashboardCat(
                 else -> drawImportedFocus(dark, time, leaf, gaze)
             }
         }
+        if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = false)
     }
 }
 

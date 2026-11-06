@@ -20,12 +20,20 @@ data class BadgeStyle(
 val badgeStyles = listOf(
     BadgeStyle("classic", "原版黑金", "CLASSIC // ARCHIVE-01", Color(0xFFD89B3C), Color(0xFFB86B35), Color(0xFFF7D279), Color(0xFF17171B), Color(0xFF23242B), Color(0xFFFAF8F5), Color(0xFF1D1D22), Color(0xFF9A7438)),
     BadgeStyle("nightcity", "2077 夜之城", "NC-2077 // MERCENARY", Color(0xFFFCEE09), Color(0xFF00F0FF), Color(0xFFFF003C), Color(0xFF111318), Color(0xFF1D212A), Color(0xFFFFFFFF), Color(0xFF12141B), Color(0xFF00A8B5)),
+    BadgeStyle("ncpd", "NCPD 警局", "NCPD // NIGHT-CITY-PD", Color(0xFF00A8FF), Color(0xFFFACC15), Color(0xFFFF2A4B), Color(0xFF0E1726), Color(0xFF192740), Color(0xFFFFFFFF), Color(0xFF101A2B), Color(0xFF0284C7)),
     BadgeStyle("arasaka", "荒坂集团", "ARASAKA // CORP-SEC", Color(0xFFFF1E27), Color(0xFFD4D4D8), Color(0xFFFF5258), Color(0xFF0E0E11), Color(0xFF1C1C21), Color(0xFFFFFFFF), Color(0xFF111115), Color(0xFFC81E25)),
     BadgeStyle("militech", "军用科技", "MILITECH // TAC-OPS", Color(0xFFF5A623), Color(0xFF6E825B), Color(0xFFD4E157), Color(0xFF181C16), Color(0xFF242B22), Color(0xFFF4F6F0), Color(0xFF1A1F18), Color(0xFF6E825B)),
     BadgeStyle("kangtao", "康陶重工", "KANG TAO // SMART-SYS", Color(0xFFFF6B00), Color(0xFF00B8D4), Color(0xFFFFD166), Color(0xFF101820), Color(0xFF1B2836), Color(0xFFFFFFFF), Color(0xFF111B24), Color(0xFF0097B2)),
+    BadgeStyle("kiroshi", "歧路司光学", "KIROSHI // OPTICS-MK.5", Color(0xFF00D8FF), Color(0xFFFF5500), Color(0xFFE0F7FA), Color(0xFF0C1622), Color(0xFF152538), Color(0xFFFFFFFF), Color(0xFF0E1926), Color(0xFF009EC2)),
     BadgeStyle("trauma", "创伤小组", "TRAUMA TEAM // PLATINUM", Color(0xFF00E676), Color(0xFFFF2A4B), Color(0xFFFFFFFF), Color(0xFF101E1A), Color(0xFF1A2E28), Color(0xFFFFFFFF), Color(0xFF11211C), Color(0xFF00B85C)),
-    BadgeStyle("mox", "莫克斯帮", "THE MOX // LIZZIE-BAR", Color(0xFFFF2A85), Color(0xFF00F0FF), Color(0xFFFFE600), Color(0xFF1E1024), Color(0xFF2D1936), Color(0xFFFFFFFF), Color(0xFF201126), Color(0xFFD91C6B)),
     BadgeStyle("tyger", "虎爪帮", "TYGER CLAWS // JAPANTON", Color(0xFF00E5A3), Color(0xFFFF2E4C), Color(0xFFFFD54F), Color(0xFF111B18), Color(0xFF1C2B27), Color(0xFFFFFFFF), Color(0xFF131E1B), Color(0xFF00B37E)),
+    BadgeStyle("valentinos", "瓦伦蒂诺帮", "VALENTINOS // HEYWOOD-GOLD", Color(0xFFFFD700), Color(0xFFC8102E), Color(0xFFFFF3B0), Color(0xFF1F0F16), Color(0xFF331824), Color(0xFFFFFDF7), Color(0xFF231119), Color(0xFFCA8A04)),
+    BadgeStyle("maelstrom", "漩涡帮", "MAELSTROM // TOTENTANZ", Color(0xFFFF002B), Color(0xFF52525B), Color(0xFFFF6D00), Color(0xFF0B0B0D), Color(0xFF17171C), Color(0xFFF4F4F6), Color(0xFF0D0D10), Color(0xFFDC2626)),
+    BadgeStyle("sixthstreet", "六街帮", "6TH STREET // PATRIOT-66", Color(0xFFFF8C00), Color(0xFF2563EB), Color(0xFFEF4444), Color(0xFF121926), Color(0xFF1E293B), Color(0xFFFAF8F5), Color(0xFF141C2B), Color(0xFFD97706)),
+    BadgeStyle("voodooboys", "巫毒帮", "VOODOO BOYS // BLACKWALL", Color(0xFF00F5D4), Color(0xFF9B5DE5), Color(0xFFF15BB5), Color(0xFF0F1020), Color(0xFF1C1E38), Color(0xFFFFFFFF), Color(0xFF111224), Color(0xFF00BB9E)),
+    BadgeStyle("wraiths", "夜游鬼", "WRAITHS // BADLANDS-RAID", Color(0xFFC6FF00), Color(0xFFD97736), Color(0xFFFFF59D), Color(0xFF1B1A16), Color(0xFF2A2721), Color(0xFFF7F5F0), Color(0xFF1D1B17), Color(0xFF8EBA00)),
+    BadgeStyle("mox", "莫克斯帮", "THE MOX // LIZZIE-BAR", Color(0xFFFF2A85), Color(0xFF00F0FF), Color(0xFFFFE600), Color(0xFF1E1024), Color(0xFF2D1936), Color(0xFFFFFFFF), Color(0xFF201126), Color(0xFFD91C6B)),
+    BadgeStyle("scavengers", "清道夫", "SCAVENGERS // CHOP-SHOP", Color(0xFF39FF14), Color(0xFFE11D48), Color(0xFFFDE047), Color(0xFF141715), Color(0xFF202622), Color(0xFFF4F6F4), Color(0xFF161A17), Color(0xFF22C55E)),
 )
 
 private object BadgePaths {
@@ -130,25 +138,25 @@ private object BadgePaths {
     val p98 by lazy { svgPath("M40 53 L40 62") }
     val p99 by lazy { svgPath("M48 53 L48 62") }
     val p100 by lazy { svgPath("M56 53 L56 62") }
-    val p101 by lazy { svgPath("M36 45 L52 45 L58 54 L52 62 L36 62 L30 54 Z") }
-    val p102 by lazy { svgPath("M44 45 L52 45 L58 54 L52 62 L44 62 Z") }
-    val p103 by lazy { svgPath("M44 50 L50 58 L38 58 Z") }
-    val p104 by lazy { svgPath("M28 34 L34 31 L36 39 L30 42 Z") }
-    val p105 by lazy { svgPath("M38 27 L44 25 L44 35 L38 37 Z") }
-    val p106 by lazy { svgPath("M50 27 L44 25 L44 35 L50 37 Z") }
-    val p107 by lazy { svgPath("M60 34 L54 31 L52 39 L58 42 Z") }
-    val p108 by lazy { svgPath("M20 25 L29 16 L34 16 L20 30 Z") }
-    val p109 by lazy { svgPath("M36 46 L52 46 L57 55 L52 62 L36 62 L31 55 Z") }
-    val p110 by lazy { svgPath("M44 46 L52 46 L57 55 L52 62 L44 62 Z") }
-    val p111 by lazy { svgPath("M28 35 L34 32 L36 40 L30 42 Z") }
-    val p112 by lazy { svgPath("M38 28 L43 26 L44 35 L39 37 Z") }
-    val p113 by lazy { svgPath("M50 28 L45 26 L44 35 L49 37 Z") }
-    val p114 by lazy { svgPath("M60 35 L54 32 L52 40 L58 42 Z") }
-    val p115 by lazy { svgPath("M44 18 L47 24 L41 24 Z") }
-    val p116 by lazy { svgPath("M23 57 L26 33 L37 43 L44 28 L51 43 L62 33 L65 57 Z") }
-    val p117 by lazy { svgPath("M44 28 L51 43 L62 33 L65 57 L44 57 Z") }
-    val p118 by lazy { svgPath("M44 40 L49 47 L44 54 L39 47 Z") }
-    val p119 by lazy { svgPath("M25 60h38v4.5h-38Z") }
+    val p101 by lazy { svgPath("M44 18 L47 24 L41 24 Z") }
+    val p102 by lazy { svgPath("M23 57 L26 33 L37 43 L44 28 L51 43 L62 33 L65 57 Z") }
+    val p103 by lazy { svgPath("M44 28 L51 43 L62 33 L65 57 L44 57 Z") }
+    val p104 by lazy { svgPath("M44 40 L49 47 L44 54 L39 47 Z") }
+    val p105 by lazy { svgPath("M25 60h38v4.5h-38Z") }
+    val p106 by lazy { svgPath("M36 45 L52 45 L58 54 L52 62 L36 62 L30 54 Z") }
+    val p107 by lazy { svgPath("M44 45 L52 45 L58 54 L52 62 L44 62 Z") }
+    val p108 by lazy { svgPath("M44 50 L50 58 L38 58 Z") }
+    val p109 by lazy { svgPath("M28 34 L34 31 L36 39 L30 42 Z") }
+    val p110 by lazy { svgPath("M38 27 L44 25 L44 35 L38 37 Z") }
+    val p111 by lazy { svgPath("M50 27 L44 25 L44 35 L50 37 Z") }
+    val p112 by lazy { svgPath("M60 34 L54 31 L52 39 L58 42 Z") }
+    val p113 by lazy { svgPath("M20 25 L29 16 L34 16 L20 30 Z") }
+    val p114 by lazy { svgPath("M36 46 L52 46 L57 55 L52 62 L36 62 L31 55 Z") }
+    val p115 by lazy { svgPath("M44 46 L52 46 L57 55 L52 62 L44 62 Z") }
+    val p116 by lazy { svgPath("M28 35 L34 32 L36 40 L30 42 Z") }
+    val p117 by lazy { svgPath("M38 28 L43 26 L44 35 L39 37 Z") }
+    val p118 by lazy { svgPath("M50 28 L45 26 L44 35 L49 37 Z") }
+    val p119 by lazy { svgPath("M60 35 L54 32 L52 40 L58 42 Z") }
     val p120 by lazy { svgPath("M16 53 L72 53") }
     val p121 by lazy { svgPath("M42 35h4v30h-4Z") }
     val p122 by lazy { svgPath("M44 45 L50 28 L66 26 L60 43 Z") }
@@ -462,30 +470,30 @@ internal fun DrawScope.drawBadgeIcon(key: String, c1: Color, c2: Color, c3: Colo
             drawPath(BadgePaths.p99, dark, style = Stroke(2.0f, cap = StrokeCap.Butt, join = StrokeJoin.Miter))
             drawPath(BadgePaths.p100, dark, style = Stroke(2.0f, cap = StrokeCap.Butt, join = StrokeJoin.Miter))
         }
-        "paw-single" -> {
+        "crown-grand" -> {
             drawPath(BadgePaths.p101, c2)
-            drawPath(BadgePaths.p102, c1)
-            drawPath(BadgePaths.p103, dark)
-            drawPath(BadgePaths.p104, c3)
-            drawPath(BadgePaths.p105, c2)
-            drawPath(BadgePaths.p106, c1)
-            drawPath(BadgePaths.p107, c2)
+            drawPath(BadgePaths.p102, c2)
+            drawPath(BadgePaths.p103, c1)
+            drawPath(BadgePaths.p104, dark)
+            drawPath(BadgePaths.p105, c3)
+        }
+        "paw-single" -> {
+            drawPath(BadgePaths.p106, c2)
+            drawPath(BadgePaths.p107, c1)
+            drawPath(BadgePaths.p108, dark)
+            drawPath(BadgePaths.p109, c3)
+            drawPath(BadgePaths.p110, c2)
+            drawPath(BadgePaths.p111, c1)
+            drawPath(BadgePaths.p112, c2)
         }
         "paw-array" -> {
-            drawPath(BadgePaths.p108, c3)
-            drawPath(BadgePaths.p109, c1)
-            drawPath(BadgePaths.p110, c2)
-            drawPath(BadgePaths.p111, c2)
-            drawPath(BadgePaths.p112, c1)
             drawPath(BadgePaths.p113, c3)
             drawPath(BadgePaths.p114, c1)
-        }
-        "crown-grand" -> {
             drawPath(BadgePaths.p115, c2)
             drawPath(BadgePaths.p116, c2)
             drawPath(BadgePaths.p117, c1)
-            drawPath(BadgePaths.p118, dark)
-            drawPath(BadgePaths.p119, c3)
+            drawPath(BadgePaths.p118, c3)
+            drawPath(BadgePaths.p119, c1)
         }
         "sprout-horizon" -> {
             drawPath(BadgePaths.p120, c3, style = Stroke(2.2f, cap = StrokeCap.Butt, join = StrokeJoin.Miter))

@@ -1,5 +1,6 @@
 package com.kongye.reader.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,6 +76,7 @@ import com.kongye.reader.ui.components.Creature
 import com.kongye.reader.ui.components.GhostButton
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.Icon
+import com.kongye.reader.ui.components.IconBtn
 import com.kongye.reader.ui.components.InkButton
 import com.kongye.reader.ui.components.OrnamentArt
 import com.kongye.reader.ui.components.Sheet
@@ -118,7 +121,7 @@ private fun poly(points: String, close: Boolean = true): Path = polys.getOrPut(p
 }
 
 /** 外框：殿堂级星芒、重装六角、斜切八角，其余标准八角（和 HTML 一样按成就指定） */
-private val starFrame = setOf("read_100h", "finish_10", "animal_all", "c13", "c17", "egg", "e8")
+private val starFrame = setOf("c0", "read_100h", "finish_10", "animal_all", "c13", "c17", "egg", "e8")
 private val hexFrame = setOf("streak_3", "day_30m", "c9", "c16", "rename")
 private val diagFrame = setOf("night_owl", "shelf_1", "c7", "c14", "backup_1")
 
@@ -221,9 +224,13 @@ fun AchievementsScreen() {
     val sessions by Stats.sessions.collectAsState()
     val books by Library.books.collectAsState()
     val ctx = remember(sessions, books, profile) { AchieveCtx(sessions, books, profile) }
-    val style = badgeStyles.firstOrNull { it.id == profile.badgeStyle && profile.has("style_${it.id}") } ?: badgeStyles.first()
+    val using = badgeStyles.firstOrNull { it.id == profile.badgeStyle && profile.has("style_${it.id}") } ?: badgeStyles.first()
     var picked by remember { mutableStateOf<Achievement?>(null) }
     var buying by remember { mutableStateOf<BadgeStyle?>(null) }
+    // 试看：没换到的配色点一下，整页先换成它看看；底下一条可以换取或者退出试看
+    var preview by remember { mutableStateOf<BadgeStyle?>(null) }
+    val style = preview ?: using
+    BackHandler(preview != null) { preview = null }
     val navPad = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val done = Achievements.all.count { it.id in profile.achievements }
     val earned = Achievements.all.filter { it.id in profile.achievements }.sumOf { it.reward }
@@ -234,14 +241,21 @@ fun AchievementsScreen() {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = navPad + 28.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = navPad + if (preview != null) 96.dp else 28.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
                 item(span = { GridItemSpan(maxLineSpan) }) { Summary(style, done, Achievements.all.size, earned) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     StyleBar(style, profile) { s ->
-                        if (profile.has("style_${s.id}")) Profiles.update { it.copy(badgeStyle = s.id) } else buying = s
+                        when {
+                            profile.has("style_${s.id}") -> {
+                                preview = null
+                                Profiles.update { it.copy(badgeStyle = s.id) }
+                            }
+                            preview?.id == s.id -> buying = s
+                            else -> preview = s
+                        }
                     }
                 }
                 for (group in Achievements.groups) {
@@ -259,6 +273,27 @@ fun AchievementsScreen() {
                 }
             }
         }
+        preview?.let { pv ->
+            Row(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 22.dp)
+                    .background(c.ink, SmoothShape(22.dp))
+                    .padding(start = 16.dp, end = 4.dp, top = 5.dp, bottom = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                T("试看 · ${pv.name}", 14.sp, c.onInk, FontWeight.SemiBold, maxLines = 1)
+                Spacer(Modifier.width(12.dp))
+                Box(
+                    Modifier
+                        .press(scaleTo = 0.94f) { buying = pv }
+                        .background(c.onInk, SmoothShape(16.dp))
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                ) { T("${Shop.STYLE_PRICE} 叶换取", 13.sp, c.ink, FontWeight.SemiBold) }
+                IconBtn(Ico.CLOSE, color = c.onInk, size = 18.dp) { preview = null }
+            }
+        }
         Detail(picked, ctx, profile, style) { picked = null }
         val b = buying
         ConfirmDialog(
@@ -271,6 +306,7 @@ fun AchievementsScreen() {
             onConfirm = {
                 if (b != null && Profiles.buy("style_${b.id}")) {
                     Profiles.update { it.copy(badgeStyle = b.id) }
+                    preview = null
                     Toast.show("换上了「${b.name}」")
                 }
                 buying = null
@@ -361,7 +397,11 @@ private fun Summary(p: BadgeStyle, done: Int, total: Int, earned: Int) {
 private fun StyleBar(current: BadgeStyle, profile: Profile, onPick: (BadgeStyle) -> Unit) {
     val c = K.c
     Column {
-        T("徽章配色", 11.sp, c.text3, FontWeight.SemiBold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            T("徽章配色", 11.sp, c.text3, FontWeight.SemiBold)
+            Spacer(Modifier.weight(1f))
+            T("带锁的点一下先试看", 11.sp, c.text3)
+        }
         Spacer(Modifier.height(6.dp))
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for (s in badgeStyles) {
@@ -471,7 +511,7 @@ private fun Detail(item: Achievement?, ctx: AchieveCtx, profile: Profile, style:
                 Spacer(Modifier.height(14.dp))
                 InkButton("去装扮里用上", Modifier.fillMaxWidth(), height = 46.dp) {
                     onDismiss()
-                    Nav.push(Screen.Dress)
+                    Nav.dress(Shop.rewardOf(a.id)?.let { Nav.dressTabFor(it) } ?: 0)
                 }
             }
             Spacer(Modifier.height(10.dp))

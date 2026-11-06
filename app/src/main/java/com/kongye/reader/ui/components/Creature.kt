@@ -43,17 +43,24 @@ fun Creature(
     shadow: Boolean = true,
     /** 鎏金看板猫换姿势：happy / sleep / loaf，不给就是坐着 */
     pose: String? = null,
+    /**
+     * 看板猫、极简猫、鎏金看板猫头上的叶子：看板 HTML 里普通专注时的那片
+     * （看板猫、极简猫是墨色描边的空心叶，鎏金看板猫是自己的金叶）。商城、装扮里展示用
+     */
+    leaf: Boolean = false,
+    /** 看板猫、极简猫、鎏金看板猫动起来（眨眼、呼吸、叶子轻轻晃），大图用 */
+    animate: Boolean = false,
 ) {
-    val animal = Shop.animal(id) ?: return
-    // 极简猫、鎏金看板猫是正脸坐着的，不用“朝左”
-    val front = id == Shop.MINCAT || id == Shop.GOLDCAT
-    val mirror = flip != (faceLeft && !animal.flip && !front)
+    val animal = Shop.wearer(id) ?: return
+    // 空叶的三只猫是正脸坐着的，不用“朝左”
+    val native = id in Shop.kongyeCats
+    val mirror = flip != (faceLeft && !animal.flip && !native)
     val pieces = outfitPieces(animal, outfit)
     val dark = K.c.dark
-    val native = id == Shop.MINCAT || id == Shop.GOLDCAT
+    val time = if (animate && native) assetTime() else 0f
     val body = if (native) null else painterResource(Shop.drawable(pose?.let { animal.poses[it] } ?: animal.res))
-    // 鎏金看板猫和看板猫同一套 240x260 坐标，取景也和看板猫一样
-    val mascotFrame = id == Shop.GOLDCAT
+    // 看板猫、鎏金看板猫同一套 240x260 坐标，取景也和看板猫一样
+    val mascotFrame = id == Shop.GOLDCAT || id == Shop.MASCOT
     Canvas(if (size != null) modifier.size(size) else modifier) {
         val vb = animal.vb
         val (k, ox, oy) = if (mascotFrame) {
@@ -67,7 +74,11 @@ fun Creature(
             drawOutfit(animal, pieces, k, ox, oy, behind = true)
             if (body != null) translate(ox, oy) { with(body) { draw(Size(vb[2] * k, vb[3] * k)) } }
             else withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
-                if (mascotFrame) drawGoldFocus(dark, 0f, shadow = shadow) else drawMinimalFocus(dark, 0f, shadow = shadow)
+                when (id) {
+                    Shop.MASCOT -> drawImportedFocus(dark, time, shadow = shadow, plainLeaf = leaf)
+                    Shop.GOLDCAT -> drawGoldFocus(dark, time, leaf, shadow = shadow)
+                    else -> drawMinimalFocus(dark, time, shadow = shadow, plainLeaf = leaf)
+                }
             }
             drawOutfit(animal, pieces, k, ox, oy, behind = false)
         }
@@ -98,17 +109,28 @@ internal fun outfitPieces(animal: ShopAnimal, outfit: Map<String, String>? = nul
     }
 }
 
-/** behind：脚下（H）那层，画在身体前面；否则其余部位按次序盖在身体上 */
+/** 翅膀：正脸坐着的猫左右各一只（锚点在身体中线上，镜像一份） */
+private val pairedWings = setOf("acc-F-wings", "acc-F-batwings")
+
+/**
+ * behind：画在身体后面的那层——脚下（H）；空叶的三只猫是正脸坐着的，背上的东西（F）也挂在身体后面。
+ * 否则其余部位按次序盖在身体上
+ */
 internal fun DrawScope.drawOutfit(animal: ShopAnimal, pieces: List<Piece>, k: Float, ox: Float, oy: Float, behind: Boolean) {
-    if (behind) for (p in pieces.filter { it.slot == "H" }) drawPiece(animal, p, k, ox, oy)
-    else for (slot in frontSlots) for (p in pieces.filter { it.slot == slot }) drawPiece(animal, p, k, ox, oy)
+    val front = animal.id in Shop.kongyeCats
+    val back = if (front) listOf("H", "F") else listOf("H")
+    val slots = if (behind) back else frontSlots - back.toSet()
+    for (slot in slots) for (p in pieces.filter { it.slot == slot }) {
+        drawPiece(animal, p, k, ox, oy)
+        if (front && p.acc.id in pairedWings) drawPiece(animal, p, k, ox, oy, mirror = true)
+    }
 }
 
-private fun DrawScope.drawPiece(animal: ShopAnimal, p: Piece, k: Float, ox: Float, oy: Float) {
+private fun DrawScope.drawPiece(animal: ShopAnimal, p: Piece, k: Float, ox: Float, oy: Float, mirror: Boolean = false) {
     val base = animal.slots[p.slot] ?: return
     val a = base.items[p.acc.id] ?: base
     val vb = animal.vb
-    val dir = if (animal.flip) -1f else 1f
+    val dir = (if (animal.accFlip ?: animal.flip) -1f else 1f) * (if (mirror) -1f else 1f)
     // SVG 里是 translate · scale(±s) · rotate；等比缩放和旋转可以交换，缩放直接放进画的尺寸里，
     // 矢量图按最终像素栅格化，不会先画小再放大发糊
     val f = a.s * k

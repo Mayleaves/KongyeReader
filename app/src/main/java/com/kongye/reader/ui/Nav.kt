@@ -1,10 +1,12 @@
 package com.kongye.reader.ui
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.kongye.reader.data.Library
+import com.kongye.reader.data.Shop
 
 sealed class Screen(val key: String) {
     data object Home : Screen("home")
@@ -55,6 +57,26 @@ object Nav {
         stack.removeAll { it is Screen.Reader }
         forward = true
         stack.add(Screen.Reader(id))
+    }
+
+    /** 装扮停在哪一页（0 首页、1 猫园、2 饰品、3 图标）。放在这里，去猫园试看背景再回来还是那一页 */
+    var dressTab by mutableIntStateOf(0)
+
+    /** 打开装扮的某一页；装扮已经在栈里（比如 装扮→商城→去装扮）就退回到它，不叠两层 */
+    fun dress(tab: Int) {
+        dressTab = tab
+        val i = stack.indexOfLast { it == Screen.Dress }
+        if (i < 0 || i == stack.lastIndex) return push(Screen.Dress)
+        forward = false
+        while (stack.size > i + 1) stack.removeAt(stack.lastIndex)
+    }
+
+    /** 这件东西在装扮的哪一页用：动物→首页，背景、挂件→猫园，饰品→饰品，图标→图标 */
+    fun dressTabFor(id: String): Int = when {
+        id.startsWith("icon_") -> 3
+        Shop.accessory(id) != null -> 2
+        Shop.background(id) != null || Shop.ornament(id) != null -> 1
+        else -> 0
     }
 
     /** 选择导入文件，由根界面注册 */

@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +33,8 @@ import com.kongye.reader.data.Library
 import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Settings
 import com.kongye.reader.data.Stats
+import com.kongye.reader.data.Updates
+import kotlinx.coroutines.launch
 import com.kongye.reader.ui.Fmt
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
@@ -63,6 +66,9 @@ fun PrefsScreen() {
     // 彩蛋：连点版本号七下
     var taps by remember { mutableIntStateOf(0) }
     var egg by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    var checking by remember { mutableStateOf(false) }
+    var update by remember { mutableStateOf<Updates.Release?>(null) }
 
     Box(Modifier.fillMaxSize().background(c.bg2)) {
         Column(Modifier.fillMaxSize()) {
@@ -114,6 +120,18 @@ fun PrefsScreen() {
                             taps >= 3 -> Toast.show("再点 ${7 - taps} 下")
                         }
                     }
+                    ValueRow("检查更新", if (checking) "正在看 GitHub…" else "", chevron = true) {
+                        if (checking) return@ValueRow
+                        checking = true
+                        scope.launch {
+                            val r = runCatching { Updates.latest() }
+                            checking = false
+                            r.onSuccess { rel ->
+                                if (Updates.newer(rel.version, version)) update = rel else Toast.show("已经是最新版（$version）")
+                            }.onFailure { Toast.show("没连上 GitHub，过会儿再试") }
+                        }
+                    }
+                    ValueRow("GitHub", "Mayleaves/KongyeReader", chevron = true) { Updates.open(context, Updates.GITHUB) }
                     // 找到过彩蛋才出现：关掉后只剩自己用叶子换到的，正在用的没买的换回默认
                     if ("egg" in profile.achievements) {
                         SwitchRow("彩蛋", profile.egg == true, "开着时商城里的东西全部能用；关掉只剩自己换到的") { v ->
@@ -146,6 +164,19 @@ fun PrefsScreen() {
                 Toast.show("全部解锁了，去装扮看看吧")
             },
             onDismiss = { egg = false },
+        )
+        val u = update
+        ConfirmDialog(
+            visible = u != null,
+            title = "有新版本 ${u?.version ?: ""}",
+            message = u?.let { "现在是 $version\n" + Updates.summary(it.body) } ?: "",
+            confirm = "去 GitHub 看看",
+            ico = Ico.GIFT,
+            onConfirm = {
+                u?.let { Updates.open(context, it.url.ifEmpty { Updates.GITHUB }) }
+                update = null
+            },
+            onDismiss = { update = null },
         )
         ConfirmDialog(
             visible = clearing,
@@ -184,7 +215,7 @@ private fun LeafCard(leaves: Int, done: Int, total: Int) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Tile(Ico.BAG, "商城", "动物 · 背景", Modifier.weight(1f)) { Nav.push(Screen.Shop) }
-            Tile(Ico.HANGER, "装扮", "首页 · 猫园", Modifier.weight(1f)) { Nav.push(Screen.Dress) }
+            Tile(Ico.HANGER, "装扮", "首页 · 猫园", Modifier.weight(1f)) { Nav.dress(0) }
             Tile(Ico.TROPHY, "成就", "$done / $total", Modifier.weight(1f)) { Nav.push(Screen.Achievements) }
         }
     }

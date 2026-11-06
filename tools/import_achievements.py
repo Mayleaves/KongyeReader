@@ -1,6 +1,6 @@
 """成就页：从成就设计 HTML 生成徽章画法（Kotlin）和 16 件成就奖励的 SVG。
 
-用法（仓库根目录）：python -X utf8 tools/import_achievements.py ["E:/Chrome/code_artifact (4).html"]
+用法（仓库根目录）：python -X utf8 tools/import_achievements.py [成就设计 HTML，默认 design/source/achievements.html]
 需要 node。
 
 - 48 个徽章中心图形：HTML 的 renderCenterGraphic 用四个占位色跑一遍，按占位色换成参数，
@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-HTML = Path(sys.argv[1] if len(sys.argv) > 1 else 'E:/Chrome/code_artifact (4).html')
+HTML = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / 'design/source/achievements.html')
 OUT_KT = ROOT / 'app/src/main/java/com/kongye/reader/ui/components/BadgeArt.kt'
 OUT_JSON = ROOT / 'tools/achievement_rewards.json'
 
@@ -32,7 +32,7 @@ const vm = require('vm');
 const ctx = vm.createContext({{}});
 vm.runInContext({json.dumps(script)} + `
 this.F = FACTIONS; this.C = achievementCategories; this.R = ACHIEVEMENT_REWARD_SVGS;
-this.icon = renderCenterGraphic; this.mascot = getHauteConnectedMascotSvg;`, ctx);
+this.icon = renderCenterGraphic; this.mascot = typeof getHauteConnectedMascotSvg === 'function' ? getHauteConnectedMascotSvg : null;`, ctx);
 const icons = {{}};
 for (const cat of ctx.C) for (const it of cat.items) {{
   icons[it.icon] = {{
@@ -46,10 +46,13 @@ for (const [k, r] of Object.entries(ctx.R)) {{
   rewards[k] = {{name: r.name, slot: r.slotCode, viewBox: r.viewBox, svg: r.svgBody, single: r.singleEyeSvg || null}};
 }}
 const poses = {{}};
-for (const p of ['focus', 'happy', 'sleep', 'loaf']) poses[p] = ctx.mascot(p);
+if (ctx.mascot) for (const p of ['focus', 'happy', 'sleep', 'loaf']) poses[p] = ctx.mascot(p);
 process.stdout.write(JSON.stringify({{factions: ctx.F, categories: ctx.C, icons, rewards, poses}}));
 """, capture_output=True, text=True, encoding='utf-8', check=True, cwd=ROOT).stdout)
 
+# 新版成就 HTML 里没有鎏金看板猫四个姿势的生成函数了：沿用上次导出的姿势
+if not data['poses'] and OUT_JSON.exists():
+    data['poses'] = json.loads(OUT_JSON.read_text(encoding='utf-8'))['poses']
 OUT_JSON.write_text(json.dumps({'rewards': data['rewards'], 'poses': data['poses'],
                                 'categories': data['categories']}, ensure_ascii=False, indent=1), encoding='utf-8')
 
@@ -177,10 +180,27 @@ for key, v in data['icons'].items():
     else:
         branches += [f'        {json.dumps(key)} -> if (blueprint) {{', *bp, '        } else {', *on, '        }']
 
+# 配色顺序：原版黑金（免费）打头，然后 2077、政府、企业、帮派；后三类里按 2077 势力从高到低
+STYLE_ORDER = ['classic', 'nightcity',
+               'ncpd',
+               'arasaka', 'militech', 'kangtao', 'kiroshi', 'trauma',
+               'tyger', 'valentinos', 'maelstrom', 'sixthstreet', 'voodooboys', 'wraiths', 'mox', 'scavengers']
+order = STYLE_ORDER + [k for k in data['factions'] if k not in STYLE_ORDER]
+
+
+def spaced(name):
+    """中文和英文、数字之间空一格：2077夜之城 → 2077 夜之城"""
+    name = re.sub(r'([A-Za-z0-9])([\u4e00-\u9fff])', r'\1 \2', name)
+    return re.sub(r'([\u4e00-\u9fff])([A-Za-z0-9])', r'\1 \2', name)
+
+
 factions = []
-for k, f in data['factions'].items():
+for k in order:
+    f = data['factions'].get(k)
+    if f is None:
+        continue
     cols = ', '.join(f'Color(0xFF{f[n][1:].upper()})' for n in ('pri', 'sec', 'acc', 'plate', 'sub', 'paper', 'card', 'lockProg'))
-    factions.append(f'    BadgeStyle({json.dumps(k)}, {json.dumps(f["name"], ensure_ascii=False)}, {json.dumps(f["code"])}, {cols}),')
+    factions.append(f'    BadgeStyle({json.dumps(k)}, {json.dumps(spaced(f["name"]), ensure_ascii=False)}, {json.dumps(f["code"])}, {cols}),')
 
 kt = f'''// 生成：tools/import_achievements.py（来自成就设计 HTML 的 renderCenterGraphic 和 FACTIONS）
 package com.kongye.reader.ui.components

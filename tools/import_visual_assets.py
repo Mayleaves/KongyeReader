@@ -173,8 +173,10 @@ def emit(el, dark_el, css, dark_css, inherited=None, dark_inherited=None, indent
 LEAF_COLOR = r'(\(if \(dark\) Color\(0x\w+\) else Color\(0x\w+\)\)|Color\(0x\w+\))'
 
 
-def leafify(lines, group, drop=False):
-    """头顶叶子：只有 leaf 为真才画，画成红叶（填充 + 深红描边）；drop 直接去掉（猫园趴着的猫）"""
+def leafify(lines, group, drop=False, plain=False):
+    """头顶叶子：只有 leaf 为真才画，画成红叶（填充 + 深红描边）；drop 直接去掉（猫园趴着的猫）。
+    plain：另加一个 plainLeaf 开关，画看板 HTML 里普通专注时的原样叶子（墨色描边，经典猫不填色、极简猫填底色），
+    商城、装扮里展示用"""
     i = next(i for i, line in enumerate(lines) if f'assetGroup("{group}", time) {{' in line)
     indent = len(lines[i]) - len(lines[i].lstrip())
     j = next(j for j in range(i + 1, len(lines)) if lines[j] == ' ' * indent + '}')
@@ -186,6 +188,9 @@ def leafify(lines, group, drop=False):
     if not any('drawPath(' in line for line in body):
         ref = re.search(r'assetStroke\((ImportedCatPaths\.p\d+)', body[0]).group(1)
         body.insert(0, ' ' * (indent + 4) + f'drawPath({ref}, Color(0xFFEE4326))')
+    if plain:
+        original = [line for line in lines[i + 1:j] if not line.strip().startswith('if (leaf)')]
+        body += [' ' * indent + f'}} else if (plainLeaf) assetGroup("{group}", time) {{'] + original
     return lines[:i] + [' ' * indent + f'if (leaf) assetGroup("{group}", time) {{'] + body + lines[j:]
 
 
@@ -212,7 +217,7 @@ for name, filename in [('Focus','home-focus'), ('Happy','home-happy'), ('Sleep',
     light, dark = [ET.parse(OUT / f'{filename}{suffix}.svg').getroot() for suffix in ('', '-dark')]
     lines = emit(light,dark,classes(light),classes(dark))
     if name in ('Focus', 'Happy', 'Sleep'):
-        lines = leafify(lines, 'svg-head-leaf')
+        lines = leafify(lines, 'svg-head-leaf', plain=name == 'Focus')
     if name == 'Focus':
         eyes = next(e for e in light.iter() if e.get('class') == 'svg-eye-blink')
         lines = follow_gaze(lines, [path_ref(shape(e)) for e in list(eyes)[2:]])
@@ -224,6 +229,8 @@ for name, filename in [('Focus','home-focus'), ('Happy','home-happy'), ('Sleep',
                  .replace('Color(0xFF47474E)', '(detailColor ?: Color(0xFF47474E))') for line in lines]
         lines[0] = lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
         params += ', bodyColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true'
+    if name == 'Focus':
+        params += ', plainLeaf: Boolean = false'
     functions += [f'internal fun DrawScope.drawImported{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
 
 # User-supplied replacement for every legacy loaf pose. Preserve its paths and
@@ -278,7 +285,7 @@ for name in ('Focus', 'Happy', 'Sleep', 'Loaf', 'Splash'):
     lines = emit(light, dark, classes(light), classes(dark))
     params = ''
     if name in ('Focus', 'Happy', 'Sleep'):
-        lines = leafify(lines, 'm-min-leaf')
+        lines = leafify(lines, 'm-min-leaf', plain=name == 'Focus')
         params += ', leaf: Boolean = false'
     if name == 'Loaf':
         lines = leafify(lines, 'm-min-leaf', drop=True)
@@ -294,6 +301,8 @@ for name in ('Focus', 'Happy', 'Sleep', 'Loaf', 'Splash'):
             lines = [line.replace('Color(0xFFFFFFFF)', '(eyeColor ?: Color.White)') for line in lines]
             params += ', eyeColor: Color? = null'
         params += ', shadow: Boolean = true'
+    if name == 'Focus':
+        params += ', plainLeaf: Boolean = false'
     functions += [f'internal fun DrawScope.drawMinimal{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
 
 # —— 鎏金看板猫（成就「看板猫猫」的奖励）：成就 HTML 里的四个姿势，和看板猫同一套 240x260 骨架。

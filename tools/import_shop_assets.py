@@ -14,6 +14,7 @@
 - 成就奖励：tools/achievement_rewards.json（tools/import_achievements.py 从成就 HTML 取出）里的鎏金看板猫（四个姿势）、
   4 件饰品、4 张背景、4 件挂件、3 个图标。lock 是对应成就的编号，点亮成就才能用，不用叶子买。
   奖励背景是 260x540 的布局，挂件位置按路牌、小屋、太阳、空地重新对过（REWARD_SLOTS）。
+- 镇店之宝：至尊金猪皇和 8 件神装，见 tools/treasure.py。
 - 图标：看板 HTML 的 getAppIconSvgMarkup：经典落日（免费）、极简（浅色，要解锁）、极简落日（要解锁），胡须压到猫头下面。
 """
 import json
@@ -29,6 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from svg_whiskers import whiskers_under_head  # noqa: E402
+from front_cat_anchors import MASCOT as MASCOT_SLOTS, MINIMAL as MINIMAL_SLOTS  # noqa: E402
 
 ART = Path(sys.argv[1] if len(sys.argv) > 1 else 'E:/Chrome/阅读')
 BOARD = Path(sys.argv[2] if len(sys.argv) > 2 else ART / '看板+图标+开屏.html')
@@ -381,6 +383,9 @@ for group, items, private in (('kongye', KONGYE, False), ('animal', ANIMALS, Fal
             if over:
                 s['items'] = over
             slots[code] = s
+        if aid == 'mincat':
+            # 正脸坐着的极简猫：白膜Ⅰ类的头在身体右边，按外框换算会偏到右耳上，改用照它自己的头、眼、嘴、尾巴摆的锚点
+            slots = MINIMAL_SLOTS
         res = f'shop_animal_{aid}'
         jobs.append((ET.tostring(root, encoding='unicode'), (RES_PRIVATE if private else RES) / 'drawable' / f'{res}.xml'))
         catalog['animals'].append({'id': aid, 'name': name, 'price': price, 'group': group, 'res': res, 'private': private, 'vb': vb,
@@ -395,12 +400,19 @@ for pose, markup in REWARDS['poses'].items():
     gold_res[pose] = res
     jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'{res}.xml'))
 arch = data['arch'][file_arch['猫.svg']]
-gold_slots = {code: map_anchor(anchor, MEASURE['arch'][file_arch['猫.svg']], MEASURE['reward']['pose-focus'])
-              for code, anchor in arch['anchors'].items()}
+# 和看板猫同一套骨架、正脸坐着：用看板猫的锚点（tools/front_cat_anchors.py），看板猫自己戴饰品也借这一套
+gold_slots = MASCOT_SLOTS
 catalog['animals'].insert(1, {'id': 'goldcat', 'name': '鎏金看板猫', 'price': 0, 'lock': 'c7', 'group': 'kongye',
                               'res': gold_res['focus'], 'private': False, 'vb': [0.0, 0.0, 240.0, 260.0],
                               'dual': arch['dualEyes'], 'flip': arch['facingLeft'], 'slots': gold_slots,
                               'poses': {k: v for k, v in gold_res.items() if k != 'focus'}})
+
+# 镇店之宝：至尊金猪皇（9999 叶子）排在动物最前面，8 件神装由成就 c0 解锁（tools/treasure.py）
+import treasure  # noqa: E402
+_pig, _pig_accs, _pig_jobs = treasure.entries()
+catalog['animals'].insert(0, _pig)
+catalog['accessories'] += _pig_accs
+jobs += _pig_jobs
 
 # 成就奖励饰品：和白膜配饰同样以部位锚点为原点
 for aid in ('c10', 'c11', 'c12', 'c13'):
@@ -451,9 +463,10 @@ for file, bid, name, price in BACKGROUNDS:
 # 成就奖励背景：去掉底部的返回胶囊
 for aid, bid in REWARD_BG.items():
     r = REWARDS['rewards'][aid]
-    # 新画的版本（E:/Chrome/<编号>.svg，比如 bg-sun-library.svg）优先
-    newer = NEWER / f"bg-{ {'rainwindow': 'rain-window', 'sunlibrary': 'sun-library', 'forest': 'forest-sanctuary', 'galaxytrain': 'galaxy-train'}[bid] }.svg"
-    if newer.exists():
+    # 新画的版本优先：E:/Chrome/<编号>.svg（比如 bg-sun-library.svg），其次是收进仓库的 design/source/<编号>.svg
+    name = f"bg-{ {'rainwindow': 'rain-window', 'sunlibrary': 'sun-library', 'forest': 'forest-sanctuary', 'galaxytrain': 'galaxy-train'}[bid] }.svg"
+    newer = next((d / name for d in (NEWER, ROOT / 'design/source') if (d / name).exists()), None)
+    if newer:
         root = ET.parse(newer).getroot()
         root.attrib.pop('width', None)
         root.attrib.pop('height', None)
