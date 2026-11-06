@@ -21,7 +21,7 @@ import java.net.URL
 
 /**
  * 检查更新：看 GitHub 上仓库最新的 Release（tag 是 v2.0.7 这样），比现在装的新就在 App 里下载安装包、交给系统安装，
- * 不用跳到 GitHub。安装包是 Release 里附的 .apk（公开版，见 README）。
+ * 不用跳到 GitHub。安装包是 Release 里附的 .apk。
  */
 object Updates {
     private const val REPO = "Mayleaves/KongyeReader"
@@ -199,13 +199,6 @@ object Updates {
             )
         }
         return true
-    }
-
-    /** 这台手机上的是不是自用版（带两款楷体或小马宝莉）：公开版装上去这些会没有 */
-    fun personalBuild(): Boolean {
-        val app = KongyeReaderApp.app
-        return runCatching { !app.assets.list("fonts").isNullOrEmpty() }.getOrDefault(false) ||
-            Shop.drawable("shop_animal_twilight") != 0
     }
 
     /** a 比 b 新：按点分开逐段比数字（2.0.10 比 2.0.9 新） */

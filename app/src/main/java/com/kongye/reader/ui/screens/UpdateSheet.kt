@@ -86,10 +86,6 @@ fun UpdateSheet(visible: Boolean, state: Updates.State, onDismiss: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 14.dp),
         ) { Notes(rel.body) }
-        if (Updates.personalBuild()) {
-            Spacer(Modifier.height(10.dp))
-            T("这台手机装的是自用版。发行包是公开版，不带两款楷体字体和小马宝莉，装上后这两样会没有", 12.sp, c.accent, lineHeight = 18.sp)
-        }
         Spacer(Modifier.height(18.dp))
         when (s.phase) {
             Phase.DOWNLOADING -> {

@@ -217,15 +217,15 @@ $env:JAVA_HOME = 'D:\Program\Android\Android Studio\jbr'
 
 仓库里没有字体文件，直接构建也能用，只是“霞鹜文楷”“仓耳今楷”会显示成系统字体。要带上字体，先按下面“字体”一节准备好。
 
-### 公开发行包
+### 发行包
 
-GitHub Release 里附的 APK 是公开版：不带两款楷体（`app/src/main/assets-private/`）和小马宝莉（`app/src/main/res-private/`），这两样版权上不能再分发。加 `-Ppublic` 构建：
+两款楷体放在 `app/src/main/assets-private/`、小马宝莉放在 `app/src/main/res-private/`，都不进仓库。2.0.8 起 GitHub Release 里附的是作者自用的完整版（带这两样，只作个人存档、不作商用），App 里的「检查更新」下载的就是 Release 附的包。
+
+要构建不带这两样的公开版，加 `-Ppublic`：
 
 ```powershell
 .\gradlew.bat :app:assembleRelease --offline -Ppublic
 ```
-
-App 里的「检查更新」下载的就是这个包。自用版装上公开版后，两款楷体会换成系统字体、小马宝莉会不见；自用的手机直接装本机构建的包。
 
 ### 离线词典
 
