@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 只有在设置里填了 WebDAV、做云备份时才联网；书和阅读记录平时都只在本机 -->
+    <!-- 联网只有两处：设置里填了 WebDAV 做云备份，和手动点「检查更新」；书和阅读记录平时都只在本机 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 检查更新：下好的安装包交给系统安装 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".KongyeReaderApp"
@@ -37,6 +39,17 @@
                 <data android:mimeType="application/epub+zip" />
             </intent-filter>
         </activity>
+
+        <!-- 检查更新下好的安装包（cache/update）交给系统安装器 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity-alias
             android:name=".LauncherDefault"

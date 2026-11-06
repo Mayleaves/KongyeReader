@@ -6,7 +6,7 @@ import com.kongye.reader.KongyeReaderApp
 import java.io.File
 
 /**
- * 正文字体。两款楷体打包在 assets/fonts 里（只留了常用汉字、拉丁字母和标点），
+ * 正文字体。两款楷体打包在 assets/fonts 里（源文件在 assets-private/fonts，公开发行包不带）（只留了常用汉字、拉丁字母和标点），
  * 第一次用时解到应用目录，之后直接从文件读，不必每次把十几 MB 读进内存。
  */
 object ReaderFonts {

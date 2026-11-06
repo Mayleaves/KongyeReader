@@ -31,8 +31,13 @@ android {
     }
 
     sourceSets {
-        // 小马宝莉是孩之宝的形象，图不进仓库：本机运行 tools/import_shop_assets.py 时生成在这里
-        getByName("main").res.srcDir("src/main/res-private")
+        // 不进仓库、也不进公开发行包的东西：小马宝莉是孩之宝的形象（本机运行 tools/import_shop_assets.py 时生成在 res-private），
+        // 两款楷体在 assets-private/fonts（仓耳今楷不许再分发，霞鹜文楷裁剪过不能再叫这个名字，见 README）。
+        // 公开发行包（Release 里附的 APK）加 -Ppublic 构建，不带这两样
+        if (!project.hasProperty("public")) {
+            getByName("main").res.srcDir("src/main/res-private")
+            getByName("main").assets.srcDir("src/main/assets-private")
+        }
     }
 
     compileOptions {

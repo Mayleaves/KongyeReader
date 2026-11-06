@@ -20,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +34,6 @@ import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Settings
 import com.kongye.reader.data.Stats
 import com.kongye.reader.data.Updates
-import kotlinx.coroutines.launch
 import com.kongye.reader.ui.Fmt
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
@@ -66,9 +65,20 @@ fun PrefsScreen() {
     // 彩蛋：连点版本号七下
     var taps by remember { mutableIntStateOf(0) }
     var egg by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var checking by remember { mutableStateOf(false) }
-    var update by remember { mutableStateOf<Updates.Release?>(null) }
+    // 检查更新：状态在 Updates 里（下载在后台接着跑），这里只管什么时候弹出来
+    val up by Updates.state.collectAsState()
+    var sheet by remember { mutableStateOf(false) }
+    var asked by remember { mutableStateOf(false) }
+    LaunchedEffect(up.phase) {
+        if (!asked) return@LaunchedEffect
+        when (up.phase) {
+            Updates.Phase.LATEST -> Toast.show("已经是最新版（$version）")
+            Updates.Phase.FOUND, Updates.Phase.READY -> sheet = true
+            Updates.Phase.FAILED -> if (up.release == null) Toast.show(up.error ?: "没连上 GitHub") else sheet = true
+            else -> return@LaunchedEffect
+        }
+        asked = false
+    }
 
     Box(Modifier.fillMaxSize().background(c.bg2)) {
         Column(Modifier.fillMaxSize()) {
@@ -120,15 +130,21 @@ fun PrefsScreen() {
                             taps >= 3 -> Toast.show("再点 ${7 - taps} 下")
                         }
                     }
-                    ValueRow("检查更新", if (checking) "正在看 GitHub…" else "", chevron = true) {
-                        if (checking) return@ValueRow
-                        checking = true
-                        scope.launch {
-                            val r = runCatching { Updates.latest() }
-                            checking = false
-                            r.onSuccess { rel ->
-                                if (Updates.newer(rel.version, version)) update = rel else Toast.show("已经是最新版（$version）")
-                            }.onFailure { Toast.show("没连上 GitHub，过会儿再试") }
+                    val upValue = when (up.phase) {
+                        Updates.Phase.CHECKING -> "正在检查…"
+                        Updates.Phase.LATEST -> "已是最新版"
+                        Updates.Phase.FOUND -> "有新版本 ${up.release?.version}"
+                        Updates.Phase.DOWNLOADING -> "下载中 ${if (up.total > 0) up.done * 100 / up.total else 0}%"
+                        Updates.Phase.READY -> "下好了，点这里安装"
+                        Updates.Phase.FAILED -> if (up.release != null) "下载没成功" else ""
+                        Updates.Phase.IDLE -> ""
+                    }
+                    ValueRow("检查更新", upValue, color = c.ink, chevron = true) {
+                        val hasRelease = up.release != null && up.phase != Updates.Phase.LATEST
+                        if (hasRelease) sheet = true
+                        else {
+                            asked = true
+                            Updates.check()
                         }
                     }
                     ValueRow("GitHub", "Mayleaves/KongyeReader", chevron = true) { Updates.open(context, Updates.GITHUB) }
@@ -165,19 +181,13 @@ fun PrefsScreen() {
             },
             onDismiss = { egg = false },
         )
-        val u = update
-        ConfirmDialog(
-            visible = u != null,
-            title = "有新版本 ${u?.version ?: ""}",
-            message = u?.let { "现在是 $version\n" + Updates.summary(it.body) } ?: "",
-            confirm = "去 GitHub 看看",
-            ico = Ico.GIFT,
-            onConfirm = {
-                u?.let { Updates.open(context, it.url.ifEmpty { Updates.GITHUB }) }
-                update = null
-            },
-            onDismiss = { update = null },
-        )
+        UpdateSheet(
+            visible = sheet && up.release != null && up.phase != Updates.Phase.LATEST && up.phase != Updates.Phase.CHECKING,
+            state = up,
+        ) {
+            sheet = false
+            Updates.dismiss()
+        }
         ConfirmDialog(
             visible = clearing,
             title = "清空阅读记录？",

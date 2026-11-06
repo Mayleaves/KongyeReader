@@ -1,6 +1,6 @@
 # 空叶阅读
 
-本地 TXT / EPUB 阅读器。黑白手绘风，参考「小鸡专注」：白底、粗黑圆角按钮、灰色胶囊，吉祥物是一只黑猫。书、阅读记录和词典都在手机里；2.0.0 起申请联网权限，只用于用户自己填写的 WebDAV 云备份，不填就不联网。
+本地 TXT / EPUB 阅读器。黑白手绘风，参考「小鸡专注」：白底、粗黑圆角按钮、灰色胶囊，吉祥物是一只黑猫。书、阅读记录和词典都在手机里；2.0.0 起申请联网权限，只用于用户自己填写的 WebDAV 云备份和手动点的「检查更新」，平时不联网。
 
 - 包名 `com.kongye.reader`（1.1.0 及以前用过 `com.kongye.yuedu`）
 - 最低 Android 8.0（API 26）
@@ -40,7 +40,8 @@
   - 背上的东西挂在身体后面，翅膀左右各一只。
 - **头上的叶子**：商城「空叶」组和装扮「首页」「饰品」两页里，三只猫都顶着叶子：看板猫、极简猫是看板 HTML 里普通专注时的空心叶，鎏金看板猫是金叶。首页读满半小时长的红叶不变。
 - **猫园**：长按动物提起来（变大、离地，地上留影子），拖到别处松手放下，位置会记住。
-- **关于**：新加「检查更新」（看 GitHub 上最新的 Release）和项目的 GitHub 地址。
+- **检查更新**：设置「关于」里点一下，看 GitHub 上最新的 Release；有新版本就弹出版本号、大小和更新说明，在 App 里下载 Release 附的安装包、交给系统安装，不用跳到 GitHub（第一次要在系统设置里允许空叶阅读安装应用）。下载在后台进行，那一行显示进度。
+- **关于**：项目的 GitHub 地址。
 - **装扮跳转**：商城里点「去装扮」直接到对应那页（动物→首页，背景和挂件→猫园，饰品→饰品，图标→图标），右上角衣架按正在看的分类跳；猫园试看背景再返回，还停在猫园页。
 - 「看板猫猫」写成“在首页连着摸看板猫 ? 下”。
 - 阳光旧书屋换成新版（光束移到太阳下面），素材收进 `design/source/bg-sun-library.svg`。
@@ -216,6 +217,16 @@ $env:JAVA_HOME = 'D:\Program\Android\Android Studio\jbr'
 
 仓库里没有字体文件，直接构建也能用，只是“霞鹜文楷”“仓耳今楷”会显示成系统字体。要带上字体，先按下面“字体”一节准备好。
 
+### 公开发行包
+
+GitHub Release 里附的 APK 是公开版：不带两款楷体（`app/src/main/assets-private/`）和小马宝莉（`app/src/main/res-private/`），这两样版权上不能再分发。加 `-Ppublic` 构建：
+
+```powershell
+.\gradlew.bat :app:assembleRelease --offline -Ppublic
+```
+
+App 里的「检查更新」下载的就是这个包。自用版装上公开版后，两款楷体会换成系统字体、小马宝莉会不见；自用的手机直接装本机构建的包。
+
 ### 离线词典
 
 `app/src/main/assets/dict.db` 由 `tools/build_dict.py` 生成（需要 `pypinyin`、`opencc-python-reimplemented`），数据都是 MIT 许可，版权声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)：
@@ -230,7 +241,7 @@ $env:JAVA_HOME = 'D:\Program\Android\Android Studio\jbr'
 
 ### 字体
 
-字体放在 `app/src/main/assets/fonts/wenkai.ttf`、`jinkai.ttf`，不进仓库。下载原字体后用脚本裁掉谚文、扩展汉字和字形微调，只留常用汉字、拉丁字母和标点（需要 `fonttools`）：
+字体放在 `app/src/main/assets-private/fonts/wenkai.ttf`、`jinkai.ttf`（打包后在 APK 的 `assets/fonts/`），不进仓库，也不进公开发行包。下载原字体后用脚本裁掉谚文、扩展汉字和字形微调，只留常用汉字、拉丁字母和标点（需要 `fonttools`）：
 
 ```powershell
 python -I tools/subset_fonts.py LXGWWenKaiGB-Regular.ttf TsangerJinKai02-W04.ttf
@@ -250,6 +261,6 @@ python -I tools/subset_fonts.py LXGWWenKaiGB-Regular.ttf TsangerJinKai02-W04.ttf
 - `ui/screens/` 首页、书架、统计、时间轴、猫园、设置、商城、装扮、成就、备份
 - `data/Profile.kt` 叶子、已拥有的东西、装扮和成就（存在 `profile.json`）；`Shop.kt` 读 `assets/shop.json` 里的商品目录；`Backup.kt` 本地 zip 和 WebDAV；`AppIcon.kt` 用清单里的三个 activity-alias 切换桌面图标
 - `ui/components/Creature.kt` 画商城动物和身上的饰品
-- `data/Updates.kt` 检查更新：读 GitHub 上最新的 Release
+- `data/Updates.kt` 检查更新：读 GitHub 上最新的 Release，下载附的安装包交给系统安装；`ui/screens/UpdateSheet.kt` 新版本弹层
 - `tools/treasure.py` 镇店之宝金猪皇和 8 件神装；`tools/front_cat_anchors.py` 空叶三只正脸猫的饰品位置
 - `ui/components/Scene.kt` 画猫园背景、路牌上的字和节日挂件（猫园、商城、装扮共用）

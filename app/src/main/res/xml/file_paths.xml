@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 检查更新：只把 cache/update 里的安装包给系统安装器看 -->
+<paths>
+    <cache-path name="update" path="update/" />
+</paths>
