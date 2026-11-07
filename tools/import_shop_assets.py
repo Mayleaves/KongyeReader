@@ -4,7 +4,7 @@
 需要：node（读 HTML 里的数据和图标生成函数）、Android Studio（用它自带的 Svg2Vector 转 SVG）。
 
 - 生物：素材目录/生物 下的 SVG；E:/Chrome 下有同名的新版就用新版。小马宝莉是孩之宝的形象，
-  转出来放 app/src/main/res-private（不进仓库）。极简猫用看板 HTML 的极简风看板猫（专注坐姿）。
+  转出来放 app/src/main/res-private（不进仓库）。墨团用看板 HTML 的极简风看板猫（专注坐姿）。
   Svg2Vector 不认 <style> 里的 class、<use> 上的属性，这里先把它们写回每个图形上，不然会画成黑色。
 - 背景：素材目录/背景图 下的 SVG。去掉“返回首页”胶囊和所有文字，路牌上的字记下位置，由 App 自己写（门牌可改）。
 - 饰品：生物/白膜配饰.html 里的 34 款配饰。配饰锚点是按 HTML 里 7 种“白膜”身体定的，这里按身体外框
@@ -47,7 +47,7 @@ ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
 NEWER = Path('E:/Chrome')  # 新画的版本先放在这里，和素材目录里同名的旧版二选一
 
 # —— 商品清单：文件名 → (编号, 名字, 价格叶子)；商城按组排：空叶自己的猫、小动物、小马宝莉、表情 ——
-KONGYE = [('极简猫.svg', 'mincat', '极简猫', 200)]
+KONGYE = [('极简猫.svg', 'mincat', '墨团', 200)]
 ANIMALS = [
     ('小猫.svg', 'cat', '小猫', 120), ('小狗.svg', 'dog', '小狗', 120), ('小猪.svg', 'pig', '小猪', 120),
     ('小羊.svg', 'sheep', '小羊', 120), ('小老鼠.svg', 'mouse', '小老鼠', 120), ('小鸡.svg', 'chicken', '小鸡', 120),
@@ -104,6 +104,11 @@ REWARD_SIGN = {'x': 65.3, 'y': 87.5, 'size': 8.5, 'color': '#FFFFFF', 'bold': Tr
 REWARDS = json.loads((ROOT / 'tools/achievement_rewards.json').read_text(encoding='utf-8'))
 REWARD_BG = {'c14': 'rainwindow', 'c15': 'sunlibrary', 'c16': 'forest', 'c17': 'galaxytrain'}
 REWARD_ICON = {'e7': ('gold', '#111115'), 'e8': ('neon', '#0D0B18'), 'e9': ('pixel', '#F4EFE6')}
+# 极简版成就 HTML：鎏金墨团（成就「墨团猫猫」的奖励）和三个墨团版的成就图标（同一个成就解锁两款）。
+# 抽出来存到 tools/minimal_rewards.json，HTML 不在本机时沿用上次抽出的
+MIN_ACH = Path('E:/Chrome/阅读/成就系统_极简.html')
+MIN_REWARDS_JSON = ROOT / 'tools/minimal_rewards.json'
+REWARD_ICON_MIN = {'e7': ('mingold', '#111115'), 'e8': ('minneon', '#0D0B18'), 'e9': ('minpixel', '#F4EFE6')}
 # 谷歌猪是 emoji：朝左、几乎占满画布，比别的动物大一圈。翻成朝右，放进更大的画布（size），
 # 让身体宽度和别的动物差不多，脚落在画布 82% 高的地方（和别的动物在格子里站得一样低）
 REFRAME = {'notopig': {'mirror': True, 'size': 236, 'feet': 0.82},
@@ -117,6 +122,23 @@ def q(tag):
 
 def local(el):
     return el.tag.split('}')[-1]
+
+
+def minimal_rewards():
+    if MIN_ACH.exists():
+        h = MIN_ACH.read_text(encoding='utf-8')
+        b0 = h.index('    const ACHIEVEMENT_REWARD_SVGS = {')
+        b1 = h.index('    // 实机试穿状态')
+        out = node_json(f"""
+const vm = require('vm');
+const ctx = vm.createContext({{}});
+vm.runInContext({json.dumps(h[b0:b1])} + ';this.R = ACHIEVEMENT_REWARD_SVGS;', ctx);
+const r = ctx.R, out = {{}};
+for (const k of ['c7', 'e7', 'e8', 'e9']) out[k] = {{name: r[k].name, svg: r[k].svgBody}};
+process.stdout.write(JSON.stringify(out));
+""")
+        MIN_REWARDS_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding='utf-8')
+    return json.loads(MIN_REWARDS_JSON.read_text(encoding='utf-8'))
 
 
 def node_json(script: str):
@@ -384,7 +406,7 @@ for group, items, private in (('kongye', KONGYE, False), ('animal', ANIMALS, Fal
                 s['items'] = over
             slots[code] = s
         if aid == 'mincat':
-            # 正脸坐着的极简猫：白膜Ⅰ类的头在身体右边，按外框换算会偏到右耳上，改用照它自己的头、眼、嘴、尾巴摆的锚点
+            # 正脸坐着的墨团：白膜Ⅰ类的头在身体右边，按外框换算会偏到右耳上，改用照它自己的头、眼、嘴、尾巴摆的锚点
             slots = MINIMAL_SLOTS
         res = f'shop_animal_{aid}'
         jobs.append((ET.tostring(root, encoding='unicode'), (RES_PRIVATE if private else RES) / 'drawable' / f'{res}.xml'))
@@ -406,6 +428,17 @@ catalog['animals'].insert(1, {'id': 'goldcat', 'name': '鎏金看板猫', 'price
                               'res': gold_res['focus'], 'private': False, 'vb': [0.0, 0.0, 240.0, 260.0],
                               'dual': arch['dualEyes'], 'flip': arch['facingLeft'], 'slots': gold_slots,
                               'poses': {k: v for k, v in gold_res.items() if k != 'focus'}})
+
+# 成就「墨团猫猫」：鎏金墨团，200x220 和墨团同一套坐标；身体由 App 自己画（四个姿势都有），这张图只做目录里的占位
+MIN_REWARDS = minimal_rewards()
+_root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 200 220">{MIN_REWARDS["c7"]["svg"]}</svg>')
+prepare(_root)
+jobs.append((ET.tostring(_root, encoding='unicode'), RES / 'drawable' / 'shop_animal_goldmin.xml'))
+_mincat = next(a for a in catalog['animals'] if a['id'] == 'mincat')
+catalog['animals'].insert(next(i for i, a in enumerate(catalog['animals']) if a['id'] == 'goldcat') + 1,
+                          {'id': 'goldmin', 'name': '鎏金墨团', 'price': 0, 'lock': 'c7m', 'group': 'kongye',
+                           'res': 'shop_animal_goldmin', 'private': False, 'vb': [0.0, 0.0, 200.0, 220.0],
+                           'dual': _mincat['dual'], 'flip': False, 'slots': MINIMAL_SLOTS})
 
 # 镇店之宝：至尊金猪皇（9999 叶子）放在空叶组最后，8 件神装由成就 c0 解锁（tools/treasure.py）
 import treasure  # noqa: E402
@@ -534,7 +567,8 @@ out.minlight = vm.runInContext("getAppIconSvgMarkup('light')", ctx);
 process.stdout.write(JSON.stringify(out));
 """)
 ANDROID = 'http://schemas.android.com/apk/res/android'
-icon_bg = {'sunset': '#FAF8F5', 'minimal': '#FAF8F5', 'minlight': '#FFFFFF', **{k: c for k, c in REWARD_ICON.values()}}
+icon_bg = {'sunset': '#FAF8F5', 'minimal': '#FAF8F5', 'minlight': '#FFFFFF', **{k: c for k, c in REWARD_ICON.values()},
+           **{k: c for k, c in REWARD_ICON_MIN.values()}}
 icon_jobs = []
 for key, markup in icons.items():
     markup = whiskers_under_head(markup)
@@ -546,8 +580,8 @@ for key, markup in icons.items():
     out = RES / 'drawable' / f'ic_launcher_fg_{key}.xml'
     icon_jobs.append((ET.tostring(root, encoding='unicode'), out))
 # 成就奖励图标：底板（大圆角矩形和装饰边框）交给背景层
-for aid, (key, _) in REWARD_ICON.items():
-    root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 512 512">{REWARDS["rewards"][aid]["svg"]}</svg>')
+for aid, key, markup in [(a, k, REWARDS['rewards'][a]['svg']) for a, (k, _) in REWARD_ICON.items()] +         [(a, k, MIN_REWARDS[a]['svg']) for a, (k, _) in REWARD_ICON_MIN.items()]:
+    root = ET.fromstring(f'<svg xmlns="{SVG_NS}" viewBox="0 0 512 512">{markup}</svg>')
     for parent in list(root.iter()):
         for child in list(parent):
             if local(child) == 'rect' and float(child.get('width', 0)) >= 400:
@@ -555,14 +589,17 @@ for aid, (key, _) in REWARD_ICON.items():
     prepare(root)
     icon_jobs.append((ET.tostring(root, encoding='unicode'), RES / 'drawable' / f'ic_launcher_fg_{key}.xml'))
 jobs += icon_jobs
+# 名字「款式·猫」：看板猫的是经典，墨团的是极简；同一款的经典、极简挨着放
 catalog['icons'] = [
-    {'id': 'default', 'name': '经典', 'price': 0},
-    {'id': 'sunset', 'name': '经典落日', 'price': 200},
-    {'id': 'minlight', 'name': '极简', 'price': 200},
-    {'id': 'minimal', 'name': '极简落日', 'price': 300},
-    *[{'id': key, 'name': REWARDS['rewards'][aid]['name'].removesuffix('图标'), 'price': 0, 'lock': aid}
-      for aid, (key, _) in REWARD_ICON.items()],
+    {'id': 'default', 'name': '浅色·经典', 'price': 0},
+    {'id': 'minlight', 'name': '浅色·极简', 'price': 200},
+    {'id': 'sunset', 'name': '落日·经典', 'price': 200},
+    {'id': 'minimal', 'name': '落日·极简', 'price': 300},
 ]
+for aid, (key, _) in REWARD_ICON.items():
+    style = REWARDS['rewards'][aid]['name'].removesuffix('图标')
+    catalog['icons'] += [{'id': key, 'name': f'{style}·经典', 'price': 0, 'lock': aid},
+                         {'id': REWARD_ICON_MIN[aid][0], 'name': f'{style}·极简', 'price': 0, 'lock': aid}]
 
 # —— 转换、收尾 ——
 if RES_PRIVATE.exists():
@@ -605,6 +642,8 @@ for key, color in icon_bg.items():
 # 商城素材只按名字查（getIdentifier），告诉资源压缩别删
 (RES / 'raw').mkdir(exist_ok=True)
 (RES / 'raw' / 'shop_keep.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<resources xmlns:tools="http://schemas.android.com/tools"\n    tools:keep="@drawable/shop_*" />\n', encoding='utf-8')
+from pride_theme import apply_pride_theme
+apply_pride_theme(catalog)
 ASSETS.mkdir(exist_ok=True)
 (ASSETS / 'shop.json').write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding='utf-8')
 print(f"动物 {len(catalog['animals'])}，背景 {len(catalog['backgrounds'])}，饰品 {len(catalog['accessories'])}，"

@@ -3,7 +3,7 @@
 Run from the repository root: python tools/import_visual_assets.py [看板 HTML]
 Only the three asset-generating functions are evaluated, in an isolated Node VM.
 
-经典猫取自 design/source/visual-workbench.html；极简猫（2.0.3 起）取自看板 HTML 的 catStyle='minimal'，
+经典猫取自 design/source/visual-workbench.html；墨团（2.0.3 起）取自看板 HTML 的 catStyle='minimal'，
 默认 E:/Chrome/阅读/看板+图标+开屏.html。头顶的叶子只在 leaf = true（当天读满半小时）时画，画成红叶。
 """
 import json
@@ -175,7 +175,7 @@ LEAF_COLOR = r'(\(if \(dark\) Color\(0x\w+\) else Color\(0x\w+\)\)|Color\(0x\w+\
 
 def leafify(lines, group, drop=False, plain=False):
     """头顶叶子：只有 leaf 为真才画，画成红叶（填充 + 深红描边）；drop 直接去掉（猫园趴着的猫）。
-    plain：另加一个 plainLeaf 开关，画看板 HTML 里普通专注时的原样叶子（墨色描边，经典猫不填色、极简猫填底色），
+    plain：另加一个 plainLeaf 开关，画看板 HTML 里普通专注时的原样叶子（墨色描边，经典猫不填色、墨团填底色），
     商城、装扮里展示用"""
     i = next(i for i, line in enumerate(lines) if f'assetGroup("{group}", time) {{' in line)
     indent = len(lines[i]) - len(lines[i].lstrip())
@@ -255,7 +255,7 @@ loaf_lines[0] = loaf_lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
 functions += ['internal fun DrawScope.drawImportedLoaf(dark: Boolean, time: Float, bodyColor: Color? = null, eyeColor: Color? = null, detailColor: Color? = null, shadow: Boolean = true) {',
               *loaf_lines, '}', '']
 
-# —— 极简猫：看板 HTML 的 catStyle='minimal'，坐标系 200x220。class 统一加 m- 前缀，
+# —— 墨团：看板 HTML 的 catStyle='minimal'，坐标系 200x220。class 统一加 m- 前缀，
 # 免得和经典猫同名的动画（爱心、腮红、Zzz、开屏耳朵）用错转动中心 ——
 minimal_extract = r"""
 const fs = require('fs'), vm = require('vm');
@@ -393,6 +393,109 @@ for name in ('Focus', 'Happy', 'Sleep', 'Loaf'):
         lines[0] = lines[0].replace('if (shadow) ', '')
         lines[1] = lines[1].replace('if (shadow) ', '')
     functions += [f'internal fun DrawScope.drawGold{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
+
+# —— 鎏金墨团（成就「墨团猫猫」的奖励）：成就 HTML 只给了坐姿一张（E:/Chrome/reward-minimal-cat.svg），
+# 四个姿势就用墨团自己的四张，换上奖励图里的金色部分：脚下双层金光环、头顶金叶呆毛和小金点、胸前金星章。
+# class 和墨团一样带 m- 前缀，动画、转动中心、眼睛跟手指都和墨团一样 ——
+GOLDMIN_STAR = [('polygon', {'points': '100,152 103,158 109,161 103,164 100,170 97,164 91,161 97,158', 'fill': '#FBBF24'}),
+                ('circle', {'cx': '100', 'cy': '161', 'r': '2', 'fill': '#FFFBEB'})]
+GOLDMIN_STAR_AT = {'focus': (0, 0), 'happy': (0, 0), 'sleep': (0, 0), 'loaf': (42, 8)}
+# 尾巴上的双层金环 + 悬浮星芒（E:/Chrome/gemini-svg (3).svg，坐姿坐标）：后半圈在尾巴下面，前半圈、高光、星在上面。
+GOLDMIN_RING_BACK = [('ellipse', {'cx': '157.5', 'cy': '158', 'rx': '8', 'ry': '3.3', 'transform': 'rotate(-14 157.5 158)', 'fill': 'none', 'stroke': '#B45309', 'stroke-width': '3'}),
+                     ('ellipse', {'cx': '156.5', 'cy': '166', 'rx': '8', 'ry': '3.2', 'transform': 'rotate(-22 156.5 166)', 'fill': 'none', 'stroke': '#B45309', 'stroke-width': '2.6'})]
+GOLDMIN_RING_FRONT = [('path', {'d': 'M150 160 C154.5 162.8, 161 161.5, 164.5 156.2', 'stroke': '#F59E0B', 'stroke-width': '4.2', 'stroke-linecap': 'round', 'fill': 'none'}),
+                      ('path', {'d': 'M151.5 160 C155 162, 160 161, 163 157', 'stroke': '#FEF08A', 'stroke-width': '1.6', 'stroke-linecap': 'round', 'fill': 'none'}),
+                      ('path', {'d': 'M149 167.5 C153.5 170.8, 160 169.5, 163.5 164', 'stroke': '#D97706', 'stroke-width': '3.4', 'stroke-linecap': 'round', 'fill': 'none'}),
+                      ('circle', {'cx': '166.5', 'cy': '156.5', 'r': '1.8', 'fill': '#FBBF24'}),
+                      ('polygon', {'points': '172,155 173.6,158.6 177.5,160.2 173.6,161.8 172,165.4 170.4,161.8 166.5,160.2 170.4,158.6', 'fill': '#FDE047'})]
+# 别的姿势尾巴不在同一处：整套金环绕环心 (157,162) 转过去、挪到那个姿势的尾巴上（小憩：横着的那段；趴着：前绕的尾巴靠尾尖处）。
+# 趴着的尾巴和身体是同一块，另画一小段尾巴（身体同色）把后半圈中间盖住。
+GOLDMIN_RING_AT = {'focus': None, 'happy': None,
+                   'sleep': ('translate(148 186) rotate(-100 0 0) scale(0.95 -0.95) translate(-157 -162)', None),
+                   'loaf': ('translate(119 195.8) rotate(-80 0 0) scale(0.82) translate(-157 -162)', 'M113 195.9 L129 195.7')}
+
+
+def goldmin_tag(root, pose):
+    ns = '{http://www.w3.org/2000/svg}'
+    shadow = next(e for e in root if e.tag == ns + 'ellipse')
+    i = list(root).index(shadow)
+    rx, ry = float(shadow.get('rx')), float(shadow.get('ry'))
+    root.remove(shadow)
+    halo = [ET.Element(ns + 'ellipse', {'cx': shadow.get('cx'), 'cy': shadow.get('cy'), 'rx': f'{rx + 8:g}', 'ry': f'{ry + 3:g}',
+                                         'fill': '#FEF3C7', 'opacity': '0.65'}),
+            ET.Element(ns + 'ellipse', {'cx': shadow.get('cx'), 'cy': shadow.get('cy'), 'rx': f'{rx:g}', 'ry': f'{ry:g}',
+                                         'fill': '#F59E0B', 'opacity': '0.35'})]
+    for n, e in enumerate(halo):
+        root.insert(i + n, e)
+    leaf = next(e for e in root.iter() if e.get('class') == 'm-min-leaf')
+    blade, stem = list(leaf)[:2]
+    blade.set('stroke', '#F59E0B'); blade.set('fill', '#FEF3C7')
+    stem.set('stroke', '#F59E0B')
+    leaf.append(ET.Element(ns + 'circle', {'cx': '125', 'cy': '24', 'r': '2.2', 'fill': '#FBBF24'}))
+    body = next(e for e in root.iter() if e.get('class') in ('m-min-body', 'm-min-body-loaf'))
+    dx, dy = GOLDMIN_STAR_AT[pose]
+    holder = body
+    if dx or dy:
+        holder = ET.SubElement(body, ns + 'g', {'transform': f'translate({dx} {dy})'})
+    for t, a in GOLDMIN_STAR:
+        holder.append(ET.Element(ns + t, a))
+    # 尾环：坐姿、小憩的尾巴是单独一笔，换成同名的组（跟着尾巴一起摆），后半圈、尾巴、前半圈依次画
+    place = GOLDMIN_RING_AT[pose]
+    tail = next((e for e in body if (e.get('class') or '').startswith('m-min-tail')), None)
+    if tail is not None:
+        group = ET.Element(ns + 'g', {'class': tail.get('class')})
+        idx = list(body).index(tail)
+        body.remove(tail)
+        del tail.attrib['class']
+        body.insert(idx, group)
+        back = front = group
+        if place:
+            back = ET.SubElement(group, ns + 'g', {'transform': place[0]})
+        for t, a in GOLDMIN_RING_BACK:
+            back.append(ET.Element(ns + t, a))
+        group.append(tail)
+        if place:
+            front = ET.SubElement(group, ns + 'g', {'transform': place[0]})
+        for t, a in GOLDMIN_RING_FRONT:
+            front.append(ET.Element(ns + t, a))
+    else:
+        fill = next(e for e in body if e.tag == ns + 'path').get('fill')
+        back = ET.SubElement(body, ns + 'g', {'transform': place[0]})
+        for t, a in GOLDMIN_RING_BACK:
+            back.append(ET.Element(ns + t, a))
+        body.append(ET.Element(ns + 'path', {'d': place[1], 'stroke': fill, 'stroke-width': '7.4', 'fill': 'none'}))
+        front = ET.SubElement(body, ns + 'g', {'transform': place[0]})
+        for t, a in GOLDMIN_RING_FRONT:
+            front.append(ET.Element(ns + t, a))
+    return root
+
+
+for name in ('Focus', 'Happy', 'Sleep', 'Loaf'):
+    light, dark = [ET.parse(OUT / f'min-{name.lower()}{suffix}.svg').getroot() for suffix in ('', '-dark')]
+    for root in (light, dark):
+        for el in root.iter():
+            if el.get('class'):
+                el.set('class', ' '.join('m-' + c for c in el.get('class').split()))
+        goldmin_tag(root, name.lower())
+    markup = '\n'.join(line.rstrip() for line in ET.tostring(light, encoding='unicode').splitlines()) + '\n'
+    (OUT / f'goldmin-{name.lower()}.svg').write_text(markup, encoding='utf-8')
+    lines = emit(light, dark, classes(light), classes(dark))
+    lines[0] = lines[0].replace('drawPath(', 'if (shadow) drawPath(', 1)
+    lines[1] = lines[1].replace('drawPath(', 'if (shadow) drawPath(', 1)
+    params = ''
+    if name != 'Loaf':
+        # 和鎏金看板猫一样：金叶当天读满半小时才长出来，保持金色
+        i = next(i for i, line in enumerate(lines) if 'assetGroup("m-min-leaf", time) {' in line)
+        lines[i] = lines[i].replace('assetGroup(', 'if (leaf) assetGroup(', 1)
+        params += ', leaf: Boolean = false'
+    else:
+        lines = leafify(lines, 'm-min-leaf', drop=True)
+    if name == 'Focus':
+        eyes = next(e for e in light.iter() if e.get('class') == 'm-min-eye-blink')
+        lines = follow_gaze(lines, [path_ref(shape(e)) for e in eyes if e.get('r') == '6.5'])
+        params += ', gaze: Offset = Offset.Zero'
+    params += ', shadow: Boolean = true'
+    functions += [f'internal fun DrawScope.drawGoldMin{name}(dark: Boolean, time: Float{params}) {{', *lines, '}', '']
 
 # Three supplied chart drawings. Stretch only the body; preserve the eyes/leaf proportions.
 for name, file in [('Black','black'),('Leaf','leaf'),('Gray','gray')]:

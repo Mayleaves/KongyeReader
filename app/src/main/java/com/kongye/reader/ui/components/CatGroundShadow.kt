@@ -7,6 +7,7 @@ import com.kongye.reader.data.Shop
 internal fun DrawScope.drawCatGroundShadow(id: String, dark: Boolean, sleeping: Boolean = false) {
     when (id) {
         Shop.MINCAT -> if (sleeping) drawMinimalSleepShadow(dark) else drawMinimalFocusShadow(dark)
+        Shop.GOLDMIN -> if (sleeping) drawGoldMinSleepShadow(dark) else drawGoldMinFocusShadow(dark)
         Shop.GOLDCAT -> if (sleeping) drawGoldSleepShadow(dark) else drawGoldFocusShadow(dark)
         else -> if (sleeping) drawImportedSleepShadow(dark) else drawImportedFocusShadow(dark)
     }

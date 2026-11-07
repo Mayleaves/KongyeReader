@@ -56,7 +56,7 @@ internal fun assetTime(stopAt: Float = Float.POSITIVE_INFINITY): Float {
 
 /**
  * The supplied 240×260 homepage drawing, with its original animated parts.
- * minimal：换成极简猫（200x220），同样三种状态、眼睛跟手指，身上戴着装扮里给它的饰品。
+ * minimal：换成墨团（200x220），同样三种状态、眼睛跟手指，身上戴着装扮里给它的饰品。
  * leaf：当天读满半小时才在头顶长出红叶子。
  */
 @Composable
@@ -67,9 +67,11 @@ fun DashboardCat(
     minimal: Boolean = false,
     /** 鎏金看板猫：和看板猫同一套骨架、同样的动画，自带金色装饰 */
     gold: Boolean = false,
+    /** 鎏金墨团：和墨团同一套骨架、同样的动画，自带金色装饰 */
+    goldMin: Boolean = false,
 ) {
     val dark = K.c.dark
-    val minCat = if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else Shop.wearer(Shop.MASCOT)
+    val minCat = if (goldMin) Shop.animal(Shop.GOLDMIN) else if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else Shop.wearer(Shop.MASCOT)
     val pieces = if (minCat != null) outfitPieces(minCat) else emptyList()
     val showGround = pieces.none { it.slot == "H" }
     val time = assetTime()
@@ -85,12 +87,16 @@ fun DashboardCat(
     Canvas(modifier.size(size).semantics {
         contentDescription = if (sleeping) "小憩黑猫，轻触唤醒" else "空叶黑猫，轻触摸摸头"
     }) {
-        if (minimal) {
+        if (minimal || goldMin) {
             val (k, ox, oy) = minimalFrame()
-            if (showGround) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MINCAT, dark, sleeping) }
+            if (showGround) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawCatGroundShadow(if (goldMin) Shop.GOLDMIN else Shop.MINCAT, dark, sleeping) }
             if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = true)
             withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
-                when {
+                if (goldMin) when {
+                    sleeping -> drawGoldMinSleep(dark, time, leaf, shadow = false)
+                    happy -> drawGoldMinHappy(dark, time, leaf, shadow = false)
+                    else -> drawGoldMinFocus(dark, time, leaf, gaze, shadow = false)
+                } else when {
                     sleeping -> drawMinimalSleep(dark, time, leaf, shadow = false)
                     happy -> drawMinimalHappy(dark, time, leaf, shadow = false)
                     else -> drawMinimalFocus(dark, time, leaf, gaze, shadow = false)
@@ -142,7 +148,7 @@ internal fun catGazeAt(pointer: Offset?, eyeCenter: Offset, radius: Float): Offs
     return delta / (radius + delta.getDistance())
 }
 
-/** Full-screen cold-start animation. SVG coordinates/timing come from the workbench. minimal：桌面图标选了极简款时用极简猫 */
+/** Full-screen cold-start animation. SVG coordinates/timing come from the workbench. minimal：桌面图标选了极简款时用墨团 */
 @Composable
 fun ReadingSplash(onFinished: () -> Unit, onSkip: () -> Unit, minimal: Boolean = false) {
     val dark = K.c.dark
@@ -169,7 +175,7 @@ fun ReadingSplash(onFinished: () -> Unit, onSkip: () -> Unit, minimal: Boolean =
 private val settle = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
 private val bouncy = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
 
-/** 极简猫和经典猫同名的动画组，在极简猫 200x220 坐标里的转动中心 */
+/** 墨团和经典猫同名的动画组，在墨团 200x220 坐标里的转动中心 */
 private val minimalPivot = mapOf(
     "splash-ear-l" to Offset(74f, 70f), "splash-ear-r" to Offset(126f, 70f), "splash-eyes" to Offset(100f, 98f),
     "head-sprout" to Offset(100f, 45f), "head-sprout-float" to Offset(100f, 45f), "svg-cheek-pulse" to Offset(100f, 106f),
@@ -199,7 +205,7 @@ internal fun DrawScope.assetGroup(group: String, time: Float, block: DrawScope.(
     var alpha = 1f
     var tx = 0f; var ty = 0f; var sx = 1f; var sy = 1f; var angle = 0f
     var pivot = Offset.Zero
-    // 极简猫的组名带 m- 前缀：动画和经典猫一样，只是转动中心在 200x220 的坐标里
+    // 墨团的组名带 m- 前缀：动画和经典猫一样，只是转动中心在 200x220 的坐标里
     val name = group.removePrefix("m-")
     when (name) {
         "min-head" -> ty = -2.8f * wave(time, 3.6f)

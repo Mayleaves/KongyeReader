@@ -143,7 +143,7 @@ fun GardenScreen(preview: String? = null) {
             val spots = remember(week, maxWidth, maxHeight) { placeSpots(week, maxWidth.value, maxHeight.value, monday.toEpochDay()) }
             week.forEachIndexed { i, s ->
                 GardenAnimal(
-                    cast[i % cast.size], s, spots[i], maxWidth.value, maxHeight.value, picked == i,
+                    s.gardenAnimal.takeIf { it.isNotBlank() && Shop.wearer(it)!=null && profile.has(it) } ?: cast[i % cast.size], s, spots[i], maxWidth.value, maxHeight.value, picked == i,
                     onTap = { picked = if (picked == i) null else i },
                     onLift = { picked = null },
                 )
@@ -276,7 +276,7 @@ private fun GardenAnimal(
         }
     }
     val pos = held ?: home
-    val cat = who == Shop.MASCOT || who == Shop.MINCAT || who == Shop.GOLDCAT
+    val cat = who in Shop.kongyeCats
     val replacesGround = !cat && profile.outfits[who]?.get("H")?.let { Shop.accessory(it) } != null
     // 动物的 SVG 四周留白比猫多，画大一点看起来才一样大；脚落在格子里的高度也不一样
     val size = if (cat) spot.size else spot.size * 1.3f
@@ -321,6 +321,7 @@ private fun GardenAnimal(
                     blink = !spot.loaf,
                     minimal = who == Shop.MINCAT,
                     gold = who == Shop.GOLDCAT,
+                    goldMin = who == Shop.GOLDMIN,
                 )
             } else Creature(who, body, size = size.dp, flip = spot.flip, shadow = lift < 0.01f)
         }

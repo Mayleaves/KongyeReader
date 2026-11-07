@@ -44,6 +44,7 @@ class VisualRegression : Instrumentation() {
     private var controlsOnly = false
     private var loafOnly = false
     private var readerUpdateOnly = false
+    private var achievementOnly = false
     private var shopGesturesOnly = false
     private var shopLayersOnly = false
 
@@ -54,6 +55,7 @@ class VisualRegression : Instrumentation() {
         controlsOnly = arguments?.getString("check") == "home-controls"
         loafOnly = arguments?.getString("check") == "loaf"
         readerUpdateOnly = arguments?.getString("check") == "reader-update"
+        achievementOnly = arguments?.getString("check") == "achievements"
         shopGesturesOnly = arguments?.getString("check") == "shop-gestures"
         shopLayersOnly = arguments?.getString("check") == "shop-layers"
         start()
@@ -62,6 +64,11 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (achievementOnly) {
+                AchievementChecks(this).run()
+                finish(0,Bundle().apply { putString("result","PASS: fifteen real achievement conditions, rewards, NEW lifecycle/persistence, ordering, Pride metadata and badge artwork") })
+                return
+            }
             if (shopGesturesOnly || shopLayersOnly) {
                 ShopGestureChecks(this, layersOnly=shopLayersOnly).run()
                 finish(0, Bundle().apply { putString("result", if(shopLayersOnly) "PASS: shadow/foot-pad/body layers and dashboard mood captures" else "PASS: shop/dress swipe navigation, scroll retention, landscape cat sizing, and shadow/foot-pad/body layers") })

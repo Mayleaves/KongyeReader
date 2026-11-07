@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.kongye.reader.data.Profiles
+import com.kongye.reader.data.Shop
 import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.screens.ShopScreen
 import com.kongye.reader.ui.screens.DressScreen
@@ -174,8 +175,8 @@ fun App(showSplash: Boolean = false) {
                     ReadingSplash(
                         onFinished = { splashFinishing = true },
                         onSkip = { splashVisible = false },
-                        // 桌面图标选了极简款，开屏也换成极简猫
-                        minimal = Profiles.value.icon in setOf("minimal", "minlight"),
+                        // 桌面图标选了极简款，开屏也换成墨团
+                        minimal = Profiles.value.icon in Shop.minimalIcons,
                     )
                 }
             }

@@ -32,7 +32,7 @@ private val frontSlots = listOf("F", "G", "E", "B", "C", "D", "A")
  * 商城里的动物，戴着身上的饰品。outfit 不给就用自己装扮过的；flip 让它朝另一边。
  * faceLeft：商城、装扮里的格子统一让头朝左（素材大多朝右，小马大多朝左）。
  * 饰品锚点在动物自己的 SVG 坐标里（tools/import_shop_assets.py 换算），这里按同样的缩放画上去。
- * 极简猫的身体由 App 自己画，取景和看板猫一样（同样大小的格子里一样大）。
+ * 墨团的身体由 App 自己画，取景和看板猫一样（同样大小的格子里一样大）。
  */
 @Composable
 fun Creature(
@@ -46,11 +46,11 @@ fun Creature(
     /** 鎏金看板猫换姿势：happy / sleep / loaf，不给就是坐着 */
     pose: String? = null,
     /**
-     * 看板猫、极简猫、鎏金看板猫头上的叶子：看板 HTML 里普通专注时的那片
-     * （看板猫、极简猫是墨色描边的空心叶，鎏金看板猫是自己的金叶）。商城、装扮里展示用
+     * 看板猫、墨团、鎏金看板猫头上的叶子：看板 HTML 里普通专注时的那片
+     * （看板猫、墨团是墨色描边的空心叶，鎏金看板猫是自己的金叶）。商城、装扮里展示用
      */
     leaf: Boolean = false,
-    /** 看板猫、极简猫、鎏金看板猫动起来（眨眼、呼吸、叶子轻轻晃），大图用 */
+    /** 看板猫、墨团、鎏金看板猫动起来（眨眼、呼吸、叶子轻轻晃），大图用 */
     animate: Boolean = false,
 ) {
     val animal = Shop.wearer(id) ?: return
@@ -87,6 +87,7 @@ fun Creature(
                 when (id) {
                     Shop.MASCOT -> drawImportedFocus(dark, time, shadow = false, plainLeaf = leaf)
                     Shop.GOLDCAT -> drawGoldFocus(dark, time, leaf, shadow = false)
+                    Shop.GOLDMIN -> drawGoldMinFocus(dark, time, leaf, shadow = false)
                     else -> drawMinimalFocus(dark, time, shadow = false, plainLeaf = leaf)
                 }
             }
@@ -96,7 +97,7 @@ fun Creature(
 }
 
 /**
- * 极简猫 200x220 坐标在画布上的位置：和看板猫（240x260，CatMascot/DashboardCat 的取景）对齐，
+ * 墨团 200x220 坐标在画布上的位置：和看板猫（240x260，CatMascot/DashboardCat 的取景）对齐，
  * 一样大、脚踩在同一条线上。返回 (缩放, 左, 上)
  */
 internal fun DrawScope.minimalFrame(): Triple<Float, Float, Float> {

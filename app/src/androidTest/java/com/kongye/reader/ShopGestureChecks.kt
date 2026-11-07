@@ -187,7 +187,7 @@ internal class ShopGestureChecks(private val test: Instrumentation, private val 
     private fun catBounds(name: String): Rect = nodes().last { "动物预览：$name" in labels(it) }.boundsInRoot
 
     private fun responsiveCats() {
-        val names=listOf("看板猫","极简猫","鎏金看板猫")
+        val names=listOf("看板猫","墨团","鎏金看板猫")
         test.runOnMainSync { Nav.home(); Nav.push(Screen.Shop) }; SystemClock.sleep(800)
         // The remembered shop list may be scrolled. Bring its first row into view.
         val grid=nodes().last { it.config.getOrNull(SemanticsActions.ScrollBy)!=null }

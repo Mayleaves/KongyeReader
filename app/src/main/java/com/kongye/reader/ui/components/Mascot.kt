@@ -51,10 +51,12 @@ fun CatMascot(
     pose: CatPose = CatPose.SIT,
     flip: Boolean = false,
     look: Float = 1f,
-    /** 极简猫（200x220 的画稿），取景和经典猫一样，同样大小一样大 */
+    /** 墨团（200x220 的画稿），取景和经典猫一样，同样大小一样大 */
     minimal: Boolean = false,
     /** 鎏金看板猫（猫园里也会趴着、睡觉；颜色是自己的） */
     gold: Boolean = false,
+    /** 鎏金墨团：墨团的取景和姿势，颜色是自己的 */
+    goldMin: Boolean = false,
 ) {
     val c = K.c
     val time = if (blink || pose == CatPose.LOAF) assetTime() else 0f
@@ -76,7 +78,7 @@ fun CatMascot(
                     translate(-32f, -55f)
                 }) { drawGoldLoaf(c.dark, time, shadow) }
             }
-        } else if (minimal) {
+        } else if (minimal || goldMin) {
             val (k, ox, oy) = if (pose == CatPose.SIT) minimalFrame() else {
                 // 趴着：和经典趴姿一样的取景（200 宽的格子，脚踩同一条线）
                 val s = this.size.minDimension / 200f
@@ -87,7 +89,11 @@ fun CatMascot(
                 translate(ox, oy)
                 scale(k, k, pivot = Offset.Zero)
             }) {
-                when {
+                if (goldMin) when {
+                    pose == CatPose.LOAF -> drawGoldMinLoaf(c.dark, time, shadow)
+                    sleep -> drawGoldMinSleep(c.dark, time, accent, shadow)
+                    else -> drawGoldMinFocus(c.dark, time, accent, shadow = shadow)
+                } else when {
                     pose == CatPose.LOAF -> drawMinimalLoaf(c.dark, time, bodyColor, if (bodyColor != null) eye else null, shadow)
                     sleep -> drawMinimalSleep(c.dark, time, accent, bodyColor, shadow)
                     else -> drawMinimalFocus(c.dark, time, accent, bodyColor = bodyColor, shadow = shadow)

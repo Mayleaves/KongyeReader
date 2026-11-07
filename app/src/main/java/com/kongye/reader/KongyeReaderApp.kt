@@ -20,6 +20,7 @@ class KongyeReaderApp : Application() {
         Stats.load()
         CatRest.load()
         Profiles.load()
+        Stats.bindAchievementHistory(Profiles.value)
         Store.io.launch { Dict.prepare() }
         // 读书换叶子、书架变化时看看有没有新成就
         Store.io.launch { Stats.sessions.collect { Profiles.syncReading(it) } }

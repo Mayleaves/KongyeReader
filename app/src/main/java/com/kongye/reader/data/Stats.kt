@@ -31,16 +31,43 @@ object Stats {
         _sessions.update { list ->
             val last = list.lastOrNull()
             // 同一本书、隔了不到 3 分钟又接着读，算作同一次
-            if (last != null && last.bookId == s.bookId && s.start - last.end < 3 * 60_000 && date(last.start) == date(s.start)) {
-                list.dropLast(1) + last.copy(
+            val merge=last != null && last.bookId == s.bookId && s.start - last.end < 3 * 60_000 && date(last.start) == date(s.start)
+            val base=if(merge) last!!.copy(
                     end = s.end,
                     millis = last.millis + s.millis,
                     pages = last.pages + s.pages,
                     toChapter = s.toChapter.ifEmpty { last.toChapter },
                     finished = last.finished || s.finished,
+                    bookChars = maxOf(last.bookChars,s.bookChars),
                 )
-            } else list + s
+            else s
+            val old=if(merge) list.dropLast(1) else list
+            val chars=maxOf(base.bookChars,Library.get(s.bookId)?.chars ?: 0)
+            val animal=if(isCat(base) && base.gardenAnimal.isBlank()) {
+                val pool=visitorPool(Profiles.value)
+                val index=old.count { isCat(it) && monday(date(it.start))==monday(date(base.start)) }
+                pool[index%pool.size]
+            } else base.gardenAnimal
+            old+base.copy(bookChars=chars,gardenAnimal=animal)
         }
+        saver.poke()
+    }
+
+    private fun visitorPool(profile: Profile)=profile.gardenAnimals.filter { Shop.wearer(it)!=null && profile.has(it) }.ifEmpty { listOf(Shop.MASCOT) }
+
+    /** 旧记录依照升级前猫园的实际排列补齐；之后每次会话固定保存动物。 */
+    fun bindAchievementHistory(profile: Profile) {
+        if(_sessions.value.none { it.bookChars==0L || (isCat(it) && it.gardenAnimal.isBlank()) }) return
+        val pool=visitorPool(profile)
+        val indices=HashMap<LocalDate,Int>()
+        _sessions.update { list -> list.map { s ->
+            var animal=s.gardenAnimal
+            if(isCat(s)) {
+                val week=monday(date(s.start));val i=indices[week] ?: 0;indices[week]=i+1
+                if(animal.isBlank()) animal=pool[i%pool.size]
+            }
+            s.copy(gardenAnimal=animal,bookChars=maxOf(s.bookChars,Library.get(s.bookId)?.chars ?: 0))
+        } }
         saver.poke()
     }
 

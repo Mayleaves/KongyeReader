@@ -50,6 +50,9 @@ data class Session(
     val fromChapter: String = "",
     val toChapter: String = "",
     val finished: Boolean = false,
+    /** 保留当次实际来访的动物和书籍长度，装扮变化或删书后不改写历史。 */
+    val gardenAnimal: String = "",
+    val bookChars: Long = 0,
 )
 
 @Serializable

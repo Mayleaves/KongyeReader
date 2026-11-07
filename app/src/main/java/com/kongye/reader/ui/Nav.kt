@@ -54,7 +54,10 @@ object Nav {
     }
 
     fun openBook(id: String) {
-        Library.update(id) { it.copy(lastReadAt = System.currentTimeMillis()) }
+        val previous=Library.get(id)?.lastReadAt ?: 0
+        val now=System.currentTimeMillis()
+        Library.update(id) { it.copy(lastReadAt = now) }
+        com.kongye.reader.data.AchievementTracking.openedBook(id,previous,now)
         stack.removeAll { it is Screen.Reader }
         forward = true
         stack.add(Screen.Reader(id))

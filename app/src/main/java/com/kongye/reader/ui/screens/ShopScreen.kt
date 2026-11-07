@@ -57,6 +57,7 @@ import com.kongye.reader.data.Achievements
 import com.kongye.reader.data.Profile
 import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Shop
+import com.kongye.reader.data.ShopBlurbs
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
 import com.kongye.reader.ui.components.AccessoryArt
@@ -151,13 +152,13 @@ fun ShopScreen() {
                             val list = cat.animals.filter { it.group == group }
                             if (list.isEmpty()) continue
                             item(key = "group-$group", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(title.first, title.second) }
-                            // 空叶组：看板猫打头（本来就有），极简猫和它一样大；三只猫头上都顶着叶子
+                            // 空叶组：看板猫打头（本来就有），墨团和它一样大；四只猫头上都顶着叶子
                             if (group == "kongye") item(key = Shop.MASCOT) {
                                 ItemCard("看板猫", Shop.MASCOT, 0, profile, onClick = { picked = Shop.MASCOT }) { Creature(Shop.MASCOT, Modifier.fillMaxSize(0.72f), leaf = true) }
                             }
                             items(list, key = { it.id }) { a ->
                                 ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
-                                    if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, Modifier.fillMaxSize(0.72f), leaf = true)
+                                    if (a.id in Shop.kongyeCats) Creature(a.id, Modifier.fillMaxSize(0.72f), leaf = true)
                                     else Creature(a.id, Modifier.fillMaxSize().padding(6.dp), faceLeft = true)
                                 }
                             }
@@ -349,20 +350,24 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         Spacer(Modifier.height(16.dp))
         T(Shop.nameOf(item), 20.sp, c.ink, FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
-        val desc = when {
-            lock != null -> "成就「${lock.title}」的奖励"
-            item == Shop.MASCOT -> "空叶阅读自己的猫，一开始就陪着你，首页和猫园默认都是它"
-            item == "icon_minlight" -> "极简猫的浅色桌面图标，选了它开屏也换成极简猫"
-            item == Shop.TREASURE -> "24K 纯金的至尊金猪皇。带回家就点亮成就「镇店之宝」，送 8 件所有动物都能戴的神装"
+        // 上面一句是它自己的介绍（ShopBlurbs），下面一行小字是用法
+        val blurb = ShopBlurbs.of(item)
+        val usage = when {
+            item == Shop.TREASURE -> "带回家就点亮成就「镇店之宝」，送 8 件所有动物都能戴的神装"
+            lock != null -> "成就「${lock.title}」的奖励" +
+                (if (animal != null) "，可以放到首页，也能请它来猫园" else if (item.startsWith("icon_")) "，随时可以换" else "")
+            item == Shop.MASCOT -> "一开始就陪着你，首页和猫园默认都是它"
             animal != null -> "领养后可以放到首页，也能请它来猫园"
             bg != null -> "猫园背景，路牌上写你起的名字"
             acc != null -> "戴在动物的${Shop.slotNames[acc.slot]}，每只动物各戴各的"
             orn != null -> "${Shop.festival(orn.fest)?.name ?: "节日"}挂件，挂在猫园的${Shop.catalog.ornamentSlots[orn.slot]?.name ?: "背景"}上"
-            item.startsWith("icon_") && item.removePrefix("icon_") in setOf("gold", "neon", "pixel") -> "成就奖励的桌面图标，随时可以换"
-            item == "icon_minimal" -> "极简猫的落日桌面图标，选了它开屏也换成极简猫"
             else -> "桌面图标，随时可以换"
+        } + if (item.startsWith("icon_") && item.removePrefix("icon_") in Shop.minimalIcons) "；选了它开屏也换成墨团" else ""
+        T(blurb ?: usage, 13.sp, c.text2)
+        if (blurb != null) {
+            Spacer(Modifier.height(2.dp))
+            T(usage, 12.sp, c.text3)
         }
-        T(desc, 13.sp, c.text2)
         Spacer(Modifier.height(20.dp))
         when {
             owned && orn != null && profile.scene[orn.slot] != orn.id -> InkButton("挂到猫园", Modifier.fillMaxWidth(), height = 52.dp) {

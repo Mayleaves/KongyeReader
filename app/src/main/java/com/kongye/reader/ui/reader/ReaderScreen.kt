@@ -610,6 +610,7 @@ private fun Reader(
             scope.launch {
                 val res = withContext(Dispatchers.IO) { Dict.select(text, pos) { s -> countIn(content.text, s) } }
                 Profiles.count("dict")
+                res.entry?.takeIf { it.found }?.let { com.kongye.reader.data.AchievementTracking.lookedUp(book.id,it.word) }
                 val cur = sel ?: return@launch
                 if (!cur.on(cp, pageIdx)) return@launch
                 val s = res.start.coerceIn(r.start, r.end - 1)
@@ -741,6 +742,7 @@ private fun Reader(
                     val t = selectedText()
                     scope.launch {
                         val list = withContext(Dispatchers.IO) { Dict.lookup(t) }
+                        list.filter { it.found }.forEach { com.kongye.reader.data.AchievementTracking.lookedUp(book.id,it.word) }
                         if (sel != null) entries = list
                     }
                 },

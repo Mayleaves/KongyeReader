@@ -2,7 +2,7 @@
  "animals": [
   {
    "id": "mincat",
-   "name": "极简猫",
+   "name": "墨团",
    "price": 200,
    "group": "kongye",
    "res": "shop_animal_mincat",
@@ -196,6 +196,103 @@
     "happy": "shop_goldcat_happy",
     "sleep": "shop_goldcat_sleep",
     "loaf": "shop_goldcat_loaf"
+   }
+  },
+  {
+   "id": "goldmin",
+   "name": "鎏金墨团",
+   "price": 0,
+   "lock": "c7m",
+   "group": "kongye",
+   "res": "shop_animal_goldmin",
+   "private": false,
+   "vb": [
+    0.0,
+    0.0,
+    200.0,
+    220.0
+   ],
+   "dual": true,
+   "flip": false,
+   "slots": {
+    "A": {
+     "x": 100,
+     "y": 57,
+     "s": 1.1578,
+     "r": 0
+    },
+    "B": {
+     "x": 136.5,
+     "y": 51,
+     "s": 1.072,
+     "r": 16
+    },
+    "C": {
+     "x": 100,
+     "y": 98,
+     "s": 1.1765,
+     "r": 0
+    },
+    "D": {
+     "x": 100,
+     "y": 114,
+     "s": 1.072,
+     "r": 16,
+     "items": {
+      "acc-D-rose": {
+       "x": 100,
+       "y": 112,
+       "s": 1.072,
+       "r": -6
+      }
+     }
+    },
+    "E": {
+     "x": 100,
+     "y": 136,
+     "s": 1.072,
+     "r": 0,
+     "items": {
+      "acc-E-medal": {
+       "x": 89.28,
+       "y": 138,
+       "s": 1.072,
+       "r": 10
+      }
+     }
+    },
+    "F": {
+     "x": 100,
+     "y": 152,
+     "s": 1.3,
+     "r": 0,
+     "items": {
+      "acc-F-backpack": {
+       "x": 66,
+       "y": 168,
+       "s": 1.05,
+       "r": -14
+      },
+      "acc-F-windup": {
+       "x": 70,
+       "y": 156,
+       "s": 1.0,
+       "r": -18
+      }
+     }
+    },
+    "G": {
+     "x": 156,
+     "y": 146,
+     "s": 0.84,
+     "r": 0
+    },
+    "H": {
+     "x": 100,
+     "y": 197,
+     "s": 0.4983,
+     "r": 0
+    }
    }
   },
   {
@@ -5417,7 +5514,7 @@
   },
   {
    "id": "orn_mothers_a",
-   "name": "暖心彩条小旗",
+   "name": "骄傲彩虹旗",
    "fest": "mothers",
    "slot": "A",
    "price": 40,
@@ -5431,7 +5528,7 @@
   },
   {
    "id": "orn_mothers_b",
-   "name": "彩虹气球花屋",
+   "name": "彩虹气球屋",
    "fest": "mothers",
    "slot": "B",
    "price": 60,
@@ -5445,7 +5542,7 @@
   },
   {
    "id": "orn_mothers_c",
-   "name": "馨香花瓣漫舞",
+   "name": "自由花瓣雨",
    "fest": "mothers",
    "slot": "C",
    "price": 60,
@@ -5459,7 +5556,7 @@
   },
   {
    "id": "orn_mothers_d",
-   "name": "紫韵康乃馨花",
+   "name": "骄傲花束",
    "fest": "mothers",
    "slot": "D",
    "price": 40,
@@ -5473,7 +5570,7 @@
   },
   {
    "id": "orn_mothers_e",
-   "name": "珍珠胸针礼盒",
+   "name": "骄傲徽章礼盒",
    "fest": "mothers",
    "slot": "E",
    "price": 40,
@@ -5487,7 +5584,7 @@
   },
   {
    "id": "orn_mothers_f",
-   "name": "感恩粉红甜心",
+   "name": "爱无界甜心",
    "fest": "mothers",
    "slot": "F",
    "price": 50,
@@ -6443,7 +6540,7 @@
   },
   {
    "id": "mothers",
-   "name": "感恩母亲",
+   "name": "骄傲日",
    "color": "#DB2777"
   },
   {
@@ -6543,39 +6640,57 @@
  "icons": [
   {
    "id": "default",
-   "name": "经典",
+   "name": "浅色·经典",
    "price": 0
   },
   {
-   "id": "sunset",
-   "name": "经典落日",
+   "id": "minlight",
+   "name": "浅色·极简",
    "price": 200
   },
   {
-   "id": "minlight",
-   "name": "极简",
+   "id": "sunset",
+   "name": "落日·经典",
    "price": 200
   },
   {
    "id": "minimal",
-   "name": "极简落日",
+   "name": "落日·极简",
    "price": 300
   },
   {
    "id": "gold",
-   "name": "暗金浮雕",
+   "name": "暗金浮雕·经典",
+   "price": 0,
+   "lock": "e7"
+  },
+  {
+   "id": "mingold",
+   "name": "暗金浮雕·极简",
    "price": 0,
    "lock": "e7"
   },
   {
    "id": "neon",
-   "name": "霓虹幻彩",
+   "name": "霓虹幻彩·经典",
+   "price": 0,
+   "lock": "e8"
+  },
+  {
+   "id": "minneon",
+   "name": "霓虹幻彩·极简",
    "price": 0,
    "lock": "e8"
   },
   {
    "id": "pixel",
-   "name": "像素复古",
+   "name": "像素复古·经典",
+   "price": 0,
+   "lock": "e9"
+  },
+  {
+   "id": "minpixel",
+   "name": "像素复古·极简",
    "price": 0,
    "lock": "e9"
   }

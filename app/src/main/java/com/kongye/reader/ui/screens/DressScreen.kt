@@ -356,7 +356,7 @@ private fun AnimalGrid(animals: List<ShopAnimal>, mascot: Boolean, leaf: Boolean
     val ids = (if (mascot) listOf(Shop.MASCOT) else emptyList()) + animals.map { it.id }
     Grid(ids, cols = 4, collapsedRows = 2, selected = selected) { id, m ->
         if (id in Shop.kongyeCats) {
-            // 看板猫、极简猫、鎏金看板猫一样大；leaf：头上顶着普通专注时的叶子
+            // 看板猫、墨团、鎏金看板猫一样大；leaf：头上顶着普通专注时的叶子
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, Modifier.fillMaxSize(0.78f), shadow = false, leaf = leaf) }
         } else {
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) {

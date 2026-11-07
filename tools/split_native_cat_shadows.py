@@ -4,7 +4,7 @@ import re
 def split_native_cat_shadows(source: str) -> str:
     helpers = []
     pattern = re.compile(
-        r'^(internal fun DrawScope\.(draw(?:Imported|Minimal|Gold)(?:Focus|Happy|Sleep|Loaf))\([^\n]*\) \{\n)'
+        r'^(internal fun DrawScope\.(draw(?:Imported|Minimal|GoldMin|Gold)(?:Focus|Happy|Sleep|Loaf))\([^\n]*\) \{\n)'
         r'((?:    (?:if \(shadow\) )?drawPath[^\n]*\n){1,2})', re.M)
 
     def replace(match):

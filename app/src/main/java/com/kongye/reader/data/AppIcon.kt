@@ -24,6 +24,9 @@ object AppIcon {
         "gold" to ".LauncherGold",
         "neon" to ".LauncherNeon",
         "pixel" to ".LauncherPixel",
+        "mingold" to ".LauncherMinGold",
+        "minneon" to ".LauncherMinNeon",
+        "minpixel" to ".LauncherMinPixel",
     )
 
     fun apply(context: Context, id: String) {

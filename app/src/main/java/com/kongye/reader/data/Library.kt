@@ -63,6 +63,7 @@ object Library {
 
     /** 书架长按里改书名、作者、简介、标签 */
     fun updateInfo(id: String, title: String, author: String, intro: String, tags: List<String>) {
+        val before=get(id)
         update(id) {
             it.copy(
                 title = title.trim().ifEmpty { it.title },
@@ -72,6 +73,11 @@ object Library {
             )
         }
         flush()
+        val after=get(id)
+        if(before!=null && after!=null && (
+            (before.author!=after.author && after.author.isNotBlank()) ||
+            (before.intro!=after.intro && after.intro.isNotBlank()) ||
+            (before.tags!=after.tags && after.tags.isNotEmpty()))) AchievementTracking.editedBook(id)
     }
 
     fun loadContent(id: String): BookContent? = runCatching {

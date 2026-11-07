@@ -1,0 +1,38 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="100%" height="100%" fill="none">
+    <ns0:style>
+        @keyframes minHeadFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-2px); } }
+        @keyframes minBodyBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.022); } }
+        @keyframes minLeafSway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(6deg); } }
+        .min-head-loaf-wrap { animation: minHeadFloat 3.8s ease-in-out infinite; }
+        .min-body-loaf { animation: minBodyBreathe 3.8s ease-in-out infinite; transform-origin: 120px 189px; }
+        .min-leaf { animation: minLeafSway 3.4s ease-in-out infinite; transform-origin: 100px 45px; }
+    </ns0:style>
+
+
+    <ns0:ellipse cx="118" cy="191" rx="68" ry="7.5" fill="#FEF3C7" opacity="0.65" /><ns0:ellipse cx="118" cy="191" rx="60" ry="4.5" fill="#F59E0B" opacity="0.35" /><ns0:g class="m-min-body-loaf">
+        <ns0:path d="M 65 189 C 66 159, 80 143, 98 143 C 114 141.5, 134 141.5, 148 144 C 166 148, 178 164, 178 183 C 178 193, 168 199, 148 199.5 C 130 200, 115 199.8, 106 202.8 C 102 204, 99.5 201.5, 100 198 C 100.5 194.8, 103.5 194, 107.5 193.2 C 118 191, 134 191.5, 150 191 C 160 190.5, 166 189.8, 168 189 L 65 189 Z" fill="#1B1B1B" />
+    <ns0:g transform="translate(42 8)"><ns0:polygon points="100,152 103,158 109,161 103,164 100,170 97,164 91,161 97,158" fill="#FBBF24" /><ns0:circle cx="100" cy="161" r="2" fill="#FFFBEB" /></ns0:g><ns0:g transform="translate(119 195.8) rotate(-80 0 0) scale(0.82) translate(-157 -162)"><ns0:ellipse cx="157.5" cy="158" rx="8" ry="3.3" transform="rotate(-14 157.5 158)" fill="none" stroke="#B45309" stroke-width="3" /><ns0:ellipse cx="156.5" cy="166" rx="8" ry="3.2" transform="rotate(-22 156.5 166)" fill="none" stroke="#B45309" stroke-width="2.6" /></ns0:g><ns0:path d="M113 195.9 L129 195.7" stroke="#1B1B1B" stroke-width="7.4" fill="none" /><ns0:g transform="translate(119 195.8) rotate(-80 0 0) scale(0.82) translate(-157 -162)"><ns0:path d="M150 160 C154.5 162.8, 161 161.5, 164.5 156.2" stroke="#F59E0B" stroke-width="4.2" stroke-linecap="round" fill="none" /><ns0:path d="M151.5 160 C155 162, 160 161, 163 157" stroke="#FEF08A" stroke-width="1.6" stroke-linecap="round" fill="none" /><ns0:path d="M149 167.5 C153.5 170.8, 160 169.5, 163.5 164" stroke="#D97706" stroke-width="3.4" stroke-linecap="round" fill="none" /><ns0:circle cx="166.5" cy="156.5" r="1.8" fill="#FBBF24" /><ns0:polygon points="172,155 173.6,158.6 177.5,160.2 173.6,161.8 172,165.4 170.4,161.8 166.5,160.2 170.4,158.6" fill="#FDE047" /></ns0:g></ns0:g>
+
+
+    <ns0:g class="m-min-head-loaf-wrap">
+        <ns0:g transform="translate(91, 103) scale(0.78) translate(-100, -96)">
+
+            <ns0:g class="m-min-leaf">
+                <ns0:path d="M100 45 C100 28, 118 22, 122 32 C118 42, 105 45, 100 45 Z" stroke="#F59E0B" stroke-width="4" stroke-linejoin="round" fill="#FEF3C7" />
+                <ns0:path d="M100 45 C95 35, 86 33, 82 38" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round" fill="none" />
+            <ns0:circle cx="125" cy="24" r="2.2" fill="#FBBF24" /></ns0:g>
+
+            <ns0:path d="M62 85 L56 36 C56 32, 62 30, 66 34 L92 62 Z" fill="#1B1B1B" />
+            <ns0:path d="M138 85 L144 36 C144 32, 138 30, 134 34 L108 62 Z" fill="#1B1B1B" />
+
+            <ns0:path d="M42 94 L58 96 M42 103 L58 103 M158 94 L142 96 M158 103 L142 103" stroke="#777777" stroke-width="2.5" stroke-linecap="round" />
+
+            <ns0:ellipse cx="100" cy="96" rx="48" ry="40" fill="#1B1B1B" />
+
+            <ns0:path d="M68 98 Q80 105 92 98" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" />
+            <ns0:path d="M108 98 Q120 105 132 98" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none" />
+
+            <ns0:path d="M93 111 Q96.5 115 100 111 Q103.5 115 107 111" stroke="#555555" stroke-width="2.5" fill="none" stroke-linecap="round" />
+        </ns0:g>
+    </ns0:g>
+</ns0:svg>

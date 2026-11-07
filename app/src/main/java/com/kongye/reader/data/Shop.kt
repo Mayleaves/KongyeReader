@@ -87,11 +87,15 @@ data class ShopIcon(val id: String, val name: String, val price: Int, val lock: 
 object Shop {
     /** 首页和猫园默认那只“看板猫”（不在目录里，App 自己画的） */
     const val MASCOT = "mascot"
-    /** 极简猫：目录里有（饰品锚点、价格），身体由 App 自己画（和看板猫一样有三种状态、眼睛跟手指） */
+    /** 墨团：目录里有（饰品锚点、价格），身体由 App 自己画（和看板猫一样有三种状态、眼睛跟手指） */
     const val MINCAT = "mincat"
     /** 鎏金看板猫：成就「看板猫猫」的奖励（连着摸 20 下，页面上写成“ ? ”下） */
     const val GOLDCAT = "goldcat"
+    /** 鎏金墨团：成就「墨团猫猫」的奖励（首页连着摸墨团 20 下）；和墨团同一套 200x220 骨架、同样四个姿势 */
+    const val GOLDMIN = "goldmin"
     const val DEFAULT_BG = "farm"
+    /** 墨团（墨团）款的桌面图标：选了开屏也换成墨团 */
+    val minimalIcons = setOf("minimal", "minlight", "mingold", "minneon", "minpixel")
     /** 镇店之宝：至尊金猪皇，9999 片叶子；买下点亮成就 c0「镇店之宝」，送 8 件神装 */
     const val TREASURE = "goldpig"
 
@@ -118,8 +122,8 @@ object Shop {
 
     fun animal(id: String) = catalog.animals.firstOrNull { it.id == id }
 
-    /** 空叶自己的三只猫：头上有叶子，身体由 App 自己画 */
-    val kongyeCats = setOf(MASCOT, MINCAT, GOLDCAT)
+    /** 空叶自己的四只猫：头上有叶子，身体由 App 自己画 */
+    val kongyeCats = setOf(MASCOT, MINCAT, GOLDCAT, GOLDMIN)
 
     /** 看板猫不在目录里，但和鎏金看板猫是同一套 240x260 骨架：借它的饰品位置，也能戴饰品 */
     private val mascotWearer: ShopAnimal? by lazy {

@@ -30,6 +30,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import com.kongye.reader.data.AchieveCtx
 import com.kongye.reader.data.Achievement
 import com.kongye.reader.data.Achievements
+import com.kongye.reader.data.AchievementOrdering
 import com.kongye.reader.data.Library
 import com.kongye.reader.data.Profile
 import com.kongye.reader.data.Profiles
@@ -85,6 +89,8 @@ import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.badgeStyles
 import com.kongye.reader.ui.components.drawBadgeIcon
+import com.kongye.reader.ui.components.drawAddedBadgeIcon
+import com.kongye.reader.ui.components.drawExtraBadgeIcon
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.components.svgPath
 import com.kongye.reader.ui.theme.K
@@ -120,9 +126,9 @@ private fun poly(points: String, close: Boolean = true): Path = polys.getOrPut(p
 }
 
 /** 外框：殿堂级星芒、重装六角、斜切八角，其余标准八角（和 HTML 一样按成就指定） */
-private val starFrame = setOf("c0", "read_100h", "finish_10", "animal_all", "c13", "c17", "egg", "e8")
-private val hexFrame = setOf("streak_3", "day_30m", "c9", "c16", "rename")
-private val diagFrame = setOf("night_owl", "shelf_1", "c7", "c14", "backup_1")
+private val starFrame = setOf("c0", "read_100h", "finish_10", "animal_all", "c13", "c17", "egg", "e8", "r13", "r14", "p7", "p8", "b7", "c24", "e11")
+private val hexFrame = setOf("streak_3", "day_30m", "c9", "c16", "rename", "p5", "p6", "c22")
+private val diagFrame = setOf("night_owl", "shelf_1", "c7", "c7m", "c14", "backup_1", "r11", "b6", "c23", "e10")
 
 private fun DrawScope.drawFrame(id: String, p: BadgeStyle) {
     when (id) {
@@ -177,13 +183,15 @@ private val chipDark = ChipGray(
 
 /** 一枚徽章（88x88 画稿）：点亮是阵营配色的平面贴花；没点亮是灰色蓝图芯片，外圈折线是进度 */
 @Composable
-private fun Badge(a: Achievement, on: Boolean, ratio: Float, style: BadgeStyle, size: Dp) {
+internal fun Badge(a: Achievement, on: Boolean, ratio: Float, style: BadgeStyle, size: Dp) {
     val gray = if (K.c.dark) chipDark else chipLight
     Canvas(Modifier.size(size)) {
         scale(this.size.minDimension / 88f, pivot = Offset.Zero) {
             if (on) {
                 drawFrame(a.id, style)
-                drawBadgeIcon(a.icon, style.paper, style.pri, style.sec, style.plate, blueprint = false)
+                if (!drawExtraBadgeIcon(a.icon, style.paper, style.pri, style.sec, style.plate, style.acc) &&
+                    !drawAddedBadgeIcon(a.icon, style.paper, style.pri, style.sec, style.plate, blueprint=false))
+                    drawBadgeIcon(a.icon, style.paper, style.pri, style.sec, style.plate, blueprint = false)
                 return@scale
             }
             drawPath(poly(OCT_OUTER), gray.outer)
@@ -209,7 +217,10 @@ private fun Badge(a: Achievement, on: Boolean, ratio: Float, style: BadgeStyle, 
                 drawPath(poly(pts, close = false), gray.reticle, style = Stroke(1.5f))
             // 中心图形：灰色蓝图，58% 透明
             drawContext.canvas.saveLayer(androidx.compose.ui.geometry.Rect(0f, 0f, 88f, 88f), Paint().apply { alpha = 0.58f })
-            drawBadgeIcon(a.icon, gray.g1, gray.g2, if (progress) style.lockProg else gray.g3, gray.inner, blueprint = true)
+            val g3 = if (progress) style.lockProg else gray.g3
+            if (!drawExtraBadgeIcon(a.icon, gray.g1, gray.g2, g3, gray.inner, gray.g2) &&
+                !drawAddedBadgeIcon(a.icon, gray.g1, gray.g2, g3, gray.inner, blueprint=true))
+                drawBadgeIcon(a.icon, gray.g1, gray.g2, g3, gray.inner, blueprint = true)
             drawContext.canvas.restore()
             drawRect(if (progress) style.lockProg else gray.idle, Offset(39f, 69f), Size(10f, 2.2f), alpha = 0.65f)
         }
@@ -257,7 +268,7 @@ fun AchievementsScreen() {
                     }
                 }
                 for (group in Achievements.groups) {
-                    val list = Achievements.all.filter { it.group == group.id }
+                    val list = AchievementOrdering.category(group.id)
                     item(key = "g-${group.id}", span = { GridItemSpan(maxLineSpan) }) {
                         Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.Bottom) {
                             T(group.name, 18.sp, c.ink, FontWeight.Bold)
@@ -267,7 +278,7 @@ fun AchievementsScreen() {
                             T(group.subtitle, 11.sp, c.text3, maxLines = 1)
                         }
                     }
-                    items(list, key = { it.id }) { a -> Cell(a, a.id in profile.achievements, ctx, style) { picked = a } }
+                    items(list, key = { it.id }) { a -> Cell(a, a.id in profile.achievements, a.id in profile.unreadAchievements, ctx, style) { picked = a } }
                 }
             }
         }
@@ -434,12 +445,19 @@ private fun ratioOf(a: Achievement, ctx: AchieveCtx): Pair<Float, Pair<Long, Lon
 }
 
 @Composable
-private fun Cell(a: Achievement, on: Boolean, ctx: AchieveCtx, style: BadgeStyle, onClick: () -> Unit) {
+private fun Cell(a: Achievement, on: Boolean, fresh: Boolean, ctx: AchieveCtx, style: BadgeStyle, onClick: () -> Unit) {
     val c = K.c
     val (ratio, nums) = remember(a, ctx) { ratioOf(a, ctx) }
     val secret = a.hidden && !on
     Column(Modifier.press(scaleTo = 0.94f, onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally) {
-        Badge(a, on, ratio, style, 74.dp)
+        Box(Modifier.size(74.dp)) {
+            Badge(a, on, ratio, style, 74.dp)
+            if(on && fresh) Box(Modifier.align(Alignment.TopEnd).offset(x=5.dp,y=(-1).dp)
+                .semantics { contentDescription="未查看的新成就：${a.title}" }
+                .background(Color(0xFFFBBF24),RoundedCornerShape(4.dp)).padding(horizontal=4.dp,vertical=1.dp)) {
+                T("NEW",8.sp,Color(0xFF17171B),FontWeight.ExtraBold,maxLines=1)
+            }
+        }
         Spacer(Modifier.height(6.dp))
         T(if (secret) "？？？" else a.title, 12.sp, if (on) c.ink else Color(0xFF9EA3AE), if (on) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1, align = TextAlign.Center)
@@ -456,6 +474,9 @@ private fun Cell(a: Achievement, on: Boolean, ctx: AchieveCtx, style: BadgeStyle
 @Composable
 private fun Detail(item: Achievement?, ctx: AchieveCtx, profile: Profile, style: BadgeStyle, onDismiss: () -> Unit) {
     val c = K.c
+    LaunchedEffect(item?.id,item?.let { profile.achievements[it.id] }) {
+        item?.let { Profiles.markAchievementViewed(it.id) }
+    }
     val last = remember { arrayOfNulls<Achievement>(1) }
     item?.let { last[0] = it }
     Sheet(visible = item != null, onDismiss = onDismiss) {

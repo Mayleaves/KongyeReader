@@ -30,6 +30,9 @@ data class Profile(
     val icon: String = "default",
     /** 成就编号 → 解锁时间 */
     val achievements: Map<String, Long> = emptyMap(),
+    /** 仅保存点亮后尚未查看详情的徽章；升级前已有徽章默认视为已查看。 */
+    val unreadAchievements: Set<String> = emptySet(),
+    val achievementMemory: AchievementMemory = AchievementMemory(),
     /** 查字典、编辑、备份等次数 */
     val counters: Map<String, Int> = emptyMap(),
     /** 彩蛋开着：商城里的东西全部能用（不算买到）。null 是 2.0.3 以前的存档，读进来时换算 */
@@ -116,6 +119,7 @@ class AchieveCtx(val sessions: List<Session>, val books: List<Book>, val profile
     val focusCount by lazy { sessions.count { Stats.isCat(it) }.toLong() }
     /** 已经点亮的成就数（只算现在这套） */
     val lit: Long by lazy { Achievements.all.count { it.id in profile.achievements }.toLong() }
+    val additions by lazy { AddedAchievementContext(this) }
 }
 
 private fun flag(b: Boolean) = Pair(if (b) 1L else 0L, 1L)
@@ -160,7 +164,8 @@ object Achievements {
         Achievement("bg_3", "companions", "换个背景", "拥有 3 张猫园背景", 120, "银", "sprout-horizon", "猫园背景") { Pair(it.ownedBgs, 3) },
         Achievement("acc_10", "companions", "衣帽间", "收集 10 件饰品", 120, "银", "hanger-basic", "动物配饰") { Pair(it.ownedAcc, 10) },
         Achievement("dress_1", "companions", "打扮一下", "给动物戴上一件饰品", 120, "铜", "hanger-bowtie", "动物配饰") { flag(it.profile.outfits.values.any { o -> o.isNotEmpty() }) },
-        Achievement("c7", "companions", "看板猫猫", "在首页连着摸看板猫 ? 下", 0, "银", "cyber-cat", "鎏金看板猫", item = "鎏金看板猫") { Pair(minOf(it.count("pet20"), 1), 1) },
+        Achievement("c7", "companions", "看板猫猫", "在首页连着摸看板猫 ? 下", 0, "银", "mascot-cat", "鎏金看板猫", item = "鎏金看板猫") { Pair(minOf(it.count("pet20"), 1), 1) },
+        Achievement("c7m", "companions", "墨团猫猫", "在首页连着摸墨团 ? 下", 0, "银", "ink-cat", "鎏金墨团", item = "鎏金墨团") { Pair(minOf(it.count("petmin20"), 1), 1) },
         Achievement("c8", "companions", "橘猫驾到", "累计阅读满 300 分钟", 180, "银", "fox-spirit", "稀有伙伴") { it.minutes(300) },
         Achievement("c9", "companions", "神秘夜行兽", "深夜（23 点以后）读 10 次书", 260, "紫晶", "owl-mecha", "夜行") { Pair(it.lateNights, 10) },
         Achievement("c10", "companions", "巫师尖帽", "读完 3 本书", 0, "银", "wizard-hat", "解锁饰品", item = "巫师尖帽") { Pair(it.finished, 3) },
@@ -187,6 +192,21 @@ object Achievements {
         Achievement("e7", "explore", "暗金浮雕", "累计阅读满 20 小时", 0, "金", "app-icon-gold", "桌面图标", item = "暗金浮雕图标") { it.hours(20) },
         Achievement("e8", "explore", "霓虹幻彩", "点亮 25 枚成就", 0, "紫晶", "app-icon-cyber", "桌面图标", item = "霓虹幻彩图标") { Pair(it.lit, 25) },
         Achievement("e9", "explore", "像素复古", "连续 14 天都读了书", 0, "银", "app-icon-pixel", "桌面图标", item = "像素复古图标") { Pair(it.longestStreak.toLong(), 14) },
+        Achievement("r11", "reading", "久别重逢", "重新阅读一本至少 14 天没打开的书，读满 10 分钟", 80, "铜", "reunion-book", "重逢") { it.additions.reunion },
+        Achievement("r12", "reading", "故事接力", "读完一本书后，开始下一本并读满 30 分钟", 120, "银", "story-relay", "接力") { it.additions.relay },
+        Achievement("r13", "reading", "长篇远航", "读完一本超过 100 万字的书，并在该书累计阅读 30 小时", 360, "金", "voyage-1m", "百万巨著") { it.additions.voyage },
+        Achievement("r14", "reading", "千时灯火", "累计阅读达到 1000 小时", 600, "金", "lamp-1000h", "千时殿堂") { Pair(it.totalMillis/3_600_000,1000L) },
+        Achievement("p5", "persist", "慢慢也很好", "一个月内有 20 天读过书，不要求连续", 150, "银", "slow-20d", "从容阅读") { it.additions.slowMonth },
+        Achievement("p6", "persist", "四季有书", "同一年四个季度都有阅读记录", 240, "银", "four-seasons", "四季流转") { it.additions.seasons },
+        Achievement("p7", "persist", "四季常青", "连续 12 个月，每个月至少有 15 天读过书", 450, "金", "evergreen-12m", "年度常青") { it.additions.evergreen },
+        Achievement("p8", "persist", "十二封书信", "同一年每个月都读完至少一本超过 20 万字的书", 480, "金", "twelve-letters", "月度长信") { it.additions.letters },
+        Achievement("b6", "bookshelf", "自己的书房", "给 3 本书整理作者、标签或简介", 90, "铜", "my-study", "整理编目") { it.additions.study },
+        Achievement("b7", "bookshelf", "一书一世界", "在同一本书上留下 30 个不同日期的阅读记录，累计读满 30 小时并读完", 380, "金", "one-book-world", "深度沉浸") { it.additions.world },
+        Achievement("c22", "companions", "小猫巡游", "猫园里实际来过 5 种不同的动物", 150, "银", "cat-parade", "巡游访客") { it.additions.parade },
+        Achievement("c23", "companions", "醒来陪你", "在 3 个不同的日子里，轻触唤醒小憩猫", 90, "铜", "wake-cat", "温柔唤醒") { it.additions.wake },
+        Achievement("c24", "companions", "猫园毕业季", "让 10 种不同动物分别陪你读完一本书，每只在对应书籍中陪读至少 1 小时", 400, "金", "cat-graduation", "伴读毕业") { it.additions.graduation },
+        Achievement("e10", "explore", "字里行间", "在同一本书里查过 10 个不同的词", 80, "铜", "between-lines", "精读查词") { it.additions.words },
+        Achievement("e11", "explore", "群星归位", "六个成就分类中，各获得至少一枚金色成就", 800, "金", "stars-aligned", "六界全金") { it.additions.stars },
     )
 
     fun byId(id: String) = all.firstOrNull { it.id == id }
@@ -282,6 +302,7 @@ object Profiles {
     }
 
     /** 检查有没有新达成的成就，有就发奖励 */
+    @Synchronized
     fun check() {
         val ctx = AchieveCtx(Stats.sessions.value, Library.books.value, _state.value)
         val fresh = Achievements.all.filter { it.id !in ctx.profile.achievements && it.progress(ctx).let { (a, b) -> a >= b } }
@@ -290,6 +311,7 @@ object Profiles {
         _state.update { p ->
             p.copy(
                 achievements = p.achievements + fresh.associate { it.id to now },
+                unreadAchievements = p.unreadAchievements + fresh.map { it.id },
                 leaves = p.leaves + fresh.sumOf { it.reward },
             )
         }
@@ -300,6 +322,12 @@ object Profiles {
     }
 
     fun flush() = saver.flush()
+
+    fun markAchievementViewed(id: String) {
+        if(id !in value.achievements || id !in value.unreadAchievements) return
+        _state.update { it.copy(unreadAchievements=it.unreadAchievements-id) }
+        saver.flush()
+    }
 
     private const val FILE = "profile.json"
 }

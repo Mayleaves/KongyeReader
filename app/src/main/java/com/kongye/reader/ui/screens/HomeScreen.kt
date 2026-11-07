@@ -109,17 +109,19 @@ fun HomeScreen() {
     val profile by Profiles.state.collectAsState()
     // 首页可以换成商城里领养的动物；没领养（或彩蛋之后又清了数据）就还是看板猫
     val homeAnimal = profile.homeAnimal.takeIf { it != Shop.MASCOT && profile.has(it) && Shop.animal(it) != null }
-    // 极简猫和看板猫一样：会睡、会开心、眼睛跟手指，只是画法不同
+    // 墨团和看板猫一样：会睡、会开心、眼睛跟手指，只是画法不同
     val minimal = homeAnimal == Shop.MINCAT
     // 鎏金看板猫：和看板猫同一套动画，走 DashboardCat
     val gold = homeAnimal == Shop.GOLDCAT
-    // 成就「看板猫猫」：连着摸 20 下（两下之间不超过 1.5 秒）
+    // 鎏金墨团：和墨团同一套动画
+    val goldMin = homeAnimal == Shop.GOLDMIN
+    // 成就「看板猫猫」：连着摸 20 下（两下之间不超过 1.5 秒）；首页是墨团时算成就「墨团猫猫」
     val petStreak = remember { longArrayOf(0L, 0L) }
     fun countPet() {
         val now = System.currentTimeMillis()
         petStreak[1] = if (now - petStreak[0] <= 1500) petStreak[1] + 1 else 1
         petStreak[0] = now
-        if (petStreak[1] == 20L) Profiles.count("pet20")
+        if (petStreak[1] == 20L) Profiles.count(if (minimal) "petmin20" else "pet20")
     }
     val scope = rememberCoroutineScope()
     val hop = remember { Animatable(0f) }
@@ -195,7 +197,7 @@ fun HomeScreen() {
             Box(Modifier.size(210.dp).onGloballyPositioned {
                 catHeadTop = it.positionInRoot().y + headInset
             }) {
-                if (homeAnimal != null && !minimal && !gold) {
+                if (homeAnimal != null && !minimal && !gold && !goldMin) {
                     Creature(
                         homeAnimal,
                         Modifier
@@ -214,13 +216,14 @@ fun HomeScreen() {
                     Modifier
                         .offset { IntOffset(0, hop.value.roundToInt()) }
                         .onGloballyPositioned {
-                            // 眼睛在画布里的高度：经典猫 126，极简猫 98+36（取景对齐到经典猫的坐标）
-                            val eyeY = if (minimal) 99f else 91f
+                            // 眼睛在画布里的高度：经典猫 126，墨团 98+36（取景对齐到经典猫的坐标）
+                            val eyeY = if (minimal || goldMin) 99f else 91f
                             catEyeCenter = it.positionInRoot() + Offset(it.size.width / 2f, it.size.height * (eyeY / 210f))
                         }
                         .press(scaleTo = 0.97f) {
                             if (sleeping) {
                                 CatRest.wake(totalRead, LocalDateTime.now())
+                                com.kongye.reader.data.AchievementTracking.wokeCat()
                                 speech = "醒啦，陪你继续读书"
                             } else {
                                 petSignal++
@@ -240,6 +243,7 @@ fun HomeScreen() {
                     sleeping = sleeping,
                     minimal = minimal,
                     gold = gold,
+                    goldMin = goldMin,
                 )
             }
             Spacer(Modifier.height(12.dp))
