@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import com.kongye.reader.data.AccArt
 import com.kongye.reader.data.Profiles
@@ -23,7 +25,7 @@ import com.kongye.reader.data.ShopAccessory
 import com.kongye.reader.data.ShopAnimal
 import com.kongye.reader.ui.theme.K
 
-/** 和配饰 HTML 舞台一样的前后次序：H（脚下）在动物身后，其余按 F G E B C D A 依次盖在上面 */
+/** 阴影 → H（脚下）→ 动物身体 → F G E B C D A。正脸猫的 F 也在身体后面。 */
 private val frontSlots = listOf("F", "G", "E", "B", "C", "D", "A")
 
 /**
@@ -58,10 +60,13 @@ fun Creature(
     val pieces = outfitPieces(animal, outfit)
     val dark = K.c.dark
     val time = if (animate && native) assetTime() else 0f
-    val body = if (native) null else painterResource(Shop.drawable(pose?.let { animal.poses[it] } ?: animal.res))
+    val resource = pose?.let { animal.poses[it] } ?: animal.res
+    val bodyLayer = if (native) 0 else Shop.drawable("${resource}_body")
+    val body = if (native) null else painterResource(if (bodyLayer != 0) bodyLayer else Shop.drawable(resource))
+    val ground = if (!native && shadow && bodyLayer != 0) painterResource(Shop.drawable("${resource}_shadow")) else null
     // 看板猫、鎏金看板猫同一套 240x260 坐标，取景也和看板猫一样
     val mascotFrame = id == Shop.GOLDCAT || id == Shop.MASCOT
-    Canvas(if (size != null) modifier.size(size) else modifier) {
+    Canvas((if (size != null) modifier.size(size) else modifier).semantics { contentDescription = "动物预览：${animal.name}" }) {
         val vb = animal.vb
         val (k, ox, oy) = if (mascotFrame) {
             val s = this.size.minDimension / 210f
@@ -71,13 +76,17 @@ fun Creature(
             Triple(k, (this.size.width - vb[2] * k) / 2, (this.size.height - vb[3] * k) / 2)
         }
         withTransform({ if (mirror) scale(-1f, 1f, pivot = center) }) {
+            if (native && shadow) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
+                drawCatGroundShadow(id, dark)
+            }
+            if (ground != null) translate(ox, oy) { with(ground) { draw(Size(vb[2] * k, vb[3] * k)) } }
             drawOutfit(animal, pieces, k, ox, oy, behind = true)
             if (body != null) translate(ox, oy) { with(body) { draw(Size(vb[2] * k, vb[3] * k)) } }
             else withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
                 when (id) {
-                    Shop.MASCOT -> drawImportedFocus(dark, time, shadow = shadow, plainLeaf = leaf)
-                    Shop.GOLDCAT -> drawGoldFocus(dark, time, leaf, shadow = shadow)
-                    else -> drawMinimalFocus(dark, time, shadow = shadow, plainLeaf = leaf)
+                    Shop.MASCOT -> drawImportedFocus(dark, time, shadow = false, plainLeaf = leaf)
+                    Shop.GOLDCAT -> drawGoldFocus(dark, time, leaf, shadow = false)
+                    else -> drawMinimalFocus(dark, time, shadow = false, plainLeaf = leaf)
                 }
             }
             drawOutfit(animal, pieces, k, ox, oy, behind = false)

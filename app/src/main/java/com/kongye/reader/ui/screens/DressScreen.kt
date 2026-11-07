@@ -1,6 +1,8 @@
 package com.kongye.reader.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -30,12 +32,12 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,7 +61,6 @@ import com.kongye.reader.data.ShopAnimal
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
 import com.kongye.reader.ui.components.AccessoryArt
-import com.kongye.reader.ui.components.CatMascot
 import com.kongye.reader.ui.components.Creature
 import com.kongye.reader.ui.components.GardenBackdrop
 import com.kongye.reader.ui.components.OrnamentArt
@@ -76,6 +77,7 @@ import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.grayscale
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
+import kotlinx.coroutines.launch
 
 private val tabs = listOf("首页", "猫园", "饰品", "图标")
 
@@ -85,15 +87,20 @@ fun DressScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
     val animals = Shop.catalog.animals.filter { profile.has(it.id) }
-    val tab = Nav.dressTab
+    val pager = rememberPagerState(initialPage = Nav.dressTab, pageCount = { tabs.size })
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Nav.dressRequest) { pager.scrollToPage(Nav.dressTab) }
+    LaunchedEffect(pager) { snapshotFlow { pager.currentPage }.collect { Nav.dressTab = it } }
 
     Column(Modifier.fillMaxSize().background(c.bg2)) {
         TopBar("装扮", onBack = { Nav.pop() }) {
             IconBtn(Ico.BAG) { Nav.push(Screen.Shop) }
         }
-        Segmented(tabs, tab, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Nav.dressTab = it }
+        Segmented(tabs, pager.currentPage, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            scope.launch { pager.animateScrollToPage(it) }
+        }
         Spacer(Modifier.height(16.dp))
-        key(tab) {
+        HorizontalPager(pager, Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { tab ->
             Column(
                 Modifier
                     .fillMaxSize()
@@ -350,7 +357,7 @@ private fun AnimalGrid(animals: List<ShopAnimal>, mascot: Boolean, leaf: Boolean
     Grid(ids, cols = 4, collapsedRows = 2, selected = selected) { id, m ->
         if (id in Shop.kongyeCats) {
             // 看板猫、极简猫、鎏金看板猫一样大；leaf：头上顶着普通专注时的叶子
-            Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, size = 50.dp, shadow = false, leaf = leaf) }
+            Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) { Creature(id, Modifier.fillMaxSize(0.78f), shadow = false, leaf = leaf) }
         } else {
             Pick(selected(id), Shop.nameOf(id), modifier = m, onClick = { onPick(id) }) {
                 Creature(id, Modifier.fillMaxSize().padding(4.dp), faceLeft = true)

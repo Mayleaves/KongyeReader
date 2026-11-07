@@ -416,7 +416,8 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 
 '''
 path_code = ['private object ImportedCatPaths {'] + [f'    val p{i} by lazy {{ svgPath({json.dumps(d)}) }}' for i,d in enumerate(paths)] + ['}', '']
-(JAVA / 'ImportedCatArt.kt').write_text(header + '\n'.join(path_code + functions), encoding='utf-8')
+from split_native_cat_shadows import split_native_cat_shadows
+(JAVA / 'ImportedCatArt.kt').write_text(split_native_cat_shadows(header + '\n'.join(path_code + functions)), encoding='utf-8')
 
 # Android adaptive icon: preserve all workbench paths, with artwork in the safe zone.
 ANDROID = 'http://schemas.android.com/apk/res/android'

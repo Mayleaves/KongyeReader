@@ -5,6 +5,8 @@ app/build/
 local.properties
 dist/
 *.iml
+__pycache__/
+*.py[cod]
 .idea/
 
 # 字体不进仓库，见 README 和 tools/subset_fonts.py

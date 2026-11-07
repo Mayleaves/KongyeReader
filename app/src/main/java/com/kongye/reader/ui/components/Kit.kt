@@ -1,6 +1,8 @@
 package com.kongye.reader.ui.components
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -292,8 +294,10 @@ fun Segmented(options: List<String>, selected: Int, modifier: Modifier = Modifie
         )
         Row(Modifier.fillMaxSize()) {
             options.forEachIndexed { i, s ->
+                val active = i == selected
                 Box(
                     Modifier
+                        .semantics { this.selected = active }
                         .weight(1f)
                         .fillMaxHeight()
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onSelect(i) },

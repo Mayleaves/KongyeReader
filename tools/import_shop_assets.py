@@ -571,6 +571,9 @@ for old in (RES / 'drawable').glob('shop_*.xml'):
     old.unlink()
 print(f'转换 {len(jobs)} 个 SVG …')
 convert(jobs)
+from split_animal_shadows import split_animal_shadows
+split_animal_shadows(RES)
+split_animal_shadows(RES_PRIVATE)
 
 # 图标前景缩进自适应图标的安全区（和 import_visual_assets.py 的默认图标一致）
 ET.register_namespace('android', ANDROID)

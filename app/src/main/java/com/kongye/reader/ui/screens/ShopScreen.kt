@@ -1,6 +1,8 @@
 package com.kongye.reader.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,10 +37,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,6 @@ import com.kongye.reader.data.Shop
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
 import com.kongye.reader.ui.components.AccessoryArt
-import com.kongye.reader.ui.components.CatMascot
 import com.kongye.reader.ui.components.Creature
 import com.kongye.reader.ui.components.GhostButton
 import com.kongye.reader.ui.components.Ico
@@ -75,6 +75,7 @@ import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.grayscale
 import com.kongye.reader.ui.theme.K
+import kotlinx.coroutines.launch
 
 private val tabs = listOf("动物", "背景", "饰品", "挂件", "图标")
 
@@ -101,11 +102,16 @@ fun ShopScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
     val resume = remember { ShopResume.state }
-    var tab by rememberSaveable { mutableIntStateOf(resume?.first ?: 0) }
+    val pager = rememberPagerState(initialPage = resume?.first ?: 0, pageCount = { tabs.size })
+    val tab = pager.currentPage
+    val scope = rememberCoroutineScope()
     var picked by remember { mutableStateOf<String?>(null) }
-    val grid = rememberLazyGridState(resume?.second ?: 0, resume?.third ?: 0)
-    LaunchedEffect(grid) {
-        snapshotFlow { Triple(tab, grid.firstVisibleItemIndex, grid.firstVisibleItemScrollOffset) }
+    val grids = tabs.indices.map { page ->
+        rememberLazyGridState(if (page == resume?.first) resume.second else 0, if (page == resume?.first) resume.third else 0)
+    }
+    val grid = grids[tab]
+    LaunchedEffect(pager) {
+        snapshotFlow { grids[pager.currentPage].let { Triple(pager.currentPage, it.firstVisibleItemIndex, it.firstVisibleItemScrollOffset) } }
             .collect { ShopResume.state = it }
     }
     val tryOn: (String) -> Unit = { id ->
@@ -123,70 +129,72 @@ fun ShopScreen() {
                 // 衣架：按正在看的分类进装扮的那一页（动物→首页、背景和挂件→猫园、饰品→饰品、图标→图标）
                 IconBtn(Ico.HANGER) { Nav.dress(listOf(0, 1, 2, 1, 3)[tab]) }
             }
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier.fillMaxSize(),
-                state = grid,
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = navPad + 28.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-            ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Column {
-                        Leaves(profile.leaves)
-                        Spacer(Modifier.height(14.dp))
-                        Segmented(tabs, tab, Modifier.fillMaxWidth()) { tab = it }
-                    }
-                }
-                when (tab) {
-                    // 动物按来历分组：空叶自己的猫、小动物、小马宝莉、表情
-                    0 -> for ((group, title) in Shop.animalGroups) {
-                        val list = cat.animals.filter { it.group == group }
-                        if (list.isEmpty()) continue
-                        item(key = "group-$group", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(title.first, title.second) }
-                        // 空叶组：看板猫打头（本来就有），极简猫和它一样大；三只猫头上都顶着叶子
-                        if (group == "kongye") item(key = Shop.MASCOT) {
-                            ItemCard("看板猫", Shop.MASCOT, 0, profile, onClick = { picked = Shop.MASCOT }) { Creature(Shop.MASCOT, size = 76.dp, leaf = true) }
+            HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    state = grids[page],
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = navPad + 28.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
+                ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Column {
+                            Leaves(profile.leaves)
+                            Spacer(Modifier.height(14.dp))
+                            Segmented(tabs, tab, Modifier.fillMaxWidth()) { scope.launch { pager.animateScrollToPage(it) } }
                         }
-                        items(list, key = { it.id }) { a ->
-                            ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
-                                if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, size = 76.dp, leaf = true)
-                                else Creature(a.id, Modifier.fillMaxSize().padding(6.dp), faceLeft = true)
+                    }
+                    when (page) {
+                        // 动物按来历分组：空叶自己的猫、小动物、小马宝莉、表情
+                        0 -> for ((group, title) in Shop.animalGroups) {
+                            val list = cat.animals.filter { it.group == group }
+                            if (list.isEmpty()) continue
+                            item(key = "group-$group", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(title.first, title.second) }
+                            // 空叶组：看板猫打头（本来就有），极简猫和它一样大；三只猫头上都顶着叶子
+                            if (group == "kongye") item(key = Shop.MASCOT) {
+                                ItemCard("看板猫", Shop.MASCOT, 0, profile, onClick = { picked = Shop.MASCOT }) { Creature(Shop.MASCOT, Modifier.fillMaxSize(0.72f), leaf = true) }
+                            }
+                            items(list, key = { it.id }) { a ->
+                                ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
+                                    if (a.id == Shop.MINCAT || a.id == Shop.GOLDCAT) Creature(a.id, Modifier.fillMaxSize(0.72f), leaf = true)
+                                    else Creature(a.id, Modifier.fillMaxSize().padding(6.dp), faceLeft = true)
+                                }
                             }
                         }
-                    }
-                    1 -> items(cat.backgrounds, key = { it.id }) { b ->
-                        ItemCard(b.name, b.id, b.price, profile, ratio = 0.62f, onClick = { picked = b.id }) {
-                            Image(painterResource(Shop.drawable(b.res)), b.name, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
-                        }
-                    }
-                    // 饰品按部位分组，每组上面一个小标题
-                    2 -> for ((slot, slotName) in Shop.slotNames) {
-                        val group = cat.accessories.filter { it.slot == slot }
-                        if (group.isEmpty()) continue
-                        item(key = "slot-$slot", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(slotName, slotHint[slot].orEmpty()) }
-                        items(group, key = { it.id }) { a ->
-                            ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
-                                AccessoryArt(a, Modifier.fillMaxSize().padding(14.dp))
+                        1 -> items(cat.backgrounds, key = { it.id }) { b ->
+                            ItemCard(b.name, b.id, b.price, profile, ratio = 0.62f, onClick = { picked = b.id }) {
+                                Image(painterResource(Shop.drawable(b.res)), b.name, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
                             }
                         }
-                    }
-                    // 挂件按节日分组，一个节日六件：路牌、小屋、天空、三块空地各一件
-                    3 -> for (fest in cat.festivals) {
-                        val list = cat.ornaments.filter { it.fest == fest.id }
-                        if (list.isEmpty()) continue
-                        item(key = "fest-${fest.id}", span = { GridItemSpan(maxLineSpan) }) {
-                            GroupTitle(fest.name, "${list.count { profile.has(it.id) }} / ${list.size}", dot = parseColor(fest.color))
-                        }
-                        items(list, key = { it.id }) { o ->
-                            ItemCard(o.name, o.id, o.price, profile, onClick = { picked = o.id }) {
-                                OrnamentArt(o, Modifier.fillMaxSize().padding(16.dp))
+                        // 饰品按部位分组，每组上面一个小标题
+                        2 -> for ((slot, slotName) in Shop.slotNames) {
+                            val group = cat.accessories.filter { it.slot == slot }
+                            if (group.isEmpty()) continue
+                            item(key = "slot-$slot", span = { GridItemSpan(maxLineSpan) }) { GroupTitle(slotName, slotHint[slot].orEmpty()) }
+                            items(group, key = { it.id }) { a ->
+                                ItemCard(a.name, a.id, a.price, profile, onClick = { picked = a.id }) {
+                                    AccessoryArt(a, Modifier.fillMaxSize().padding(14.dp))
+                                }
                             }
                         }
-                    }
-                    else -> items(cat.icons, key = { it.id }) { i ->
-                        ItemCard(i.name, "icon_${i.id}", i.price, profile, onClick = { picked = "icon_${i.id}" }) {
-                            IconPreview(i.id, Modifier.fillMaxSize().padding(12.dp))
+                        // 挂件按节日分组，一个节日六件：路牌、小屋、天空、三块空地各一件
+                        3 -> for (fest in cat.festivals) {
+                            val list = cat.ornaments.filter { it.fest == fest.id }
+                            if (list.isEmpty()) continue
+                            item(key = "fest-${fest.id}", span = { GridItemSpan(maxLineSpan) }) {
+                                GroupTitle(fest.name, "${list.count { profile.has(it.id) }} / ${list.size}", dot = parseColor(fest.color))
+                            }
+                            items(list, key = { it.id }) { o ->
+                                ItemCard(o.name, o.id, o.price, profile, onClick = { picked = o.id }) {
+                                    OrnamentArt(o, Modifier.fillMaxSize().padding(16.dp))
+                                }
+                            }
+                        }
+                        else -> items(cat.icons, key = { it.id }) { i ->
+                            ItemCard(i.name, "icon_${i.id}", i.price, profile, onClick = { picked = "icon_${i.id}" }) {
+                                IconPreview(i.id, Modifier.fillMaxSize().padding(12.dp))
+                            }
                         }
                     }
                 }

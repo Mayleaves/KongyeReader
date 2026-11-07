@@ -212,8 +212,8 @@ internal fun DrawScope.drawImportedFocus(dark: Boolean, time: Float, leaf: Boole
     }
 }
 
-internal fun DrawScope.drawImportedHappy(dark: Boolean, time: Float, leaf: Boolean = false) {
-    drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+internal fun DrawScope.drawImportedHappy(dark: Boolean, time: Float, leaf: Boolean = false, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("svg-cat-tail", time) {
         assetStroke(ImportedCatPaths.p1, (if (dark) Color(0xFF232329) else Color(0xFF1E1E22)), 11.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
     }
@@ -451,8 +451,8 @@ internal fun DrawScope.drawMinimalFocus(dark: Boolean, time: Float, leaf: Boolea
     }
 }
 
-internal fun DrawScope.drawMinimalHappy(dark: Boolean, time: Float, leaf: Boolean = false) {
-    drawPath(ImportedCatPaths.p64, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+internal fun DrawScope.drawMinimalHappy(dark: Boolean, time: Float, leaf: Boolean = false, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p64, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
     assetGroup("m-min-body", time) {
         drawPath(ImportedCatPaths.p65, (if (dark) Color(0xFF232329) else Color(0xFF1B1B1B)), alpha = 1.0f)
         assetGroup("m-min-tail", time) {
@@ -677,9 +677,9 @@ internal fun DrawScope.drawGoldFocus(dark: Boolean, time: Float, leaf: Boolean =
     }
 }
 
-internal fun DrawScope.drawGoldHappy(dark: Boolean, time: Float, leaf: Boolean = false) {
-    drawPath(ImportedCatPaths.p97, Color(0xFFFEF3C7), alpha = 0.7f)
-    drawPath(ImportedCatPaths.p98, Color(0xFFF59E0B), alpha = 0.38f)
+internal fun DrawScope.drawGoldHappy(dark: Boolean, time: Float, leaf: Boolean = false, shadow: Boolean = true) {
+    if (shadow) drawPath(ImportedCatPaths.p97, Color(0xFFFEF3C7), alpha = 0.7f)
+    if (shadow) drawPath(ImportedCatPaths.p98, Color(0xFFF59E0B), alpha = 0.38f)
     assetGroup("svg-cat-tail", time) {
         withTransform({ rotate(-14.0f, pivot = Offset(187.0f, 186.0f)) }) {
             assetStroke(ImportedCatPaths.p99, Color(0xFFB45309), 3.2f, StrokeCap.Butt, StrokeJoin.Miter, 1.0f, 1f)
@@ -938,4 +938,56 @@ internal fun DrawScope.drawImportedBarGray(body: Path) {
     assetGroup("st0", time) {
         assetStroke(ImportedCatPaths.p154, Color(0xFFFFFFFF), 3.0f, StrokeCap.Round, StrokeJoin.Miter, 1.0f, 1f)
     }
+}
+
+internal fun DrawScope.drawImportedFocusShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawImportedHappyShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p0, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawImportedSleepShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p35, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawImportedLoafShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p57, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawMinimalFocusShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p64, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawMinimalHappyShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p64, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawMinimalSleepShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p89, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawMinimalLoafShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p93, (if (dark) Color(0x73000000) else Color(0xFFEFEFEF)), alpha = 1.0f)
+}
+
+internal fun DrawScope.drawGoldFocusShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p97, Color(0xFFFEF3C7), alpha = 0.7f)
+    drawPath(ImportedCatPaths.p98, Color(0xFFF59E0B), alpha = 0.38f)
+}
+
+internal fun DrawScope.drawGoldHappyShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p97, Color(0xFFFEF3C7), alpha = 0.7f)
+    drawPath(ImportedCatPaths.p98, Color(0xFFF59E0B), alpha = 0.38f)
+}
+
+internal fun DrawScope.drawGoldSleepShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p117, Color(0xFFFEF3C7), alpha = 0.7f)
+    drawPath(ImportedCatPaths.p118, Color(0xFFF59E0B), alpha = 0.38f)
+}
+
+internal fun DrawScope.drawGoldLoafShadow(dark: Boolean) {
+    drawPath(ImportedCatPaths.p126, Color(0xFFFEF3C7), alpha = 0.72f)
+    drawPath(ImportedCatPaths.p127, Color(0xFFF59E0B), alpha = 0.38f)
 }

@@ -86,12 +86,13 @@ fun DashboardCat(
     }) {
         if (minimal) {
             val (k, ox, oy) = minimalFrame()
+            withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MINCAT, dark, sleeping) }
             if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = true)
             withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
                 when {
-                    sleeping -> drawMinimalSleep(dark, time, leaf)
-                    happy -> drawMinimalHappy(dark, time, leaf)
-                    else -> drawMinimalFocus(dark, time, leaf, gaze)
+                    sleeping -> drawMinimalSleep(dark, time, leaf, shadow = false)
+                    happy -> drawMinimalHappy(dark, time, leaf, shadow = false)
+                    else -> drawMinimalFocus(dark, time, leaf, gaze, shadow = false)
                 }
             }
             if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = false)
@@ -102,12 +103,13 @@ fun DashboardCat(
         if (gold) {
             val ox = (this@Canvas.size.width - 240f * s) / 2f
             val oy = -35f * s
+            withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.GOLDCAT, dark, sleeping) }
             if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
             withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) {
                 when {
-                    sleeping -> drawGoldSleep(dark, time, leaf)
-                    happy -> drawGoldHappy(dark, time, leaf)
-                    else -> drawGoldFocus(dark, time, leaf, gaze)
+                    sleeping -> drawGoldSleep(dark, time, leaf, shadow = false)
+                    happy -> drawGoldHappy(dark, time, leaf, shadow = false)
+                    else -> drawGoldFocus(dark, time, leaf, gaze, shadow = false)
                 }
             }
             if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = false)
@@ -115,16 +117,17 @@ fun DashboardCat(
         }
         val ox = (this@Canvas.size.width - 240f * s) / 2f
         val oy = -35f * s
+        withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MASCOT, dark, sleeping) }
         if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
         withTransform({
             translate(ox, oy)
             scale(s, s, pivot = Offset.Zero)
         }) {
             when {
-                sleeping -> drawImportedSleep(dark, time, leaf)
-                happy -> drawImportedHappy(dark, time, leaf)
+                sleeping -> drawImportedSleep(dark, time, leaf, shadow = false)
+                happy -> drawImportedHappy(dark, time, leaf, shadow = false)
                 // Use the latest pointer position directly; no tween trails the finger.
-                else -> drawImportedFocus(dark, time, leaf, gaze)
+                else -> drawImportedFocus(dark, time, leaf, gaze, shadow = false)
             }
         }
         if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = false)

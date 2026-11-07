@@ -44,6 +44,7 @@ class VisualRegression : Instrumentation() {
     private var controlsOnly = false
     private var loafOnly = false
     private var readerUpdateOnly = false
+    private var shopGesturesOnly = false
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
@@ -52,12 +53,18 @@ class VisualRegression : Instrumentation() {
         controlsOnly = arguments?.getString("check") == "home-controls"
         loafOnly = arguments?.getString("check") == "loaf"
         readerUpdateOnly = arguments?.getString("check") == "reader-update"
+        shopGesturesOnly = arguments?.getString("check") == "shop-gestures"
         start()
     }
 
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (shopGesturesOnly) {
+                ShopGestureChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: shop/dress swipe navigation, scroll retention, landscape cat sizing, and shadow/foot-pad/body layers") })
+                return
+            }
             if (readerUpdateOnly) {
                 ReaderUpdateChecks(this).run()
                 finish(0, Bundle().apply { putString("result", "PASS: TXT rules; character selection; book recognition; shop category/scroll restoration; achievement preview back; long press with reader bars; dress and settings") })
