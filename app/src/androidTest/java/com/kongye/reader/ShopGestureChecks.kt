@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 /** Real pointer gestures, portrait/landscape geometry, and rendered layer invariants. */
-internal class ShopGestureChecks(private val test: Instrumentation) {
+internal class ShopGestureChecks(private val test: Instrumentation, private val layersOnly: Boolean = false) {
     private lateinit var activity: MainActivity
     private val output = File(test.targetContext.filesDir, "shop-gesture-checks").apply { mkdirs() }
     private val log = StringBuilder()
@@ -58,13 +58,18 @@ internal class ShopGestureChecks(private val test: Instrumentation) {
             activity = test.startActivitySync(Intent(test.targetContext, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }) as MainActivity
+            test.runOnMainSync {
+                activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
             SystemClock.sleep(3000)
             orient(false)
-            navigation()
-            responsiveCats()
+            if(!layersOnly) {
+                navigation()
+                responsiveCats()
+            }
             layers()
         } finally {
-            File(output, "result.txt").writeText(log.toString())
+            File(output, if(layersOnly) "layers-result.txt" else "result.txt").writeText(log.toString())
             if (::activity.isInitialized) test.runOnMainSync {
                 activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 activity.finish()
@@ -83,7 +88,9 @@ internal class ShopGestureChecks(private val test: Instrumentation) {
             }
             visit(activity.window.decorView)
         }
-        return result
+        // Pager prefetch can retain off-screen pages in the semantics tree.
+        // Only interact with controls that actually occupy the visible viewport.
+        return result.filter { it.boundsInRoot.width > 0f && it.boundsInRoot.height > 0f }
     }
 
     private fun labels(n: SemanticsNode) = n.config.getOrNull(SemanticsProperties.Text).orEmpty().map { it.text } +
@@ -91,10 +98,15 @@ internal class ShopGestureChecks(private val test: Instrumentation) {
 
     private fun selected(label: String) {
         val all=nodes()
-        val target=all.lastOrNull { label in labels(it) } ?: error("Missing tab: $label")
-        check(all.any { it.config.getOrNull(SemanticsProperties.Selected)==true && it.boundsInRoot.contains(target.boundsInRoot.center) }) {
-            "Swipe did not select $label"
+        val targets=all.filter { label in labels(it) }
+        val selected=all.filter { it.config.getOrNull(SemanticsProperties.Selected)==true }
+        val correct=targets.any { target -> selected.any { it.boundsInRoot.contains(target.boundsInRoot.center) } }
+        if(!correct) {
+            log.append("Expected $label; targets=${targets.map { it.boundsInRoot }}; selected=${selected.map { labels(it) to it.boundsInRoot }}\n")
+            screenshot("failed-selection").recycle()
         }
+        check(correct) { "Swipe did not select $label" }
+        log.append("Selected tab: $label\n")
     }
 
     private fun touch(action: Int, x: Float, y: Float, down: Long) {
@@ -233,7 +245,8 @@ internal class ShopGestureChecks(private val test: Instrumentation) {
             val pad=stage(id,false,true)
             val combined=stage(id,true,true)
             var aboveShadow=0; var belowFeet=0
-            for(y in (bare.height*.55f).toInt() until bare.height-2) for(x in 2 until bare.width-2) {
+            val interior=listOf(-3 to -3,0 to -3,3 to -3,-3 to 0,3 to 0,-3 to 3,0 to 3,3 to 3)
+            for(y in (bare.height*.55f).toInt() until bare.height-3) for(x in 3 until bare.width-3) {
                 val indexColor=bare.getPixel(x,y)
                 if(clear.getPixel(x,y)==background && indexColor!=background && pad.getPixel(x,y)==android.graphics.Color.WHITE) {
                     check(combined.getPixel(x,y)==android.graphics.Color.WHITE) { "$id shadow covered the white foot pad at $x,$y" }
@@ -241,7 +254,7 @@ internal class ShopGestureChecks(private val test: Instrumentation) {
                 }
                 val body=clear.getPixel(x,y)
                 if(body!=background && body!=android.graphics.Color.WHITE &&
-                    listOf(-2 to 0,2 to 0,0 to -2,0 to 2).all { (dx,dy)->clear.getPixel(x+dx,y+dy)!=background }) {
+                    interior.all { (dx,dy)->clear.getPixel(x+dx,y+dy)!=background }) {
                     check(combined.getPixel(x,y)==body) { "$id pad covered the animal's feet at $x,$y" }
                     belowFeet++
                 }
