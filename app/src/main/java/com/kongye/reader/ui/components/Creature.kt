@@ -25,7 +25,7 @@ import com.kongye.reader.data.ShopAccessory
 import com.kongye.reader.data.ShopAnimal
 import com.kongye.reader.ui.theme.K
 
-/** 阴影 → H（脚下）→ 动物身体 → F G E B C D A。正脸猫的 F 也在身体后面。 */
+/** H（脚下）替换原阴影，位于动物身体下面；正脸猫的 F 也在身体后面。 */
 private val frontSlots = listOf("F", "G", "E", "B", "C", "D", "A")
 
 /**
@@ -58,12 +58,13 @@ fun Creature(
     val native = id in Shop.kongyeCats
     val mirror = flip != (faceLeft && !animal.flip && !native)
     val pieces = outfitPieces(animal, outfit)
+    val showGround = shadow && pieces.none { it.slot == "H" }
     val dark = K.c.dark
     val time = if (animate && native) assetTime() else 0f
     val resource = pose?.let { animal.poses[it] } ?: animal.res
     val bodyLayer = if (native) 0 else Shop.drawable("${resource}_body")
     val body = if (native) null else painterResource(if (bodyLayer != 0) bodyLayer else Shop.drawable(resource))
-    val ground = if (!native && shadow && bodyLayer != 0) painterResource(Shop.drawable("${resource}_shadow")) else null
+    val ground = if (!native && showGround && bodyLayer != 0) painterResource(Shop.drawable("${resource}_shadow")) else null
     // 看板猫、鎏金看板猫同一套 240x260 坐标，取景也和看板猫一样
     val mascotFrame = id == Shop.GOLDCAT || id == Shop.MASCOT
     Canvas((if (size != null) modifier.size(size) else modifier).semantics { contentDescription = "动物预览：${animal.name}" }) {
@@ -76,7 +77,7 @@ fun Creature(
             Triple(k, (this.size.width - vb[2] * k) / 2, (this.size.height - vb[3] * k) / 2)
         }
         withTransform({ if (mirror) scale(-1f, 1f, pivot = center) }) {
-            if (native && shadow) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
+            if (native && showGround) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
                 drawCatGroundShadow(id, dark)
             }
             if (ground != null) translate(ox, oy) { with(ground) { draw(Size(vb[2] * k, vb[3] * k)) } }

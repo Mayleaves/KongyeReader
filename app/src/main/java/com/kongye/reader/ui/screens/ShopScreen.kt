@@ -129,22 +129,22 @@ fun ShopScreen() {
                 // 衣架：按正在看的分类进装扮的那一页（动物→首页、背景和挂件→猫园、饰品→饰品、图标→图标）
                 IconBtn(Ico.HANGER) { Nav.dress(listOf(0, 1, 2, 1, 3)[tab]) }
             }
-            HorizontalPager(pager, Modifier.fillMaxSize()) { page ->
+            // 叶子数和分类条五页都一样，固定在上面不跟着左右滑；只有下面的格子换页
+            Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 12.dp)) {
+                Leaves(profile.leaves)
+                Spacer(Modifier.height(14.dp))
+                Segmented(tabs, tab, Modifier.fillMaxWidth()) { scope.launch { pager.animateScrollToPage(it) } }
+            }
+            // 左右两页提前排好，滑过去不卡
+            HorizontalPager(pager, Modifier.fillMaxSize(), beyondViewportPageCount = 1) { page ->
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize(),
                     state = grids[page],
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = navPad + 28.dp),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 2.dp, bottom = navPad + 28.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Column {
-                            Leaves(profile.leaves)
-                            Spacer(Modifier.height(14.dp))
-                            Segmented(tabs, tab, Modifier.fillMaxWidth()) { scope.launch { pager.animateScrollToPage(it) } }
-                        }
-                    }
                     when (page) {
                         // 动物按来历分组：空叶自己的猫、小动物、小马宝莉、表情
                         0 -> for ((group, title) in Shop.animalGroups) {

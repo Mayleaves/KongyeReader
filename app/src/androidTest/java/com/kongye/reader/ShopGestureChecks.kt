@@ -244,6 +244,16 @@ internal class ShopGestureChecks(private val test: Instrumentation, private val 
             val clear=stage(id,false,false)
             val pad=stage(id,false,true)
             val combined=stage(id,true,true)
+            fun pixels(bitmap: Bitmap) = IntArray(bitmap.width*bitmap.height).also {
+                bitmap.getPixels(it,0,bitmap.width,0,0,bitmap.width,bitmap.height)
+            }
+            val before=pixels(bare)
+            val withoutShadow=pixels(clear)
+            check(pixels(pad).contentEquals(pixels(combined))) { "$id retained its original shadow after equipping a foot pad" }
+            val shadowPixels=before.indices.count { before[it]!=withoutShadow[it] }
+            check(shadowPixels>20) { "$id did not have a visible default shadow" }
+            val restored=stage(id,true,false)
+            check(pixels(restored).contentEquals(before)) { "$id failed to restore its shadow after removing the foot pad" }
             var aboveShadow=0; var belowFeet=0
             val interior=listOf(-3 to -3,0 to -3,3 to -3,-3 to 0,3 to 0,-3 to 3,0 to 3,3 to 3)
             for(y in (bare.height*.55f).toInt() until bare.height-3) for(x in 3 until bare.width-3) {
@@ -260,8 +270,8 @@ internal class ShopGestureChecks(private val test: Instrumentation, private val 
                 }
             }
             check(aboveShadow>20 && belowFeet>100) { "Insufficient visible layer overlap for $id: $aboveShadow/$belowFeet" }
-            log.append("$id: $aboveShadow pad pixels above shadow; $belowFeet body/foot pixels above pad\n")
-            listOf(bare,clear,pad,combined).forEach { it.recycle() }
+            log.append("$id: $shadowPixels default shadow pixels removed by foot pad and restored on removal; $belowFeet body/foot pixels above pad\n")
+            listOf(bare,clear,pad,combined,restored).forEach { it.recycle() }
         }
         for(id in listOf(Shop.MASCOT,Shop.MINCAT,Shop.GOLDCAT)) for(sleep in listOf(false,true)) {
             test.runOnMainSync {

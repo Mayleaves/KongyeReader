@@ -277,13 +277,14 @@ private fun GardenAnimal(
     }
     val pos = held ?: home
     val cat = who == Shop.MASCOT || who == Shop.MINCAT || who == Shop.GOLDCAT
+    val replacesGround = !cat && profile.outfits[who]?.get("H")?.let { Shop.accessory(it) } != null
     // 动物的 SVG 四周留白比猫多，画大一点看起来才一样大；脚落在格子里的高度也不一样
     val size = if (cat) spot.size else spot.size * 1.3f
     val feet = if (cat) 0.9f else 0.86f
     Box(Modifier.offset((pos.x - (size - spot.size) / 2).dp, (pos.y - (size - spot.size)).dp).zIndex(if (held != null) 1f else 0f)) {
         Box(Modifier.size(size.dp).then(gesture)) {
             // 提起来以后地上的影子
-            if (lift > 0.01f) Canvas(Modifier.matchParentSize()) {
+            if (lift > 0.01f && !replacesGround) Canvas(Modifier.matchParentSize()) {
                 val sw = this.size.width * 0.5f * (1f - 0.15f * lift)
                 val sh = this.size.width * 0.09f
                 drawOval(

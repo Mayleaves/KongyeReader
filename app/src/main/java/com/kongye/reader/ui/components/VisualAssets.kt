@@ -71,6 +71,7 @@ fun DashboardCat(
     val dark = K.c.dark
     val minCat = if (minimal) Shop.animal(Shop.MINCAT) else if (gold) Shop.animal(Shop.GOLDCAT) else Shop.wearer(Shop.MASCOT)
     val pieces = if (minCat != null) outfitPieces(minCat) else emptyList()
+    val showGround = pieces.none { it.slot == "H" }
     val time = assetTime()
     var happy by remember { mutableStateOf(false) }
     LaunchedEffect(petSignal) {
@@ -86,7 +87,7 @@ fun DashboardCat(
     }) {
         if (minimal) {
             val (k, ox, oy) = minimalFrame()
-            withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MINCAT, dark, sleeping) }
+            if (showGround) withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MINCAT, dark, sleeping) }
             if (minCat != null) drawOutfit(minCat, pieces, k, ox, oy, behind = true)
             withTransform({ translate(ox, oy); scale(k, k, pivot = Offset.Zero) }) {
                 when {
@@ -103,7 +104,7 @@ fun DashboardCat(
         if (gold) {
             val ox = (this@Canvas.size.width - 240f * s) / 2f
             val oy = -35f * s
-            withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.GOLDCAT, dark, sleeping) }
+            if (showGround) withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.GOLDCAT, dark, sleeping) }
             if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
             withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) {
                 when {
@@ -117,7 +118,7 @@ fun DashboardCat(
         }
         val ox = (this@Canvas.size.width - 240f * s) / 2f
         val oy = -35f * s
-        withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MASCOT, dark, sleeping) }
+        if (showGround) withTransform({ translate(ox, oy); scale(s, s, pivot = Offset.Zero) }) { drawCatGroundShadow(Shop.MASCOT, dark, sleeping) }
         if (minCat != null) drawOutfit(minCat, pieces, s, ox, oy, behind = true)
         withTransform({
             translate(ox, oy)
