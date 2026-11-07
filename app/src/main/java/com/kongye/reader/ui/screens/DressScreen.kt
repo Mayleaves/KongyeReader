@@ -163,7 +163,7 @@ private fun GardenTab(profile: Profile, animals: List<ShopAnimal>) {
         Pad {
             T("每读一次来一只，按选中的顺序轮流；朝向随机", 12.sp, c.text2)
             Spacer(Modifier.height(10.dp))
-            AnimalGrid(animals, mascot = true, selected = { it in profile.gardenAnimals }) { id ->
+            AnimalGrid(animals, mascot = true, leaf = true, selected = { it in profile.gardenAnimals }) { id ->
                 Profiles.update { p ->
                     val next = if (id in p.gardenAnimals) p.gardenAnimals - id else p.gardenAnimals + id
                     p.copy(gardenAnimals = next.ifEmpty { listOf(Shop.MASCOT) })
