@@ -28,7 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kongye.reader.data.Updates
 import com.kongye.reader.data.Updates.Phase
-import com.kongye.reader.ui.components.CatMascot
+import com.kongye.reader.data.Shop
+import com.kongye.reader.ui.components.Creature
 import com.kongye.reader.ui.components.GhostButton
 import com.kongye.reader.ui.components.Ico
 import com.kongye.reader.ui.components.Icon
@@ -59,7 +60,7 @@ fun UpdateSheet(visible: Boolean, state: Updates.State, onDismiss: () -> Unit) {
         val apk = rel.apk
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(60.dp).background(c.chip, SmoothShape(20.dp)), contentAlignment = Alignment.Center) {
-                CatMascot(size = 52.dp, shadow = false, accent = true)
+                Creature(Shop.MASCOT, size = 52.dp, shadow = false, leaf = true, outfit = emptyMap())
             }
             Spacer(Modifier.width(14.dp))
             Column {
