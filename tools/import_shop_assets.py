@@ -645,6 +645,9 @@ for key, color in icon_bg.items():
 from pride_theme import apply_pride_theme
 apply_pride_theme(catalog)
 ASSETS.mkdir(exist_ok=True)
+# 逐只校正过的饰品锚点（tools/acc_anchor_fixes.json）
+from apply_acc_anchor_fixes import apply as apply_anchor_fixes  # noqa: E402
+apply_anchor_fixes(catalog)
 (ASSETS / 'shop.json').write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding='utf-8')
 print(f"动物 {len(catalog['animals'])}，背景 {len(catalog['backgrounds'])}，饰品 {len(catalog['accessories'])}，"
       f"挂件 {len(catalog['ornaments'])}，图标 {len(catalog['icons'])}")

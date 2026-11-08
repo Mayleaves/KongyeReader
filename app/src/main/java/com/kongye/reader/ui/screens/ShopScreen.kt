@@ -339,9 +339,12 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
                     ) else OrnamentArt(orn, Modifier.size(140.dp))
                 }
                 acc != null -> Row(verticalAlignment = Alignment.CenterVertically) {
-                    // 戴在看板猫（商城里的黑猫）身上看看效果
-                    val model = Shop.animal("cat")
-                    if (model != null) Creature("cat", size = 180.dp, outfit = mapOf(acc.slot to acc.id), faceLeft = true)
+                    // 戴在首页的动物身上看看效果：它身上原有的饰品照戴，这个部位换成这件
+                    val home = profile.homeAnimal.takeIf { it == Shop.MASCOT || profile.has(it) } ?: Shop.MASCOT
+                    if (Shop.wearer(home) != null) Creature(
+                        home, size = 180.dp, faceLeft = true, leaf = home in Shop.kongyeCats,
+                        outfit = profile.outfits[home].orEmpty().filterValues { profile.has(it) } + (acc.slot to acc.id),
+                    )
                     else AccessoryArt(acc, Modifier.size(140.dp))
                 }
                 else -> IconPreview(item.removePrefix("icon_"), Modifier.size(140.dp))
@@ -350,7 +353,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         Spacer(Modifier.height(16.dp))
         T(Shop.nameOf(item), 20.sp, c.ink, FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
-        // 上面一句是它自己的介绍（ShopBlurbs），下面一行小字是用法
+        // 只显示它自己的一句介绍（ShopBlurbs）；没有介绍的才用下面的用法说明
         val blurb = ShopBlurbs.of(item)
         val usage = when {
             item == Shop.TREASURE -> "带回家就点亮成就「镇店之宝」，送 8 件所有动物都能戴的神装"
@@ -364,10 +367,6 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
             else -> "桌面图标，随时可以换"
         } + if (item.startsWith("icon_") && item.removePrefix("icon_") in Shop.minimalIcons) "；选了它开屏也换成墨团" else ""
         T(blurb ?: usage, 13.sp, c.text2)
-        if (blurb != null) {
-            Spacer(Modifier.height(2.dp))
-            T(usage, 12.sp, c.text3)
-        }
         Spacer(Modifier.height(20.dp))
         when {
             owned && orn != null && profile.scene[orn.slot] != orn.id -> InkButton("挂到猫园", Modifier.fillMaxWidth(), height = 52.dp) {
