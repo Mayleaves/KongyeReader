@@ -129,10 +129,11 @@ fun AboutScreen() {
                             Updates.check()
                         }
                     }
+                    ValueRow("更新历史", "", chevron = true) { Nav.push(com.kongye.reader.ui.Screen.History) }
                     ValueRow("GitHub", "Mayleaves/KongyeReader", chevron = true) { Updates.open(context, Updates.GITHUB) }
                     // 找到过彩蛋才出现：关掉后只剩自己用叶子换到的，正在用的没买的换回默认
                     if ("egg" in profile.achievements) {
-                        SwitchRow("彩蛋", profile.egg == true, "开着时商城里的东西全部能用；关掉只剩自己换到的") { v ->
+                        SwitchRow("彩蛋", profile.egg == true) { v ->
                             Profiles.setEgg(v)
                             Toast.show(if (v) "彩蛋打开了，全部能用" else "彩蛋关掉了，只剩自己换到的")
                         }

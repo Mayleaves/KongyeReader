@@ -649,5 +649,8 @@ ASSETS.mkdir(exist_ok=True)
 from apply_acc_anchor_fixes import apply as apply_anchor_fixes  # noqa: E402
 apply_anchor_fixes(catalog)
 (ASSETS / 'shop.json').write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding='utf-8')
+# 保留原画的路径、裁切与层序，生成普通动物的局部动画图层（私有素材仍在 res-private）。
+from build_animal_motion import build as build_animal_motion
+build_animal_motion()
 print(f"动物 {len(catalog['animals'])}，背景 {len(catalog['backgrounds'])}，饰品 {len(catalog['accessories'])}，"
       f"挂件 {len(catalog['ornaments'])}，图标 {len(catalog['icons'])}")

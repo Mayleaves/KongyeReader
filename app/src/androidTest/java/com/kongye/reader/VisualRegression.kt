@@ -39,6 +39,8 @@ import kotlin.math.PI
 /** Dependency-free device checks for the artwork's edge cases and actual splash handoff. */
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
+    private var animationScopeOnly = false
+    private var animalMotionOnly = false
     private var skipOnly = false
     private var gazeOnly = false
     private var controlsOnly = false
@@ -50,6 +52,8 @@ class VisualRegression : Instrumentation() {
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
+        animationScopeOnly = arguments?.getString("check") == "animation-scope"
+        animalMotionOnly = arguments?.getString("check") == "animal-motion"
         skipOnly = arguments?.getString("check") == "splash-skip"
         gazeOnly = arguments?.getString("check") == "gaze-distance"
         controlsOnly = arguments?.getString("check") == "home-controls"
@@ -64,6 +68,16 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (animationScopeOnly) {
+                AnimationScopeChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: static thumbnails and animated large previews") })
+                return
+            }
+            if (animalMotionOnly) {
+                AnimalMotionChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: articulated animal layers, rest-pose identity, part motion and attachment transforms") })
+                return
+            }
             if (achievementOnly) {
                 AchievementChecks(this).run()
                 finish(0,Bundle().apply { putString("result","PASS: fifteen real achievement conditions, rewards, NEW lifecycle/persistence, ordering, Pride metadata and badge artwork") })

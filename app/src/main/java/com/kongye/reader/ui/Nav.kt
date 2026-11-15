@@ -23,6 +23,7 @@ sealed class Screen(val key: String) {
     data object Achievements : Screen("achievements")
     data object Backup : Screen("backup")
     data object About : Screen("about")
+    data object History : Screen("history")
 }
 
 /** 简单的页面栈：首页在最底下，返回键逐层退出 */

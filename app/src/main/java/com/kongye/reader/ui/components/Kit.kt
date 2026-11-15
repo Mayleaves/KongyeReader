@@ -50,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.CornerRadius
@@ -577,13 +578,16 @@ fun Signpost(text: String, modifier: Modifier = Modifier, dark: Boolean = false,
             text.length <= 4 -> 13.sp
             else -> 11.sp
         }
-        T(
-            text, fs, tc, FontWeight.Bold,
-            Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 13.dp, start = if (pointLeft) 10.dp else 0.dp, end = if (pointLeft) 0.dp else 10.dp),
-            maxLines = 1,
-        )
+        // 矩形牌面的中心：排除箭头，文字随上下边沿一起倾斜。
+        Box(
+            Modifier.align(Alignment.TopStart)
+                .padding(start = if (pointLeft) 17.dp else 5.dp, top = 5.6.dp)
+                .size(78.dp, 35.dp)
+                .rotate(if (pointLeft) -1.45f else 1.45f),
+            contentAlignment = Alignment.Center,
+        ) {
+            T(text, fs, tc, FontWeight.Bold, maxLines = 1)
+        }
     }
 }
 

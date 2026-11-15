@@ -79,21 +79,21 @@ fun PrefsScreen() {
                         Spacer(Modifier.height(10.dp))
                         Segmented(listOf("跟随系统", "浅色", "深色"), s.theme, Modifier.fillMaxWidth()) { i -> Settings.update { it.copy(theme = i) } }
                     }
-                    SwitchRow("夜间阅读跟随系统", s.nightFollowSystem, "系统切到深色时，阅读页自动用夜间纸色") { v ->
+                    SwitchRow("夜间阅读跟随系统", s.nightFollowSystem) { v ->
                         Settings.update { it.copy(nightFollowSystem = v) }
                     }
                 }
                 Spacer(Modifier.height(20.dp))
                 Group("阅读") {
-                    SwitchRow("启动时继续上次阅读", s.resumeLast, "打开应用直接回到上次读的那一页") { v -> Settings.update { it.copy(resumeLast = v) } }
+                    SwitchRow("启动时继续上次阅读", s.resumeLast) { v -> Settings.update { it.copy(resumeLast = v) } }
                     SwitchRow("音量键翻页", s.volumeKeys) { v -> Settings.update { it.copy(volumeKeys = v) } }
-                    SwitchRow("屏幕常亮", s.keepScreenOn, "阅读时不自动锁屏") { v -> Settings.update { it.copy(keepScreenOn = v) } }
-                    SwitchRow("点左边也翻下一页", s.tapLeftNext, "单手拿手机时更顺手") { v -> Settings.update { it.copy(tapLeftNext = v) } }
+                    SwitchRow("屏幕常亮", s.keepScreenOn) { v -> Settings.update { it.copy(keepScreenOn = v) } }
+                    SwitchRow("点左边也翻下一页", s.tapLeftNext) { v -> Settings.update { it.copy(tapLeftNext = v) } }
                     SwitchRow("显示时间和电量", s.showStatus) { v -> Settings.update { it.copy(showStatus = v) } }
                 }
                 Spacer(Modifier.height(20.dp))
                 Group("其他") {
-                    ValueRow("备份与恢复", "本地 / WebDAV", chevron = true) { Nav.push(Screen.Backup) }
+                    ValueRow("备份与恢复", "", chevron = true) { Nav.push(Screen.Backup) }
                     // 有新版本时在这一行提一句
                     val hint = when (up.phase) {
                         Updates.Phase.FOUND -> "有新版本"

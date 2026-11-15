@@ -210,7 +210,7 @@ fun HomeScreen() {
                                 }
                                 speechSignal++
                             },
-                        size = 210.dp,
+                        size = 210.dp, animate = true,
                     )
                 } else DashboardCat(
                     Modifier

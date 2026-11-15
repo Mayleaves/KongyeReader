@@ -342,7 +342,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
                     // 戴在首页的动物身上看看效果：它身上原有的饰品照戴，这个部位换成这件
                     val home = profile.homeAnimal.takeIf { it == Shop.MASCOT || profile.has(it) } ?: Shop.MASCOT
                     if (Shop.wearer(home) != null) Creature(
-                        home, size = 180.dp, faceLeft = true, leaf = home in Shop.kongyeCats,
+                        home, size = 180.dp, faceLeft = true, leaf = home in Shop.kongyeCats, animate = true,
                         outfit = profile.outfits[home].orEmpty().filterValues { profile.has(it) } + (acc.slot to acc.id),
                     )
                     else AccessoryArt(acc, Modifier.size(140.dp))

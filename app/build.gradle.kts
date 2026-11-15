@@ -12,8 +12,8 @@ android {
         applicationId = "com.kongye.reader"
         minSdk = 26
         targetSdk = 36
-        versionCode = 33
-        versionName = "2.1.1"
+        versionCode = 34
+        versionName = "2.1.2"
         testInstrumentationRunner = "com.kongye.reader.VisualRegression"
     }
 

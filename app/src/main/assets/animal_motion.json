@@ -1,0 +1,1713 @@
+{
+ "goldpig": {
+  "layers": [
+   {
+    "res": "shop_motion_goldpig_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_goldpig_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_goldpig_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_goldpig_3",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_goldpig_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     122,
+     46
+    ],
+    "angle": 7,
+    "period": 3.9,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     40,
+     53
+    ],
+    "angle": 5,
+    "period": 6.2,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "cat": {
+  "layers": [
+   {
+    "res": "shop_motion_cat_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_cat_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_cat_2",
+    "motion": "earL"
+   },
+   {
+    "res": "shop_motion_cat_3",
+    "motion": "earR"
+   },
+   {
+    "res": "shop_motion_cat_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     35,
+     67
+    ],
+    "angle": 9,
+    "period": 3.7,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "earL",
+    "pivot": [
+     71,
+     50
+    ],
+    "angle": 6,
+    "period": 5.9,
+    "kind": "twitch",
+    "attach": []
+   },
+   {
+    "name": "earR",
+    "pivot": [
+     88,
+     50
+    ],
+    "angle": -5,
+    "period": 6.8,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "dog": {
+  "layers": [
+   {
+    "res": "shop_motion_dog_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_dog_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_dog_2",
+    "motion": "ear"
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     35,
+     66
+    ],
+    "angle": 13,
+    "period": 2.3,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     69,
+     51
+    ],
+    "angle": 7,
+    "period": 5.7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "pig": {
+  "layers": [
+   {
+    "res": "shop_motion_pig_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_pig_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_pig_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_pig_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     34,
+     68
+    ],
+    "angle": 10,
+    "period": 4.1,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     64,
+     54
+    ],
+    "angle": 5,
+    "period": 6.1,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "sheep": {
+  "layers": [
+   {
+    "res": "shop_motion_sheep_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_sheep_1",
+    "motion": "blink"
+   }
+  ],
+  "motions": [
+   {
+    "name": "blink",
+    "pivot": [
+     83,
+     56
+    ],
+    "angle": 0,
+    "period": 5.8,
+    "kind": "blink",
+    "attach": []
+   }
+  ]
+ },
+ "mouse": {
+  "layers": [
+   {
+    "res": "shop_motion_mouse_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_mouse_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_mouse_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_mouse_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     38,
+     86
+    ],
+    "angle": 8,
+    "period": 4.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     72,
+     68
+    ],
+    "angle": 6,
+    "period": 5.5,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "chicken": {
+  "layers": [
+   {
+    "res": "shop_motion_chicken_0",
+    "motion": "comb"
+   },
+   {
+    "res": "shop_motion_chicken_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_chicken_2",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_chicken_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "wing",
+    "pivot": [
+     52,
+     63
+    ],
+    "angle": 7,
+    "period": 5.2,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "comb",
+    "pivot": [
+     76,
+     42
+    ],
+    "angle": 3,
+    "period": 6.4,
+    "kind": "twitch",
+    "attach": [
+     "A"
+    ]
+   }
+  ]
+ },
+ "duck": {
+  "layers": [
+   {
+    "res": "shop_motion_duck_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_duck_1",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_duck_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "wing",
+    "pivot": [
+     44,
+     60
+    ],
+    "angle": 6,
+    "period": 5.8,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "cow": {
+  "layers": [
+   {
+    "res": "shop_motion_cow_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_cow_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_cow_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_cow_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     33,
+     61
+    ],
+    "angle": 10,
+    "period": 4.6,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     91,
+     47
+    ],
+    "angle": 6,
+    "period": 6.3,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "horse": {
+  "layers": [
+   {
+    "res": "shop_motion_horse_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_horse_1",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     34,
+     64
+    ],
+    "angle": 8,
+    "period": 4.9,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "monkey": {
+  "layers": [
+   {
+    "res": "shop_motion_monkey_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_monkey_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_monkey_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_monkey_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     40,
+     76
+    ],
+    "angle": 8,
+    "period": 3.6,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     88,
+     58
+    ],
+    "angle": 4,
+    "period": 6.7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "blackbird": {
+  "layers": [
+   {
+    "res": "shop_motion_blackbird_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_blackbird_1",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_blackbird_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "wing",
+    "pivot": [
+     48,
+     65
+    ],
+    "angle": 6,
+    "period": 5.6,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "crow": {
+  "layers": [
+   {
+    "res": "shop_motion_crow_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_crow_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_crow_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_crow_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_crow_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     62,
+     96
+    ],
+    "angle": 4,
+    "period": 4.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     82,
+     70
+    ],
+    "angle": 4,
+    "period": 6.3,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "cockatiel": {
+  "layers": [
+   {
+    "res": "shop_motion_cockatiel_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_cockatiel_1",
+    "motion": "crest"
+   },
+   {
+    "res": "shop_motion_cockatiel_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_cockatiel_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_cockatiel_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "crest",
+    "pivot": [
+     76,
+     41
+    ],
+    "angle": 4,
+    "period": 4.7,
+    "kind": "twitch",
+    "attach": [
+     "A"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     49,
+     65
+    ],
+    "angle": 7,
+    "period": 5.4,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "deer": {
+  "layers": [
+   {
+    "res": "shop_motion_deer_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_deer_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_deer_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_deer_3",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_deer_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     36,
+     65
+    ],
+    "angle": 8,
+    "period": 4.7,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     67,
+     46
+    ],
+    "angle": 7,
+    "period": 6.2,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "elk": {
+  "layers": [
+   {
+    "res": "shop_motion_elk_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_elk_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_elk_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     40,
+     69
+    ],
+    "angle": 7,
+    "period": 5.3,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "fennec": {
+  "layers": [
+   {
+    "res": "shop_motion_fennec_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_fennec_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_fennec_2",
+    "motion": "earL"
+   },
+   {
+    "res": "shop_motion_fennec_3",
+    "motion": "earR"
+   },
+   {
+    "res": "shop_motion_fennec_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     40,
+     74
+    ],
+    "angle": 6,
+    "period": 5.2,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "earL",
+    "pivot": [
+     69,
+     52
+    ],
+    "angle": 6,
+    "period": 5.5,
+    "kind": "twitch",
+    "attach": []
+   },
+   {
+    "name": "earR",
+    "pivot": [
+     84,
+     52
+    ],
+    "angle": -7,
+    "period": 6.7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "giraffe": {
+  "layers": [
+   {
+    "res": "shop_motion_giraffe_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_giraffe_1",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_giraffe_2",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_giraffe_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "ear",
+    "pivot": [
+     67,
+     27
+    ],
+    "angle": 6,
+    "period": 6.6,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   },
+   {
+    "name": "tail",
+    "pivot": [
+     38,
+     68
+    ],
+    "angle": 10,
+    "period": 4.3,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "flamingo": {
+  "layers": [
+   {
+    "res": "shop_motion_flamingo_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_flamingo_1",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_flamingo_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "wing",
+    "pivot": [
+     44,
+     56
+    ],
+    "angle": 5,
+    "period": 6.4,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "tiger": {
+  "layers": [
+   {
+    "res": "shop_motion_tiger_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_tiger_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_tiger_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_tiger_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     35,
+     70
+    ],
+    "angle": 9,
+    "period": 4.2,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     90,
+     49
+    ],
+    "angle": 5,
+    "period": 6.6,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "lion": {
+  "layers": [
+   {
+    "res": "shop_motion_lion_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_lion_1",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     35,
+     72
+    ],
+    "angle": 8,
+    "period": 4.7,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "snowleopard": {
+  "layers": [
+   {
+    "res": "shop_motion_snowleopard_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_snowleopard_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_snowleopard_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_snowleopard_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     40,
+     73
+    ],
+    "angle": 3,
+    "period": 5.5,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     89,
+     49
+    ],
+    "angle": 4,
+    "period": 6.1,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "flypig": {
+  "layers": [
+   {
+    "res": "shop_motion_flypig_0",
+    "motion": "wingBack"
+   },
+   {
+    "res": "shop_motion_flypig_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_flypig_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_flypig_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_flypig_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "wingBack",
+    "pivot": [
+     57,
+     50
+    ],
+    "angle": -10,
+    "period": 2.8,
+    "kind": "flap",
+    "attach": []
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     55,
+     58
+    ],
+    "angle": 11,
+    "period": 2.8,
+    "kind": "flap",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "tail",
+    "pivot": [
+     34,
+     62
+    ],
+    "angle": 7,
+    "period": 4.4,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "unicorn": {
+  "layers": [
+   {
+    "res": "shop_motion_unicorn_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_unicorn_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_unicorn_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_unicorn_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     39,
+     65
+    ],
+    "angle": 7,
+    "period": 4.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     73,
+     36
+    ],
+    "angle": 4,
+    "period": 6.7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "notopig": {
+  "layers": [
+   {
+    "res": "shop_motion_notopig_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_notopig_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_notopig_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     75,
+     106
+    ],
+    "angle": 7,
+    "period": 4.2,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "pinkie": {
+  "layers": [
+   {
+    "res": "shop_motion_pinkie_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_pinkie_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_pinkie_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_pinkie_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     470,
+     412
+    ],
+    "angle": 4,
+    "period": 3.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     328,
+     225
+    ],
+    "angle": 5,
+    "period": 6,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "applejack": {
+  "layers": [
+   {
+    "res": "shop_motion_applejack_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_applejack_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_applejack_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_applejack_3",
+    "motion": "ear"
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     478,
+     421
+    ],
+    "angle": 4,
+    "period": 5.2,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     338,
+     245
+    ],
+    "angle": 4,
+    "period": 6.7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "fluttershy": {
+  "layers": [
+   {
+    "res": "shop_motion_fluttershy_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_fluttershy_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_fluttershy_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_fluttershy_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_fluttershy_4",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     580,
+     385
+    ],
+    "angle": 3,
+    "period": 5.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     456,
+     374
+    ],
+    "angle": 4,
+    "period": 6.5,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "rainbow": {
+  "layers": [
+   {
+    "res": "shop_motion_rainbow_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_rainbow_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_rainbow_2",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_rainbow_3",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_rainbow_4",
+    "motion": "ear"
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     466,
+     411
+    ],
+    "angle": 4,
+    "period": 4.3,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     349,
+     389
+    ],
+    "angle": 6,
+    "period": 4.8,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     332,
+     209
+    ],
+    "angle": 5,
+    "period": 6.2,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "rarity": {
+  "layers": [
+   {
+    "res": "shop_motion_rarity_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_rarity_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_rarity_2",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     610,
+     515
+    ],
+    "angle": 3,
+    "period": 5.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   }
+  ]
+ },
+ "twilight": {
+  "layers": [
+   {
+    "res": "shop_motion_twilight_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_twilight_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_twilight_2",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_twilight_3",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     598,
+     523
+    ],
+    "angle": 3.5,
+    "period": 5.1,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     408,
+     281
+    ],
+    "angle": 4,
+    "period": 6.3,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "celestia2": {
+  "layers": [
+   {
+    "res": "shop_motion_celestia2_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia2_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_celestia2_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia2_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_celestia2_4",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia2_5",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_celestia2_6",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     583,
+     473
+    ],
+    "angle": 2.5,
+    "period": 6.2,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     405,
+     462
+    ],
+    "angle": 3,
+    "period": 6.8,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     379,
+     220
+    ],
+    "angle": 3,
+    "period": 7.3,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "luna2": {
+  "layers": [
+   {
+    "res": "shop_motion_luna2_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_luna2_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_luna2_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_luna2_3",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_luna2_4",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_luna2_5",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_luna2_6",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     516,
+     476
+    ],
+    "angle": 2.5,
+    "period": 6.4,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     355,
+     473
+    ],
+    "angle": 3.5,
+    "period": 6.3,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     340,
+     243
+    ],
+    "angle": 4,
+    "period": 7.1,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "celestia": {
+  "layers": [
+   {
+    "res": "shop_motion_celestia_0",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_1",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_celestia_2",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_3",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_celestia_4",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_5",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_celestia_6",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_7",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_celestia_8",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_9",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_celestia_10",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_celestia_11",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_celestia_12",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     565,
+     405
+    ],
+    "angle": 2,
+    "period": 6.8,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     606,
+     433
+    ],
+    "angle": 3,
+    "period": 6.2,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     714,
+     180
+    ],
+    "angle": 3,
+    "period": 7.4,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   }
+  ]
+ },
+ "luna": {
+  "layers": [
+   {
+    "res": "shop_motion_luna_0",
+    "motion": "tail"
+   },
+   {
+    "res": "shop_motion_luna_1",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_luna_2",
+    "motion": "wing"
+   },
+   {
+    "res": "shop_motion_luna_3",
+    "motion": ""
+   },
+   {
+    "res": "shop_motion_luna_4",
+    "motion": "ear"
+   },
+   {
+    "res": "shop_motion_luna_5",
+    "motion": ""
+   }
+  ],
+  "motions": [
+   {
+    "name": "tail",
+    "pivot": [
+     477,
+     535
+    ],
+    "angle": 2.5,
+    "period": 6.7,
+    "kind": "sway",
+    "attach": [
+     "G"
+    ]
+   },
+   {
+    "name": "ear",
+    "pivot": [
+     593,
+     256
+    ],
+    "angle": 3,
+    "period": 7,
+    "kind": "twitch",
+    "attach": [
+     "B"
+    ]
+   },
+   {
+    "name": "wing",
+    "pivot": [
+     489,
+     544
+    ],
+    "angle": 3,
+    "period": 6.9,
+    "kind": "flutter",
+    "attach": [
+     "F"
+    ]
+   }
+  ]
+ }
+}

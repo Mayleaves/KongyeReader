@@ -323,7 +323,7 @@ private fun GardenAnimal(
                     gold = who == Shop.GOLDCAT,
                     goldMin = who == Shop.GOLDMIN,
                 )
-            } else Creature(who, body, size = size.dp, flip = spot.flip, shadow = lift < 0.01f)
+            } else Creature(who, body, size = size.dp, flip = spot.flip, shadow = lift < 0.01f, animate = true)
         }
         if (selected) {
             Column(

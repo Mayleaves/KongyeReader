@@ -1,0 +1,1333 @@
+{
+  "goldpig": [
+    {
+      "name": "tail",
+      "paths": [
+        2
+      ],
+      "pivot": [
+        122,
+        46
+      ],
+      "angle": 7,
+      "period": 3.9,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        6
+      ],
+      "pivot": [
+        40,
+        53
+      ],
+      "angle": 5,
+      "period": 6.2,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "cat": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        35,
+        67
+      ],
+      "angle": 9,
+      "period": 3.7,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "earL",
+      "paths": [
+        7,
+        8
+      ],
+      "pivot": [
+        71,
+        50
+      ],
+      "angle": 6,
+      "period": 5.9,
+      "kind": "twitch",
+      "attach": []
+    },
+    {
+      "name": "earR",
+      "paths": [
+        9,
+        10
+      ],
+      "pivot": [
+        88,
+        50
+      ],
+      "angle": -5,
+      "period": 6.8,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "dog": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        35,
+        66
+      ],
+      "angle": 13,
+      "period": 2.3,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        15
+      ],
+      "pivot": [
+        69,
+        51
+      ],
+      "angle": 7,
+      "period": 5.7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "pig": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        34,
+        68
+      ],
+      "angle": 10,
+      "period": 4.1,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        8,
+        9
+      ],
+      "pivot": [
+        64,
+        54
+      ],
+      "angle": 5,
+      "period": 6.1,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "sheep": [
+    {
+      "name": "blink",
+      "paths": [
+        13,
+        14
+      ],
+      "pivot": [
+        83,
+        56
+      ],
+      "angle": 0,
+      "period": 5.8,
+      "kind": "blink",
+      "attach": []
+    }
+  ],
+  "mouse": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        38,
+        86
+      ],
+      "angle": 8,
+      "period": 4.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        4,
+        5
+      ],
+      "pivot": [
+        72,
+        68
+      ],
+      "angle": 6,
+      "period": 5.5,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "chicken": [
+    {
+      "name": "wing",
+      "paths": [
+        5
+      ],
+      "pivot": [
+        52,
+        63
+      ],
+      "angle": 7,
+      "period": 5.2,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "comb",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        76,
+        42
+      ],
+      "angle": 3,
+      "period": 6.4,
+      "kind": "twitch",
+      "attach": [
+        "A"
+      ]
+    }
+  ],
+  "duck": [
+    {
+      "name": "wing",
+      "paths": [
+        7
+      ],
+      "pivot": [
+        44,
+        60
+      ],
+      "angle": 6,
+      "period": 5.8,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "cow": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        33,
+        61
+      ],
+      "angle": 10,
+      "period": 4.6,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        10
+      ],
+      "pivot": [
+        91,
+        47
+      ],
+      "angle": 6,
+      "period": 6.3,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "horse": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        34,
+        64
+      ],
+      "angle": 8,
+      "period": 4.9,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "monkey": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        40,
+        76
+      ],
+      "angle": 8,
+      "period": 3.6,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        7,
+        8
+      ],
+      "pivot": [
+        88,
+        58
+      ],
+      "angle": 4,
+      "period": 6.7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "blackbird": [
+    {
+      "name": "wing",
+      "paths": [
+        4
+      ],
+      "pivot": [
+        48,
+        65
+      ],
+      "angle": 6,
+      "period": 5.6,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "crow": [
+    {
+      "name": "tail",
+      "paths": [
+        3,
+        4
+      ],
+      "pivot": [
+        62,
+        96
+      ],
+      "angle": 4,
+      "period": 4.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        14,
+        15,
+        16
+      ],
+      "pivot": [
+        82,
+        70
+      ],
+      "angle": 4,
+      "period": 6.3,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "cockatiel": [
+    {
+      "name": "crest",
+      "paths": [
+        2
+      ],
+      "pivot": [
+        76,
+        41
+      ],
+      "angle": 4,
+      "period": 4.7,
+      "kind": "twitch",
+      "attach": [
+        "A"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        5,
+        6
+      ],
+      "pivot": [
+        49,
+        65
+      ],
+      "angle": 7,
+      "period": 5.4,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "deer": [
+    {
+      "name": "tail",
+      "paths": [
+        3
+      ],
+      "pivot": [
+        36,
+        65
+      ],
+      "angle": 8,
+      "period": 4.7,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        11
+      ],
+      "pivot": [
+        67,
+        46
+      ],
+      "angle": 7,
+      "period": 6.2,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "elk": [
+    {
+      "name": "tail",
+      "paths": [
+        9
+      ],
+      "pivot": [
+        40,
+        69
+      ],
+      "angle": 7,
+      "period": 5.3,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "fennec": [
+    {
+      "name": "tail",
+      "paths": [
+        1,
+        2
+      ],
+      "pivot": [
+        40,
+        74
+      ],
+      "angle": 6,
+      "period": 5.2,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "earL",
+      "paths": [
+        8,
+        9
+      ],
+      "pivot": [
+        69,
+        52
+      ],
+      "angle": 6,
+      "period": 5.5,
+      "kind": "twitch",
+      "attach": []
+    },
+    {
+      "name": "earR",
+      "paths": [
+        10,
+        11
+      ],
+      "pivot": [
+        84,
+        52
+      ],
+      "angle": -7,
+      "period": 6.7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "giraffe": [
+    {
+      "name": "ear",
+      "paths": [
+        5
+      ],
+      "pivot": [
+        67,
+        27
+      ],
+      "angle": 6,
+      "period": 6.6,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    },
+    {
+      "name": "tail",
+      "paths": [
+        6,
+        7
+      ],
+      "pivot": [
+        38,
+        68
+      ],
+      "angle": 10,
+      "period": 4.3,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "flamingo": [
+    {
+      "name": "wing",
+      "paths": [
+        9
+      ],
+      "pivot": [
+        44,
+        56
+      ],
+      "angle": 5,
+      "period": 6.4,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "tiger": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        35,
+        70
+      ],
+      "angle": 9,
+      "period": 4.2,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        12,
+        13
+      ],
+      "pivot": [
+        90,
+        49
+      ],
+      "angle": 5,
+      "period": 6.6,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "lion": [
+    {
+      "name": "tail",
+      "paths": [
+        1,
+        2
+      ],
+      "pivot": [
+        35,
+        72
+      ],
+      "angle": 8,
+      "period": 4.7,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "snowleopard": [
+    {
+      "name": "tail",
+      "paths": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "pivot": [
+        40,
+        73
+      ],
+      "angle": 3,
+      "period": 5.5,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        14
+      ],
+      "pivot": [
+        89,
+        49
+      ],
+      "angle": 4,
+      "period": 6.1,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "flypig": [
+    {
+      "name": "wingBack",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        57,
+        50
+      ],
+      "angle": -10,
+      "period": 2.8,
+      "kind": "flap",
+      "attach": []
+    },
+    {
+      "name": "wing",
+      "paths": [
+        11
+      ],
+      "pivot": [
+        55,
+        58
+      ],
+      "angle": 11,
+      "period": 2.8,
+      "kind": "flap",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "tail",
+      "paths": [
+        2
+      ],
+      "pivot": [
+        34,
+        62
+      ],
+      "angle": 7,
+      "period": 4.4,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "unicorn": [
+    {
+      "name": "tail",
+      "paths": [
+        1,
+        2,
+        3
+      ],
+      "pivot": [
+        39,
+        65
+      ],
+      "angle": 7,
+      "period": 4.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        10
+      ],
+      "pivot": [
+        73,
+        36
+      ],
+      "angle": 4,
+      "period": 6.7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "notopig": [
+    {
+      "name": "tail",
+      "paths": [
+        1
+      ],
+      "pivot": [
+        75,
+        106
+      ],
+      "angle": 7,
+      "period": 4.2,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "pinkie": [
+    {
+      "name": "tail",
+      "paths": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "pivot": [
+        470,
+        412
+      ],
+      "angle": 4,
+      "period": 3.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        18,
+        19
+      ],
+      "pivot": [
+        328,
+        225
+      ],
+      "angle": 5,
+      "period": 6,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "applejack": [
+    {
+      "name": "tail",
+      "paths": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "pivot": [
+        478,
+        421
+      ],
+      "angle": 4,
+      "period": 5.2,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        48,
+        49
+      ],
+      "pivot": [
+        338,
+        245
+      ],
+      "angle": 4,
+      "period": 6.7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "fluttershy": [
+    {
+      "name": "tail",
+      "paths": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "pivot": [
+        580,
+        385
+      ],
+      "angle": 3,
+      "period": 5.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        47,
+        48
+      ],
+      "pivot": [
+        456,
+        374
+      ],
+      "angle": 4,
+      "period": 6.5,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ],
+  "rainbow": [
+    {
+      "name": "tail",
+      "paths": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "pivot": [
+        466,
+        411
+      ],
+      "angle": 4,
+      "period": 4.3,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        19,
+        20,
+        21
+      ],
+      "pivot": [
+        349,
+        389
+      ],
+      "angle": 6,
+      "period": 4.8,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        44,
+        45
+      ],
+      "pivot": [
+        332,
+        209
+      ],
+      "angle": 5,
+      "period": 6.2,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "rarity": [
+    {
+      "name": "tail",
+      "paths": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "pivot": [
+        610,
+        515
+      ],
+      "angle": 3,
+      "period": 5.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    }
+  ],
+  "twilight": [
+    {
+      "name": "tail",
+      "paths": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "pivot": [
+        598,
+        523
+      ],
+      "angle": 3.5,
+      "period": 5.1,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        40,
+        41
+      ],
+      "pivot": [
+        408,
+        281
+      ],
+      "angle": 4,
+      "period": 6.3,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "celestia2": [
+    {
+      "name": "tail",
+      "paths": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "pivot": [
+        583,
+        473
+      ],
+      "angle": 2.5,
+      "period": 6.2,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        44,
+        45
+      ],
+      "pivot": [
+        405,
+        462
+      ],
+      "angle": 3,
+      "period": 6.8,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        50
+      ],
+      "pivot": [
+        379,
+        220
+      ],
+      "angle": 3,
+      "period": 7.3,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "luna2": [
+    {
+      "name": "tail",
+      "paths": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "pivot": [
+        516,
+        476
+      ],
+      "angle": 2.5,
+      "period": 6.4,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        66,
+        67
+      ],
+      "pivot": [
+        355,
+        473
+      ],
+      "angle": 3.5,
+      "period": 6.3,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        74
+      ],
+      "pivot": [
+        340,
+        243
+      ],
+      "angle": 4,
+      "period": 7.1,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "celestia": [
+    {
+      "name": "tail",
+      "paths": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86
+      ],
+      "pivot": [
+        565,
+        405
+      ],
+      "angle": 2,
+      "period": 6.8,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        39,
+        40,
+        41,
+        42
+      ],
+      "pivot": [
+        606,
+        433
+      ],
+      "angle": 3,
+      "period": 6.2,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        21,
+        22,
+        26
+      ],
+      "pivot": [
+        714,
+        180
+      ],
+      "angle": 3,
+      "period": 7.4,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    }
+  ],
+  "luna": [
+    {
+      "name": "tail",
+      "paths": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "pivot": [
+        477,
+        535
+      ],
+      "angle": 2.5,
+      "period": 6.7,
+      "kind": "sway",
+      "attach": [
+        "G"
+      ]
+    },
+    {
+      "name": "ear",
+      "paths": [
+        146,
+        147
+      ],
+      "pivot": [
+        593,
+        256
+      ],
+      "angle": 3,
+      "period": 7,
+      "kind": "twitch",
+      "attach": [
+        "B"
+      ]
+    },
+    {
+      "name": "wing",
+      "paths": [
+        109,
+        110,
+        111,
+        112
+      ],
+      "pivot": [
+        489,
+        544
+      ],
+      "angle": 3,
+      "period": 6.9,
+      "kind": "flutter",
+      "attach": [
+        "F"
+      ]
+    }
+  ]
+}

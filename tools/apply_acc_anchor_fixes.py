@@ -36,6 +36,12 @@ def apply(catalog):
                                       's': round(it['s'] * k, 4)}
                                 for aid, it in old['items'].items()}
             animal['slots'][slot] = new
+    item_fits = json.loads((ROOT / 'tools/accessory_item_fits.json').read_text(encoding='utf-8'))
+    accessories = {a['id']: a for a in catalog['accessories']}
+    for animal in catalog['animals']:
+        for aid, (x, y, r, scale) in item_fits.get(animal['id'], {}).items():
+            slot = animal['slots'][accessories[aid]['slot']]
+            slot.setdefault('items', {})[aid] = {'x': x, 'y': y, 'r': r, 's': scale}
     return catalog
 
 

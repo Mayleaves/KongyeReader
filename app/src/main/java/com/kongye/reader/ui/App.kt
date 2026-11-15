@@ -158,6 +158,7 @@ fun App(showSplash: Boolean = false) {
                         Screen.Achievements -> AchievementsScreen()
                         Screen.Backup -> BackupScreen()
                         Screen.About -> AboutScreen()
+                        Screen.History -> com.kongye.reader.ui.screens.HistoryScreen()
                     }
                 }
                 ImportBusy()

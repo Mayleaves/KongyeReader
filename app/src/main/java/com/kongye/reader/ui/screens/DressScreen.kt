@@ -128,7 +128,6 @@ private fun HomeTab(profile: Profile, animals: List<ShopAnimal>) {
             AnimalGrid(animals, mascot = true, leaf = true, selected = { it == profile.homeAnimal }) { id ->
                 Profiles.update { it.copy(homeAnimal = id) }
             }
-            if (animals.isEmpty()) Hint("在商城领养动物后，可以换到首页")
         }
     }
     Spacer(Modifier.height(20.dp))
@@ -161,8 +160,6 @@ private fun GardenTab(profile: Profile, animals: List<ShopAnimal>) {
     Spacer(Modifier.height(20.dp))
     Group("会来猫园的动物") {
         Pad {
-            T("每读一次来一只，按选中的顺序轮流；朝向随机", 12.sp, c.text2)
-            Spacer(Modifier.height(10.dp))
             AnimalGrid(animals, mascot = true, leaf = true, selected = { it in profile.gardenAnimals }) { id ->
                 Profiles.update { p ->
                     val next = if (id in p.gardenAnimals) p.gardenAnimals - id else p.gardenAnimals + id
@@ -195,7 +192,7 @@ private fun SceneGroup(profile: Profile) {
             }
         }
         if (Shop.catalog.ornaments.none { profile.has(it.id) }) {
-            Pad { Hint("在商城的「挂件」里换到节日挂件，就能挂到猫园的路牌、小屋、天空和空地上") }
+            // 无挂件时只保留猫园预览
         } else for ((slot, spot) in Shop.catalog.ornamentSlots) {
             val owned = Shop.catalog.ornaments.filter { it.slot == slot && profile.has(it.id) }
             Pad(vertical = 8.dp) {
@@ -259,12 +256,10 @@ private fun OutfitTab(profile: Profile, animals: List<ShopAnimal>) {
                     wear[slot]?.let { T(Shop.nameOf(it), 12.sp, c.text2) }
                 }
                 Spacer(Modifier.height(6.dp))
-                if (owned.isEmpty()) {
-                    T("商城里能换到这个部位的饰品", 12.sp, c.text3)
-                } else {
+                run {
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Pick(wear[slot] == null, "不戴", modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, null) }) {
-                            T("—", 18.sp, c.text3)
+                        Pick(wear[slot] == null, "无", modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, null) }) {
+                            com.kongye.reader.ui.components.Icon(Ico.BAN, size = 28.dp, color = androidx.compose.ui.graphics.Color(0xFFC5C5C5))
                         }
                         for (acc in owned) {
                             Pick(wear[slot] == acc.id, acc.name, modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, acc.id) }) {
@@ -310,8 +305,6 @@ private fun IconTab(profile: Profile) {
                     IconPreview(i.id, Modifier.fillMaxSize().padding(8.dp))
                 }
             }
-            Spacer(Modifier.height(4.dp))
-            T("换图标会让系统关掉 App，所以等你离开空叶阅读（回桌面或切走）时才换；有的桌面要过几秒才刷新", 12.sp, c.text3, lineHeight = 17.sp)
         }
     }
 }
@@ -320,8 +313,6 @@ private fun IconTab(profile: Profile) {
 private fun SignEditor(current: String) {
     val c = K.c
     val state = rememberTextFieldState(current)
-    T("首页左下角和猫园的路牌一起改，最多 6 个字", 12.sp, c.text2)
-    Spacer(Modifier.height(10.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             Modifier
@@ -331,6 +322,7 @@ private fun SignEditor(current: String) {
                 .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
+            if (state.text.isEmpty()) T("最多6字", 16.sp, c.text3)
             BasicTextField(
                 state,
                 Modifier.fillMaxWidth(),
@@ -343,7 +335,7 @@ private fun SignEditor(current: String) {
         Spacer(Modifier.width(10.dp))
         InkButton("保存", Modifier.width(76.dp), height = 44.dp) {
             val t = state.text.toString().trim()
-            Profiles.update { it.copy(signText = t.ifEmpty { Profile.DEFAULT_SIGN }) }
+            Profiles.update { it.copy(signText = t) }
             Toast.show("路牌改好了")
             Nav.home()
         }
