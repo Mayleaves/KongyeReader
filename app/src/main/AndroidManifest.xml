@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 联网只有两处：设置里填了 WebDAV 做云备份，和手动点「检查更新」；书和阅读记录平时都只在本机 -->
+    <!-- 联网用于 WebDAV 云备份及进入应用时自动或手动检查更新；书和阅读记录只在本机 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 检查更新：下好的安装包交给系统安装 -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />

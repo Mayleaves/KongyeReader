@@ -21,6 +21,7 @@ import com.kongye.reader.data.Library
 import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Settings
 import com.kongye.reader.data.Store
+import com.kongye.reader.data.Updates
 import com.kongye.reader.ui.App
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.theme.AppTheme
@@ -40,6 +41,11 @@ class MainActivity : ComponentActivity() {
         }
         setContent { App(showSplash = savedInstanceState == null) }
         lifecycleScope.launch { Settings.state.collect { applyBars() } }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Updates.check(automatic = true)
     }
 
     private fun systemDark() = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

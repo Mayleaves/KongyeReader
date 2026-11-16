@@ -7,6 +7,10 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import com.kongye.reader.KongyeReaderApp
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +29,7 @@ import java.net.URL
  */
 object Updates {
     private const val REPO = "Mayleaves/KongyeReader"
-    /** 关于里的 GitHub：这个项目的仓库页 */
+    /** 更新历史里的 GitHub：这个项目的仓库页 */
     const val GITHUB = "https://github.com/$REPO"
 
     @Serializable
@@ -75,33 +79,32 @@ object Updates {
             setRequestProperty("User-Agent", "KongyeReader")
         }
 
-    /** 看看 GitHub 上有没有新版本；下载中、已经下好就不重复查 */
-    fun check() {
-        if (_state.value.phase in setOf(Phase.CHECKING, Phase.DOWNLOADING)) return
-        _state.value = State(Phase.CHECKING)
-        job = Store.io.launch {
-            val r = runCatching {
-                val conn = open("https://api.github.com/repos/$REPO/releases/latest")
-                conn.setRequestProperty("Accept", "application/vnd.github+json")
-                try {
-                    if (conn.responseCode != HttpURLConnection.HTTP_OK) error("GitHub 返回 ${conn.responseCode}")
-                    Store.json.decodeFromString(Release.serializer(), conn.inputStream.bufferedReader().use { it.readText() })
-                } finally {
-                    conn.disconnect()
-                }
-            }
-            _state.value = r.fold(
-                onSuccess = { rel ->
-                    if (!newer(rel.version, current)) State(Phase.LATEST, rel)
-                    else {
-                        // 上次下好的同一版还在，就直接可以装
-                        val ready = apkFile(rel).takeIf { f -> f.exists() && f.length() == rel.apk?.size }
-                        if (ready != null) State(Phase.READY, rel, ready.length(), ready.length(), ready) else State(Phase.FOUND, rel)
-                    }
-                },
-                onFailure = { State(Phase.FAILED, error = "没连上 GitHub，过会儿再试") },
-            )
+    private val checker by lazy {
+        UpdateCheck(Store.io, _state, latest = ::latestRelease, resolve = { releaseState(it) })
+    }
+
+    /** 每次进入前台自动查一次；手动检查沿用同一请求，下载中、已就绪不打断。 */
+    fun check(automatic: Boolean = false) {
+        checker.check(automatic)?.let { job = it }
+    }
+
+    private fun latestRelease(): Release {
+        val conn = open("https://api.github.com/repos/$REPO/releases/latest")
+        conn.setRequestProperty("Accept", "application/vnd.github+json")
+        return try {
+            if (conn.responseCode != HttpURLConnection.HTTP_OK) error("GitHub 返回 ${conn.responseCode}")
+            Store.json.decodeFromString(Release.serializer(), conn.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            conn.disconnect()
         }
+    }
+
+    internal fun releaseState(rel: Release, installed: String = current): State {
+        if (!newer(rel.version, installed)) return State(Phase.LATEST, rel)
+        // 上次下好的同一版还在，就直接可以装。
+        val ready = rel.apk?.let { asset -> apkFile(rel).takeIf { it.exists() && it.length() == asset.size } }
+        return if (ready != null) State(Phase.READY, rel, ready.length(), ready.length(), ready)
+        else State(Phase.FOUND, rel)
     }
 
     private fun dir() = File(KongyeReaderApp.app.cacheDir, "update").apply { mkdirs() }
@@ -170,11 +173,6 @@ object Updates {
         _state.value = if (rel != null) State(Phase.FOUND, rel) else State()
     }
 
-    /** 不在下载就收起来 */
-    fun dismiss() {
-        if (_state.value.phase != Phase.DOWNLOADING && _state.value.phase != Phase.READY) _state.value = State()
-    }
-
     /**
      * 交给系统安装。第一次要在系统设置里允许空叶阅读“安装未知应用”：先跳过去，回来再点一次安装。
      * 返回 false 表示去设置了
@@ -214,5 +212,31 @@ object Updates {
 
     fun open(context: Context, url: String) {
         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    }
+}
+
+/** One in-flight check; automatic failures preserve a previously discovered update. */
+internal class UpdateCheck(
+    private val scope: CoroutineScope,
+    private val state: MutableStateFlow<Updates.State>,
+    private val latest: suspend () -> Updates.Release,
+    private val resolve: (Updates.Release) -> Updates.State,
+) {
+    @Synchronized
+    fun check(automatic: Boolean): Job? {
+        val previous = state.value
+        if (previous.phase in setOf(Updates.Phase.CHECKING, Updates.Phase.DOWNLOADING, Updates.Phase.READY)) return null
+        state.value = Updates.State(Updates.Phase.CHECKING, release = previous.release)
+        return scope.launch {
+            val result = try {
+                resolve(latest())
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (automatic) previous else Updates.State(Updates.Phase.FAILED, error = "没连上 GitHub，过会儿再试")
+            }
+            currentCoroutineContext().ensureActive()
+            state.value = result
+        }
     }
 }

@@ -39,6 +39,7 @@ import kotlin.math.PI
 /** Dependency-free device checks for the artwork's edge cases and actual splash handoff. */
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
+    private var updateChecksOnly = false
     private var animationScopeOnly = false
     private var animalMotionOnly = false
     private var skipOnly = false
@@ -52,6 +53,7 @@ class VisualRegression : Instrumentation() {
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
+        updateChecksOnly = arguments?.getString("check") == "update-checks"
         animationScopeOnly = arguments?.getString("check") == "animation-scope"
         animalMotionOnly = arguments?.getString("check") == "animal-motion"
         skipOnly = arguments?.getString("check") == "splash-skip"
@@ -68,6 +70,11 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (updateChecksOnly) {
+                UpdateChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: automatic update checks, version results and offline/download behavior") })
+                return
+            }
             if (animationScopeOnly) {
                 AnimationScopeChecks(this).run()
                 finish(0, Bundle().apply { putString("result", "PASS: static thumbnails and animated large previews") })

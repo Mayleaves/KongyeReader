@@ -12,10 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kongye.reader.data.Updates
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.components.*
 import com.kongye.reader.ui.theme.K
@@ -45,10 +48,12 @@ fun HistoryScreen() {
     val listState = rememberLazyListState()
     LaunchedEffect(query, current) { listState.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(c.bg2).navigationBarsPadding()) {
-        TopBar("更新历史", onBack = { Nav.pop() })
+        TopBar("更新历史", onBack = { Nav.pop() }) {
+            IconBtn(Ico.GITHUB, Modifier.semantics { contentDescription = "GitHub" }) { Updates.open(context, Updates.GITHUB) }
+        }
         Row(
             Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(46.dp)
-                .background(c.chip, SmoothShape(14.dp)).padding(horizontal = 14.dp),
+                .background(c.card, SmoothShape(14.dp)).padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Ico.SEARCH, size = 18.dp, color = c.text2)

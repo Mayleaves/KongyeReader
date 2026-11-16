@@ -43,7 +43,7 @@ import com.kongye.reader.ui.components.ValueRow
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
 
-/** 关于：猫、名字、版本（连点七下是彩蛋），读书的统计，检查更新、GitHub，找到过彩蛋后的开关 */
+/** 关于：猫、名字、版本（连点七下是彩蛋），读书的统计，检查更新、更新历史，找到过彩蛋后的开关 */
 @Composable
 fun AboutScreen() {
     val c = K.c
@@ -122,7 +122,9 @@ fun AboutScreen() {
                         Updates.Phase.IDLE -> ""
                     }
                     ValueRow("检查更新", upValue, color = c.ink, chevron = true) {
-                        val hasRelease = up.release != null && up.phase != Updates.Phase.LATEST
+                        val hasRelease = up.release != null && up.phase in setOf(
+                            Updates.Phase.FOUND, Updates.Phase.DOWNLOADING, Updates.Phase.READY, Updates.Phase.FAILED,
+                        )
                         if (hasRelease) sheet = true
                         else {
                             asked = true
@@ -130,7 +132,6 @@ fun AboutScreen() {
                         }
                     }
                     ValueRow("更新历史", "", chevron = true) { Nav.push(com.kongye.reader.ui.Screen.History) }
-                    ValueRow("GitHub", "Mayleaves/KongyeReader", chevron = true) { Updates.open(context, Updates.GITHUB) }
                     // 找到过彩蛋才出现：关掉后只剩自己用叶子换到的，正在用的没买的换回默认
                     if ("egg" in profile.achievements) {
                         SwitchRow("彩蛋", profile.egg == true) { v ->
@@ -160,7 +161,6 @@ fun AboutScreen() {
             state = up,
         ) {
             sheet = false
-            Updates.dismiss()
         }
     }
 }
