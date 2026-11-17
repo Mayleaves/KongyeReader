@@ -113,13 +113,11 @@ fun AboutScreen() {
                 Spacer(Modifier.height(20.dp))
                 Group("更新") {
                     val upValue = when (up.phase) {
-                        Updates.Phase.CHECKING -> "正在检查…"
-                        Updates.Phase.LATEST -> "已是最新版"
                         Updates.Phase.FOUND -> "有新版本 ${up.release?.version}"
                         Updates.Phase.DOWNLOADING -> "下载中 ${if (up.total > 0) up.done * 100 / up.total else 0}%"
                         Updates.Phase.READY -> "下好了，点这里安装"
                         Updates.Phase.FAILED -> if (up.release != null) "下载没成功" else ""
-                        Updates.Phase.IDLE -> ""
+                        Updates.Phase.IDLE, Updates.Phase.CHECKING, Updates.Phase.LATEST -> ""
                     }
                     ValueRow("检查更新", upValue, color = c.ink, chevron = true) {
                         val hasRelease = up.release != null && up.phase in setOf(
