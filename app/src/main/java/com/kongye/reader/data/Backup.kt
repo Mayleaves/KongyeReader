@@ -11,12 +11,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.Socket
 import java.net.URL
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLSocket
-import javax.net.ssl.SSLSocketFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,7 +39,8 @@ object Backup {
     private val skipTop = setOf("dict", "fonts", CLOUD_FILE)
     private const val CLOUD_FILE = "cloud.json"
     private const val MARK = "kongye-reader-backup"
-    private const val DIR = "kongye-reader"
+    private const val DIR = "KongyeReader"
+    private const val LEGACY_DIR = "kongye-reader"
 
     fun cloud(): CloudConfig = Store.read(CLOUD_FILE, CloudConfig.serializer()) ?: CloudConfig()
 
@@ -124,13 +120,7 @@ object Backup {
     private fun auth(c: CloudConfig): String? =
         if (c.user.isEmpty()) null else "Basic " + Base64.encodeToString("${c.user}:${c.password}".toByteArray(), Base64.NO_WRAP)
 
-    /** 地址里的中文、空格转成 %XX，已经转过的不动 */
-    private fun encode(url: String): String = buildString {
-        for (b in url.toByteArray()) {
-            val ch = b.toInt() and 0xff
-            if (ch <= 0x20 || ch >= 0x7f) append('%').append("%02X".format(ch)) else append(ch.toChar())
-        }
-    }
+    private fun encode(url: String) = davEncodedUrl(url)
 
     /** GET / PUT 走系统的 HttpURLConnection */
     private fun open(c: CloudConfig, url: String, method: String): HttpURLConnection {
@@ -142,47 +132,8 @@ object Backup {
         return conn
     }
 
-    /**
-     * MKCOL、PROPFIND：HttpURLConnection 不认这两个方法，改它的私有字段在 Android 9 以后会被拦，
-     * 所以自己发一个最简单的请求，只要状态码。HTTPS 照常校验证书和域名。
-     */
-    private fun davStatus(c: CloudConfig, url: String, method: String, headers: Map<String, String> = emptyMap()): Int {
-        val u = URL(encode(url))
-        val https = u.protocol.equals("https", ignoreCase = true)
-        val port = if (u.port != -1) u.port else if (https) 443 else 80
-        val plain = Socket().apply {
-            connect(InetSocketAddress(u.host, port), 15_000)
-            soTimeout = 30_000
-        }
-        val socket: Socket = if (!https) plain else try {
-            val s = (SSLSocketFactory.getDefault() as SSLSocketFactory).createSocket(plain, u.host, port, true) as SSLSocket
-            s.startHandshake()
-            if (!HttpsURLConnection.getDefaultHostnameVerifier().verify(u.host, s.session)) throw IOException("证书和地址对不上")
-            s
-        } catch (e: Exception) {
-            plain.close()
-            throw e
-        }
-        socket.use { s ->
-            val host = if (u.port == -1) u.host else "${u.host}:$port"
-            val req = buildString {
-                append("$method ${u.file.ifEmpty { "/" }} HTTP/1.1\r\n")
-                append("Host: $host\r\n")
-                auth(c)?.let { append("Authorization: $it\r\n") }
-                for ((k, v) in headers) append("$k: $v\r\n")
-                append("Content-Length: 0\r\nConnection: close\r\nUser-Agent: KongyeReader\r\n\r\n")
-            }
-            s.getOutputStream().apply { write(req.toByteArray()); flush() }
-            val input = s.getInputStream()
-            val line = StringBuilder()
-            while (true) {
-                val b = input.read()
-                if (b == -1 || b == '\n'.code) break
-                line.append(b.toChar())
-            }
-            return line.split(' ').getOrNull(1)?.toIntOrNull() ?: throw IOException("服务器回的不是 HTTP")
-        }
-    }
+    private fun davStatus(c: CloudConfig, url: String, method: String, headers: Map<String,String> = emptyMap()): Int =
+        CloudDav.request(url,method,auth(c),headers).code
 
     private fun failure(what: String, code: Int) = IOException(
         "$what：" + when (code) {
@@ -198,7 +149,7 @@ object Backup {
         if (code !in 200..299) throw failure(what, code)
     }
 
-    /** 放备份的目录：先试着建 kongye-reader 子目录，建不了就放在填的地址下面 */
+    /** 放备份的目录：先试着建 KongyeReader 子目录，建不了就放在填的地址下面 */
     private fun folder(c: CloudConfig): String {
         val dir = "${base(c)}/$DIR"
         val code = davStatus(c, "$dir/", "MKCOL")
@@ -233,7 +184,8 @@ object Backup {
 
     fun download(c: CloudConfig) {
         if (base(c).isEmpty()) throw IOException("先填 WebDAV 地址")
-        for (dir in listOf("${base(c)}/$DIR", base(c))) {
+        // 新目录优先；升级前的旧目录及原有根目录备份仍可恢复。
+        for (dir in listOf("${base(c)}/$DIR", "${base(c)}/$LEGACY_DIR", base(c))) {
             val conn = open(c, "$dir/$MARK-latest.zip", "GET")
             if (conn.responseCode == 404) {
                 conn.disconnect()
@@ -246,6 +198,59 @@ object Backup {
             return
         }
         throw IOException("云端还没有备份")
+    }
+
+    private fun cloudFolders(c: CloudConfig) = listOf("${base(c)}/$DIR", "${base(c)}/$LEGACY_DIR", base(c)).distinct()
+
+    /** 汇总新旧目录和根目录的备份；不递归列出其他文件夹。 */
+    fun listCloud(c: CloudConfig): CloudBackupListing {
+        if(base(c).isEmpty()) throw IOException("先填 WebDAV 地址")
+        val xml="""<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/><d:getcontentlength/><d:getlastmodified/></d:prop></d:propfind>""".toByteArray()
+        val all=mutableListOf<CloudBackup>()
+        var failures=0;var readable=0;var firstError: Exception?=null
+        for(folder in cloudFolders(c)) {
+            try {
+                val reply=CloudDav.request(folder+"/","PROPFIND",auth(c),mapOf("Depth" to "1","Content-Type" to "application/xml; charset=utf-8"),xml)
+                if(reply.code==404) continue
+                if(reply.code==401) throw failure("读取备份失败",reply.code)
+                if(reply.code !in 200..299) throw failure("读取备份失败",reply.code)
+                all+=parseCloudBackups(folder,reply.body);readable++
+            } catch(e: Exception) {
+                failures++;if(firstError==null) firstError=e
+            }
+        }
+        if(failures>0 && readable==0) throw firstError ?: IOException("读取云端备份失败")
+        val sorted=all.distinctBy { it.url }.sortedWith(compareByDescending<CloudBackup> { it.name.removePrefix("$MARK-") }.thenByDescending { it.modified })
+        return CloudBackupListing(sorted,failures>0)
+    }
+
+    private fun validateCloudFile(c: CloudConfig, file: CloudBackup) {
+        if(!isCloudBackupName(file.name) || cloudFolders(c).none { file.url=="$it/${file.name}" }) throw IOException("备份地址无效，请刷新后重试")
+    }
+
+    /** 恢复用户选中的那一份；文件若已删除，不改为恢复其他备份。 */
+    fun download(c: CloudConfig, file: CloudBackup) {
+        validateCloudFile(c,file)
+        val conn=open(c,file.url,"GET").apply { instanceFollowRedirects=false }
+        try {
+            if(conn.responseCode==404) throw IOException("这份备份已不存在，请刷新列表")
+            check(conn,"下载失败")
+            conn.inputStream.use { restore(it) }
+        } finally { conn.disconnect() }
+    }
+
+    /** 只删除明确选中的文件，目录和未勾选备份均不受影响。返回每一份的实际结果。 */
+    fun deleteCloud(c: CloudConfig, files: List<CloudBackup>): CloudDeleteResult {
+        files.forEach { validateCloudFile(c,it) }
+        val removed=mutableSetOf<String>();val failed=mutableMapOf<String,String>()
+        for(file in files.distinctBy { it.url }) {
+            try {
+                val reply=CloudDav.request(file.url,"DELETE",auth(c))
+                if(reply.code !in setOf(200,202,204,404)) throw failure("删除失败",reply.code)
+                removed+=file.url
+            } catch(e: Exception) { failed[file.url]=e.message ?: "删除失败" }
+        }
+        return CloudDeleteResult(removed,failed)
     }
 
     /** 测试连接：能列出目录就算通 */

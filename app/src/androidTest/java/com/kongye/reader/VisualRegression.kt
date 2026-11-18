@@ -39,6 +39,8 @@ import kotlin.math.PI
 /** Dependency-free device checks for the artwork's edge cases and actual splash handoff. */
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
+    private var cloudUiOnly = false
+    private var cloudBackupOnly = false
     private var updateChecksOnly = false
     private var animationScopeOnly = false
     private var animalMotionOnly = false
@@ -53,6 +55,8 @@ class VisualRegression : Instrumentation() {
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
+        cloudUiOnly = arguments?.getString("check") == "cloud-backup-ui"
+        cloudBackupOnly = arguments?.getString("check") == "cloud-backups" || cloudUiOnly
         updateChecksOnly = arguments?.getString("check") == "update-checks"
         animationScopeOnly = arguments?.getString("check") == "animation-scope"
         animalMotionOnly = arguments?.getString("check") == "animal-motion"
@@ -70,6 +74,12 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (cloudBackupOnly) {
+                if (!cloudUiOnly) CloudBackupChecks(this).run()
+                CloudBackupUiChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: cloud backup listing, historical restore and selected deletion") })
+                return
+            }
             if (updateChecksOnly) {
                 UpdateChecks(this).run()
                 finish(0, Bundle().apply { putString("result", "PASS: automatic update checks, version results and offline/download behavior") })
