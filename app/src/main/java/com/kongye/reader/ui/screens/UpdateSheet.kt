@@ -81,6 +81,7 @@ fun UpdateSheet(visible: Boolean, state: Updates.State, onDismiss: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
+                .weight(1f, fill = false)
                 .fillMaxWidth()
                 .heightIn(max = 300.dp)
                 .background(c.chip, SmoothShape(18.dp))

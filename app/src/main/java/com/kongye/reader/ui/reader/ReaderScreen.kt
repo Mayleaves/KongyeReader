@@ -428,7 +428,8 @@ private fun Reader(
         val geo = with(density) {
             // 版心宽度取整字数，多出来的零头平分到左右边距，纯中文的行不用两端对齐也是齐的
             val em = settings.fontSize.sp.toPx()
-            val room = (w - settings.marginH.dp.roundToPx() * 2).coerceAtLeast(100)
+            val viewport = w.coerceAtMost(720.dp.roundToPx())
+            val room = (viewport - settings.marginH.dp.roundToPx() * 2).coerceAtLeast(100)
             val cols = (room / em).toInt().coerceAtLeast(4)
             val tw = kotlin.math.ceil(cols * em).toInt().coerceAtMost(room) + 1
             val marginPx = (w - tw) / 2

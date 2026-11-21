@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.ValueRow
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.scrollContentWidth
 
 @Composable
 fun PrefsScreen() {
@@ -66,6 +68,8 @@ fun PrefsScreen() {
             TopBar("设置", onBack = { Nav.pop() })
             Column(
                 Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(max = scrollContentWidth)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .navigationBarsPadding()

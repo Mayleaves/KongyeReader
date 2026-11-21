@@ -76,6 +76,7 @@ import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.grayscale
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.windowSize
 import kotlinx.coroutines.launch
 
 private val tabs = listOf("动物", "背景", "饰品", "挂件", "图标")
@@ -139,7 +140,7 @@ fun ShopScreen() {
             // 左右两页提前排好，滑过去不卡
             HorizontalPager(pager, Modifier.fillMaxSize(), beyondViewportPageCount = 1) { page ->
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
+                    columns = GridCells.Adaptive(108.dp),
                     modifier = Modifier.fillMaxSize(),
                     state = grids[page],
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 2.dp, bottom = navPad + 28.dp),
@@ -305,9 +306,10 @@ fun IconPreview(id: String, modifier: Modifier = Modifier) {
 @Composable
 private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, onDismiss: () -> Unit) {
     val c = K.c
+    val previewHeight = (windowSize.height * 0.4f).coerceIn(100.dp, 220.dp)
     val last = remember { arrayOfNulls<String>(1) }
     id?.let { last[0] = it }
-    Sheet(visible = id != null, onDismiss = onDismiss) {
+    Sheet(visible = id != null, onDismiss = onDismiss, scrollContent = true) {
         val item = last[0] ?: return@Sheet
         val price = Shop.priceOf(item) ?: 0
         val owned = profile.has(item)
@@ -319,7 +321,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         BoxWithConstraints(
             Modifier
                 .fillMaxWidth()
-                .height(220.dp)
+                .height(previewHeight)
                 .clip(SmoothShape(22.dp))
                 .background(c.chip),
             contentAlignment = Alignment.Center,

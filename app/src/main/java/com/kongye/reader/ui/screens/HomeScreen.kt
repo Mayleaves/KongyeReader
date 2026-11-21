@@ -72,6 +72,7 @@ import com.kongye.reader.ui.components.T
 import com.kongye.reader.ui.components.catGazeAt
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.windowSize
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
@@ -90,6 +91,9 @@ private val quotes = listOf(
 @Composable
 fun HomeScreen() {
     val c = K.c
+    val window = windowSize
+    val catSize = (window.height * 0.28f).coerceIn(84.dp, 210.dp)
+    val footerSpace = if (window.height < 520.dp && window.width >= 550.dp) 20.dp else 72.dp
     val books by Library.books.collectAsState()
     val sessions by Stats.sessions.collectAsState()
     val wakeMemory by CatRest.state.collectAsState()
@@ -194,7 +198,7 @@ fun HomeScreen() {
             }
             Spacer(Modifier.weight(1f))
             // Anchor speech to the cat's resting layout, outside the animated hop.
-            Box(Modifier.size(210.dp).onGloballyPositioned {
+            Box(Modifier.size(catSize).onGloballyPositioned {
                 catHeadTop = it.positionInRoot().y + headInset
             }) {
                 if (homeAnimal != null && !minimal && !gold && !goldMin) {
@@ -210,7 +214,7 @@ fun HomeScreen() {
                                 }
                                 speechSignal++
                             },
-                        size = 210.dp, animate = true,
+                        size = catSize, animate = true,
                     )
                 } else DashboardCat(
                     Modifier
@@ -236,7 +240,7 @@ fun HomeScreen() {
                             }
                             speechSignal++
                         },
-                    size = 210.dp,
+                    size = catSize,
                     petSignal = petSignal,
                     leaf = today >= 30 * 60_000,
                     gaze = catGazeAt(fingerPosition?.plus(homeOrigin), catEyeCenter, gazeRadius),
@@ -283,7 +287,7 @@ fun HomeScreen() {
                 T("支持 TXT · EPUB", 13.sp, c.text3)
             }
             Spacer(Modifier.weight(0.7f))
-            Spacer(Modifier.height(72.dp))
+            Spacer(Modifier.height(footerSpace))
         }
         Signpost(
             profile.signText,

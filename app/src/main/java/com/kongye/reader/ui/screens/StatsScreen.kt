@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -63,6 +64,7 @@ import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.bigDuration
 import com.kongye.reader.ui.components.drawReadingCatBar
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.scrollContentWidth
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.max
@@ -174,6 +176,8 @@ fun StatsScreen() {
         }
         Column(
             Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = scrollContentWidth)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()

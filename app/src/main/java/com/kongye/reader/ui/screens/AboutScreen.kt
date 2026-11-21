@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -42,6 +43,7 @@ import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.ValueRow
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.scrollContentWidth
 
 /** 关于：猫、名字、版本（连点七下是彩蛋），读书的统计，检查更新、更新历史，找到过彩蛋后的开关 */
 @Composable
@@ -86,6 +88,8 @@ fun AboutScreen() {
             TopBar("关于", onBack = { Nav.pop() })
             Column(
                 Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(max = scrollContentWidth)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .navigationBarsPadding()

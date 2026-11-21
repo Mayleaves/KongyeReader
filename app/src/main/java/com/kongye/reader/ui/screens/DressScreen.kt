@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -77,6 +78,7 @@ import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.components.grayscale
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.scrollContentWidth
 import kotlinx.coroutines.launch
 
 private val tabs = listOf("首页", "猫园", "饰品", "图标")
@@ -92,15 +94,15 @@ fun DressScreen() {
     LaunchedEffect(Nav.dressRequest) { pager.scrollToPage(Nav.dressTab) }
     LaunchedEffect(pager) { snapshotFlow { pager.currentPage }.collect { Nav.dressTab = it } }
 
-    Column(Modifier.fillMaxSize().background(c.bg2)) {
+    Column(Modifier.fillMaxSize().background(c.bg2), horizontalAlignment = Alignment.CenterHorizontally) {
         TopBar("装扮", onBack = { Nav.pop() }) {
             IconBtn(Ico.BAG) { Nav.push(Screen.Shop) }
         }
-        Segmented(tabs, pager.currentPage, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Segmented(tabs, pager.currentPage, Modifier.widthIn(max = scrollContentWidth).fillMaxWidth().padding(horizontal = 16.dp)) {
             scope.launch { pager.animateScrollToPage(it) }
         }
         Spacer(Modifier.height(16.dp))
-        HorizontalPager(pager, Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { tab ->
+        HorizontalPager(pager, Modifier.widthIn(max = scrollContentWidth).fillMaxSize(), verticalAlignment = Alignment.Top) { tab ->
             Column(
                 Modifier
                     .fillMaxSize()

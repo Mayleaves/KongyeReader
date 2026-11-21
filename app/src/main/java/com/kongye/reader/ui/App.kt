@@ -33,15 +33,23 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsIgnoringVisibility
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +66,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -86,7 +95,9 @@ import com.kongye.reader.ui.theme.DarkPalette
 import com.kongye.reader.ui.theme.K
 import com.kongye.reader.ui.theme.LightPalette
 import com.kongye.reader.ui.theme.LocalPalette
+import com.kongye.reader.ui.theme.adaptiveDensity
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun App(showSplash: Boolean = false) {
     var splashVisible by rememberSaveable { mutableStateOf(showSplash) }
@@ -104,7 +115,10 @@ fun App(showSplash: Boolean = false) {
         2 -> true
         else -> AppTheme.systemDark
     }
-    CompositionLocalProvider(LocalPalette provides if (dark) DarkPalette else LightPalette) {
+    CompositionLocalProvider(
+        LocalPalette provides if (dark) DarkPalette else LightPalette,
+        LocalDensity provides adaptiveDensity(),
+    ) {
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
             Importer.start(uris, openAfter = false)
         }
@@ -125,7 +139,9 @@ fun App(showSplash: Boolean = false) {
         }
         // 最先注册，优先级最低：页面里的弹层、阅读菜单会先拦截返回键
         BackHandler(Nav.stack.size > 1) { Nav.pop() }
-        Box(Modifier.fillMaxSize().background(K.c.bg)) {
+        val sideInsets = WindowInsets.displayCutout.union(WindowInsets.navigationBarsIgnoringVisibility)
+            .only(WindowInsetsSides.Horizontal)
+        Box(Modifier.fillMaxSize().background(K.c.bg).windowInsetsPadding(sideInsets)) {
             Box(Modifier.fillMaxSize().graphicsLayer {
                 val progress = if (splashVisible) splashExit.value else 1f
                 alpha = progress

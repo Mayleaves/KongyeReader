@@ -248,7 +248,7 @@ fun AchievementsScreen() {
         Column(Modifier.fillMaxSize()) {
             TopBar("成就", onBack = { Nav.pop() })
             LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
+                columns = GridCells.Adaptive(84.dp),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = navPad + if (preview != null) 96.dp else 28.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -479,7 +479,7 @@ private fun Detail(item: Achievement?, ctx: AchieveCtx, profile: Profile, style:
     }
     val last = remember { arrayOfNulls<Achievement>(1) }
     item?.let { last[0] = it }
-    Sheet(visible = item != null, onDismiss = onDismiss) {
+    Sheet(visible = item != null, onDismiss = onDismiss, scrollContent = true) {
         val a = last[0] ?: return@Sheet
         val at = profile.achievements[a.id]
         val on = at != null

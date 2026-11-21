@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
@@ -20,6 +19,7 @@ import com.kongye.reader.data.CloudBackup
 import com.kongye.reader.data.CloudConfig
 import com.kongye.reader.ui.components.*
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.windowSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,7 +43,7 @@ internal fun CloudBackupsSheet(config: CloudConfig, startDeleting: Boolean, onDi
     var restore by remember { mutableStateOf<CloudBackup?>(null) }
     var remove by remember { mutableStateOf(emptyList<CloudBackup>()) }
     val blocked=loading || working.isNotEmpty()
-    val height=(LocalConfiguration.current.screenHeightDp.dp-280.dp).coerceIn(100.dp,440.dp)
+    val height = (windowSize.height * 0.48f).coerceAtMost(440.dp)
     val fmt=remember { SimpleDateFormat("yyyy.MM.dd HH:mm",Locale.US) }
     LaunchedEffect(config,refresh) {
         loading=true;error=null
@@ -84,7 +84,7 @@ internal fun CloudBackupsSheet(config: CloudConfig, startDeleting: Boolean, onDi
         Spacer(Modifier.height(12.dp))
         if(rows.isEmpty()) Box(Modifier.fillMaxWidth().height(120.dp),contentAlignment=Alignment.Center) {
             if(!loading && error==null) T("云端还没有备份",14.sp,c.text2)
-        } else LazyColumn(Modifier.fillMaxWidth().heightIn(max=height),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+        } else LazyColumn(Modifier.weight(1f, fill = false).fillMaxWidth().heightIn(max=height),verticalArrangement=Arrangement.spacedBy(8.dp)) {
             items(rows,key={ it.url }) { item ->
                 val checked=item.url in selected
                 Row(

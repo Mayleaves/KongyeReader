@@ -76,6 +76,7 @@ import com.kongye.reader.ui.components.T
 import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.press
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.windowSize
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -124,6 +125,7 @@ fun GardenScreen(preview: String? = null) {
     val profile by Profiles.state.collectAsState()
     // 猫园里来的动物按装扮里选的顺序轮着来；看板猫还是原来的彩色小猫
     val cast = profile.gardenAnimals.filter { it == Shop.MASCOT || profile.has(it) }.ifEmpty { listOf(Shop.MASCOT) }
+    val height = windowSize.height
 
     Box(Modifier.fillMaxSize().background(ground)) {
         val tryBg = preview?.let { Shop.background(it) }
@@ -138,7 +140,7 @@ fun GardenScreen(preview: String? = null) {
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(top = 186.dp, bottom = 92.dp, start = 14.dp, end = 14.dp),
+                .padding(top = (height * 0.24f).coerceAtMost(186.dp), bottom = (height * 0.14f).coerceAtMost(92.dp), start = 14.dp, end = 14.dp),
         ) {
             val spots = remember(week, maxWidth, maxHeight) { placeSpots(week, maxWidth.value, maxHeight.value, monday.toEpochDay()) }
             week.forEachIndexed { i, s ->
@@ -183,7 +185,7 @@ fun GardenScreen(preview: String? = null) {
             Modifier
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
-                .padding(top = 162.dp)
+                .padding(top = (height * 0.21f).coerceAtMost(162.dp))
                 .background(c.card, SmoothShape(18.dp))
                 .padding(start = 10.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,

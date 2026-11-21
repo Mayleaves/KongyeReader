@@ -43,13 +43,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -154,13 +157,16 @@ fun ReaderMenu(
         }
         AnimatedVisibility(
             visible,
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility)
+                .padding(top = 56.dp),
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
         ) {
             val shape = SmoothShape(28.dp, topOnly = true)
             Column(
                 Modifier
+                    .widthIn(max = 560.dp)
                     .fillMaxWidth()
                     .shadow(24.dp, shape, ambientColor = Color.Black.copy(alpha = 0.35f), spotColor = Color.Black.copy(alpha = 0.45f))
                     .background(c.card, shape)
@@ -169,12 +175,14 @@ fun ReaderMenu(
                     .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 14.dp),
             ) {
                 AnimatedContent(panel, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "panel") { p ->
-                    when (p) {
-                        1 -> StylePanel(night, onBack = { onPanel(0) }, onLayout = { onPanel(3) })
-                        2 -> MorePanel { onPanel(0) }
-                        3 -> LayoutPanel { onPanel(1) }
-                        4 -> NightPanel(night, onToggleNight) { onPanel(0) }
-                        else -> MainPanel(chapterTitle, chapter, last, chapterTitleAt, night, onJumpChapter, onToc, onPanel)
+                    Box(Modifier.verticalScroll(rememberScrollState())) {
+                        when (p) {
+                            1 -> StylePanel(night, onBack = { onPanel(0) }, onLayout = { onPanel(3) })
+                            2 -> MorePanel { onPanel(0) }
+                            3 -> LayoutPanel { onPanel(1) }
+                            4 -> NightPanel(night, onToggleNight) { onPanel(0) }
+                            else -> MainPanel(chapterTitle, chapter, last, chapterTitleAt, night, onJumpChapter, onToc, onPanel)
+                        }
                     }
                 }
             }

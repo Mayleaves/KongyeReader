@@ -36,14 +36,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -460,7 +464,12 @@ fun ToastBubble(text: String, modifier: Modifier = Modifier) {
 
 /** 底部弹层 */
 @Composable
-fun Sheet(visible: Boolean, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+fun Sheet(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    scrollContent: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     BackHandler(visible) { onDismiss() }
     AnimatedVisibility(visible, enter = fadeIn(), exit = fadeOut()) {
         Box(
@@ -471,9 +480,10 @@ fun Sheet(visible: Boolean, onDismiss: () -> Unit, content: @Composable ColumnSc
         )
     }
     AnimatedVisibility(visible, enter = slideInVertically(tween(260)) { it }, exit = slideOutVertically(tween(220)) { it }) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+        Box(Modifier.fillMaxSize().statusBarsPadding().imePadding(), contentAlignment = Alignment.BottomCenter) {
             Column(
                 Modifier
+                    .widthIn(max = 560.dp)
                     .fillMaxWidth()
                     .background(K.c.card, SmoothShape(28.dp, topOnly = true))
                     .blockTouches()
@@ -487,7 +497,11 @@ fun Sheet(visible: Boolean, onDismiss: () -> Unit, content: @Composable ColumnSc
                         .background(K.c.line, CircleShape),
                 )
                 Spacer(Modifier.height(16.dp))
-                content()
+                if (scrollContent) {
+                    Column(Modifier.verticalScroll(rememberScrollState()), content = content)
+                } else {
+                    content()
+                }
             }
         }
     }
@@ -514,12 +528,17 @@ fun ConfirmDialog(
         )
     }
     AnimatedVisibility(visible, enter = fadeIn() + scaleIn(initialScale = 0.92f), exit = fadeOut() + scaleOut(targetScale = 0.96f)) {
-        Box(Modifier.fillMaxSize().padding(horizontal = 28.dp), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().padding(horizontal = 28.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
             Column(
                 Modifier
+                    .widthIn(max = 420.dp)
                     .fillMaxWidth()
                     .background(K.c.card, SmoothShape(28.dp))
                     .blockTouches()
+                    .verticalScroll(rememberScrollState())
                     .padding(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.BasicTextField
@@ -57,6 +58,7 @@ import com.kongye.reader.ui.components.T
 import com.kongye.reader.ui.components.Toast
 import com.kongye.reader.ui.components.TopBar
 import com.kongye.reader.ui.theme.K
+import com.kongye.reader.ui.theme.scrollContentWidth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -117,6 +119,8 @@ fun BackupScreen() {
             TopBar("备份与恢复", onBack = { Nav.pop() })
             Column(
                 Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(max = scrollContentWidth)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .imePadding()

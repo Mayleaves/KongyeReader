@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -102,7 +101,7 @@ fun ShelfScreen() {
                 EmptyShelf(Modifier.weight(1f))
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
+                    columns = GridCells.Adaptive(108.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = navPad + 28.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -223,13 +222,14 @@ private fun EmptyShelf(modifier: Modifier) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BookSheet(id: String?, onDismiss: () -> Unit, onEdit: (String) -> Unit, onDelete: (String) -> Unit) {
     val c = K.c
     val books by Library.books.collectAsState()
     val last = remember { arrayOfNulls<Book>(1) }
     id?.let { i -> books.firstOrNull { it.id == i } }?.let { last[0] = it }
-    Sheet(visible = id != null, onDismiss = onDismiss) {
+    Sheet(visible = id != null, onDismiss = onDismiss, scrollContent = true) {
         val b = last[0] ?: return@Sheet
         Row {
             BookCover(b, Modifier.width(76.dp), 11.sp)
@@ -261,7 +261,7 @@ private fun BookSheet(id: String?, onDismiss: () -> Unit, onEdit: (String) -> Un
             Nav.openBook(b.id)
         }
         Spacer(Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             GhostButton(if (b.finished) "标为在读" else "标为读完", Ico.CHECK) {
                 Library.update(b.id) { it.copy(finished = !it.finished) }
                 onDismiss()
@@ -296,13 +296,13 @@ private fun BookInfoSheet(id: String?, onDismiss: () -> Unit) {
     val last = remember { arrayOfNulls<Book>(1) }
     id?.let { Library.get(it) }?.let { last[0] = it }
     var busy by remember { mutableStateOf(false) }
-    Sheet(visible = id != null, onDismiss = onDismiss) {
+    Sheet(visible = id != null, onDismiss = onDismiss, scrollContent = true) {
         val b = last[0] ?: return@Sheet
         val title = remember(b.id) { TextFieldState(b.title) }
         val author = remember(b.id) { TextFieldState(b.author) }
         val tags = remember(b.id) { TextFieldState(b.tags.joinToString(" ")) }
         val intro = remember(b.id) { TextFieldState(b.intro) }
-        Column(Modifier.imePadding()) {
+        Column {
             T("编辑书籍信息", 18.sp, c.ink, FontWeight.Bold)
             Spacer(Modifier.height(16.dp))
             InfoField("书名", title)
