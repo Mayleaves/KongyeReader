@@ -284,7 +284,9 @@ internal fun DrawScope.assetGroup(group: String, time: Float, block: DrawScope.(
         "book-base-mask" -> alpha = splashProgress(time, 1.05f, 0.3f)
         "splash-cat" -> {
             val p = settle.transform(splashProgress(time, 1.08f, 0.8f))
-            alpha = p; ty = 38f*(1f-p); sx = 0.9f+0.1f*p; sy = sx; pivot = Offset(187.5f, 355f)
+            // 经典猫头从贴近书页的位置缩小，让下方双叶有更舒展的比例。
+            val headScale = if (group.startsWith("m-")) 1f else 0.84f
+            alpha = p; ty = 38f*(1f-p); sx = (0.9f+0.1f*p)*headScale; sy = sx; pivot = Offset(187.5f, 355f)
         }
         "cat-paws" -> {
             val p = splashProgress(time, 1.32f, 0.5f); val q = bouncy.transform(p)

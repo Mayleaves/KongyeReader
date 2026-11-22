@@ -593,19 +593,28 @@ fun Signpost(text: String, modifier: Modifier = Modifier, dark: Boolean = false,
         }
         // 路牌上的字可以自己改：字多了缩小一点，最多六个字也放得下
         val fs = when {
-            text.length <= 2 -> 15.sp
-            text.length <= 4 -> 13.sp
-            else -> 11.sp
+            text.length <= 2 -> 17.sp
+            text.length <= 4 -> 14.sp
+            else -> 12.sp
         }
-        // 矩形牌面的中心：排除箭头，文字随上下边沿一起倾斜。
+        // 按包含箭头的整个牌面左右居中，文字随上下边沿一起倾斜。
         Box(
             Modifier.align(Alignment.TopStart)
-                .padding(start = if (pointLeft) 17.dp else 5.dp, top = 5.6.dp)
+                .padding(start = if (pointLeft) 10.5.dp else 11.5.dp, top = 5.6.dp)
                 .size(78.dp, 35.dp)
                 .rotate(if (pointLeft) -1.45f else 1.45f),
             contentAlignment = Alignment.Center,
         ) {
-            T(text, fs, tc, FontWeight.Bold, maxLines = 1)
+            BasicText(
+                text = text,
+                style = TextStyle(
+                    fontFamily = SignTypography.family,
+                    fontSize = fs,
+                    color = tc,
+                    fontWeight = FontWeight.Normal,
+                ),
+                maxLines = 1,
+            )
         }
     }
 }

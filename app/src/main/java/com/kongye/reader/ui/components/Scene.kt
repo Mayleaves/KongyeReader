@@ -66,9 +66,9 @@ fun GardenBackdrop(
                 val style = TextStyle(
                     color = color,
                     fontSize = (st.size * k * shrink).toSp(),
-                    fontWeight = if (st.bold) FontWeight.Bold else FontWeight.Normal,
+                    fontWeight = if (st.kai && st.bold) FontWeight.Bold else FontWeight.Normal,
                     letterSpacing = (st.spacing * k * shrink).toSp(),
-                    fontFamily = if (st.kai) wenkai else null,
+                    fontFamily = if (st.kai) wenkai else SignTypography.family,
                 )
                 val r = measurer.measure(sign, style)
                 drawText(r, topLeft = Offset(ox + (st.x - vx) * k - r.size.width / 2f, oy + (st.y - vy) * k - r.firstBaseline))

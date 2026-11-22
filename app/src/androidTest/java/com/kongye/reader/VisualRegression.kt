@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.kongye.reader.ui.components.drawImportedFocus
+import com.kongye.reader.ui.components.drawImportedSplash
 import com.kongye.reader.ui.components.drawImportedHappy
 import com.kongye.reader.ui.components.drawImportedSleep
 import com.kongye.reader.ui.components.drawImportedLoaf
@@ -39,6 +40,8 @@ import kotlin.math.PI
 /** Dependency-free device checks for the artwork's edge cases and actual splash handoff. */
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
+    private var signTypographyOnly = false
+    private var splashArtOnly = false
     private var cloudUiOnly = false
     private var cloudBackupOnly = false
     private var updateChecksOnly = false
@@ -55,6 +58,8 @@ class VisualRegression : Instrumentation() {
 
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
+        signTypographyOnly = arguments?.getString("check") == "sign-typography"
+        splashArtOnly = arguments?.getString("check") == "splash-art"
         cloudUiOnly = arguments?.getString("check") == "cloud-backup-ui"
         cloudBackupOnly = arguments?.getString("check") == "cloud-backups" || cloudUiOnly
         updateChecksOnly = arguments?.getString("check") == "update-checks"
@@ -74,6 +79,23 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (splashArtOnly) {
+                for (dark in listOf(false, true)) for (time in listOf(0.7f, 1.3f, 1.75f, 2.4f)) {
+                    val bitmap = render(750, 1624) {
+                        drawContext.transform.scale(2f, 2f, Offset.Zero)
+                        drawImportedSplash(dark, time)
+                    }
+                    save(bitmap, "splash-${if (dark) "dark" else "light"}-$time")
+                    bitmap.recycle()
+                }
+                finish(0, Bundle().apply { putString("result", "PASS: classic splash captured at four animation stages in light and dark themes") })
+                return
+            }
+            if (signTypographyOnly) {
+                SignTypographyChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: sign typography captures in light and dark themes") })
+                return
+            }
             if (cloudBackupOnly) {
                 if (!cloudUiOnly) CloudBackupChecks(this).run()
                 CloudBackupUiChecks(this).run()
