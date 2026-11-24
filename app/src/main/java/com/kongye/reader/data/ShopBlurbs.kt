@@ -5,7 +5,7 @@ package com.kongye.reader.data
  * 编号和 assets/shop.json 一致；图标不带 icon_ 前缀放在 [icons] 里。没写到的就只显示用法。
  */
 object ShopBlurbs {
-    fun of(id: String): String? = if (id.startsWith("icon_")) icons[id.removePrefix("icon_")] else items[id]
+    fun of(id: String): String? = ReportStyles.item(id)?.blurb ?: if (id.startsWith("icon_")) icons[id.removePrefix("icon_")] else items[id]
 
     private val icons = mapOf(
         "default" to "白底上的看板猫，空叶阅读最初的样子",

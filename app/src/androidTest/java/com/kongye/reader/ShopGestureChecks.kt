@@ -148,7 +148,7 @@ internal class ShopGestureChecks(private val test: Instrumentation, private val 
 
     private fun navigation() {
         test.runOnMainSync { Nav.push(Screen.Shop) }; SystemClock.sleep(900)
-        val shop=listOf("动物","背景","饰品","挂件","图标")
+        val shop=listOf("动物","背景","饰品","挂件","风格")
         selected(shop.first()); swipe(false); selected(shop.first())
         for(tab in shop.drop(1)) { swipe(true); selected(tab) }
         swipe(true); selected(shop.last())
@@ -169,12 +169,12 @@ internal class ShopGestureChecks(private val test: Instrumentation, private val 
         log.append("Shop: all five tabs swipe both ways, stop at ends, tap tabs, retain vertical position and return from dress\n")
 
         test.runOnMainSync { Nav.dress(0) }; SystemClock.sleep(800)
-        val dress=listOf("首页","猫园","饰品","图标")
+        val dress=listOf("首页","猫园","饰品","风格")
         selected(dress.first()); swipe(false); selected(dress.first())
         for(tab in dress.drop(1)) { swipe(true); selected(tab) }
         swipe(true); selected(dress.last())
         for(tab in dress.dropLast(1).asReversed()) { swipe(false); selected(tab) }
-        click("图标"); selected("图标"); click("首页"); selected("首页")
+        click("风格"); selected("风格"); click("首页"); selected("首页")
         log.append("Dress: all four tabs swipe both ways, stop at ends, and remain selectable by tap\n")
     }
 

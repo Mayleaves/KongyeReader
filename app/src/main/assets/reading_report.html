@@ -1,0 +1,864 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=1080"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; img-src data:; style-src 'unsafe-inline'"><style>html,body{margin:0;background:transparent}canvas{display:block}</style></head><body><canvas id="report-canvas" width="1080" height="1620"></canvas><input id="show-books" type="checkbox" hidden><script>
+const $=s=>document.querySelector(s);
+let model,period,titles=[],records=[],today,homeAnimal;
+const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const hm=v=>{const m=Math.floor(v),h=Math.floor(m/60);return h?`${h}h${m%60?m%60+'m':''}`:`${m}m`;};
+const cn=v=>{const m=Math.floor(v),h=Math.floor(m/60);return h?`${h}时${m%60?m%60+'分':''}`:`${m}分钟`;};
+const REPORT_THEMES = {
+  light: {
+    name: '浅色',
+    iconBg: '#FFFFFF',
+    mat: '#ECECEF',
+    card: '#FFFFFF',
+    panel: '#F6F6F8',
+    line: '#E5E5EA',
+    ink: '#18181B',
+    muted: '#74747D',
+    soft: '#AEAEB7',
+    barEmpty: '#EAEAEF',
+    barLow: '#9A9AA3',
+    accent: '#1E1E22',
+    accent2: '#52525B',
+    sealColor: '#D6452E',
+    sealSoft: 'rgba(214,69,46,0.09)',
+    accentSoft: 'rgba(24,24,27,0.07)',
+    accentLine: 'rgba(24,24,27,0.32)',
+    halo: '#EFEFF3',
+    heat: ['#ECECF0', '#D4D4DA', '#A6A6B0', '#686872', '#18181B'],
+    grain: 'rgba(0,0,0,0.01)'
+  },
+  sunset: {
+    name: '落日',
+    iconBg: '#F9F8F4',
+    mat: '#EAE3D7',
+    card: '#FAF7F0',
+    panel: '#F3EDE2',
+    line: '#E0D7C8',
+    ink: '#221F1D',
+    muted: '#857C72',
+    soft: '#B5ABA0',
+    barEmpty: '#E6DFD2',
+    barLow: '#A3998E',
+    accent: '#E86852',
+    accent2: '#FFB19E',
+    sealColor: '#E86852',
+    sealSoft: 'rgba(232,104,82,0.11)',
+    accentSoft: 'rgba(232,104,82,0.11)',
+    accentLine: 'rgba(232,104,82,0.42)',
+    halo: '#EFE6DA',
+    heat: ['#E8E0D4', '#F2C6B9', '#F08F7C', '#E86852', '#221F1D'],
+    grain: 'rgba(34,30,24,0.02)'
+  },
+  gold: {
+    name: '暗金浮雕',
+    iconBg: '#111015',
+    mat: '#09090B',
+    card: '#131217',
+    panel: '#1B1A20',
+    line: '#302A20',
+    ink: '#F5EFE2',
+    muted: '#9C907E',
+    soft: '#665D4F',
+    barEmpty: '#26242B',
+    barLow: '#73654E',
+    accent: '#F6B525',
+    accent2: '#D97F1F',
+    sealColor: '#F6B525',
+    sealSoft: 'rgba(246,181,37,0.13)',
+    accentSoft: 'rgba(246,181,37,0.14)',
+    accentLine: 'rgba(246,181,37,0.45)',
+    halo: '#231F1A',
+    heat: ['#242228', '#3D3423', '#7C5E28', '#D97F1F', '#FDC043'],
+    grain: 'rgba(255,235,190,0.018)'
+  },
+  neon: {
+    name: '霓虹幻彩',
+    iconBg: '#0E0A18',
+    mat: '#07060D',
+    card: '#0F0C1B',
+    panel: '#171328',
+    line: '#2B2445',
+    ink: '#F2F4FA',
+    muted: '#8E92B2',
+    soft: '#5A5E80',
+    barEmpty: '#221D38',
+    barLow: '#3B6F8C',
+    accent: '#FA2C7E',
+    accent2: '#36BCC7',
+    sealColor: '#FA2C7E',
+    sealSoft: 'rgba(250,44,126,0.14)',
+    accentSoft: 'rgba(250,44,126,0.15)',
+    accentLine: 'rgba(54,188,199,0.50)',
+    halo: '#1E1735',
+    heat: ['#1E1933', '#243B55', '#2B9AA3', '#36BCC7', '#FA2C7E'],
+    grain: 'rgba(54,188,199,0.016)'
+  },
+  pixel: {
+    name: '像素复古',
+    iconBg: '#F3EFE6',
+    mat: '#E4DDD0',
+    card: '#F5F0E6',
+    panel: '#EBE4D6',
+    line: '#D6CCB8',
+    ink: '#1E1C1A',
+    muted: '#7D7568',
+    soft: '#ACA393',
+    barEmpty: '#DFD7C7',
+    barLow: '#9E937E',
+    accent: '#E09224',
+    accent2: '#805C22',
+    sealColor: '#D46A28',
+    sealSoft: 'rgba(212,106,40,0.12)',
+    accentSoft: 'rgba(224,146,36,0.14)',
+    accentLine: 'rgba(224,146,36,0.45)',
+    halo: '#E4DCC8',
+    heat: ['#DFD7C7', '#D7C397', '#E6BF40', '#E09224', '#1E1C1A'],
+    grain: 'rgba(30,28,26,0.022)'
+  }
+};
+
+let reportTheme = 'light', reportVariant = 'classic', userPickedReportTheme = false, grainCache = {};
+
+function getGrainPattern(ctx, color) {
+  if (grainCache[color]) return grainCache[color];
+  const off = document.createElement('canvas');
+  off.width = 140; off.height = 140;
+  const octx = off.getContext('2d');
+  octx.fillStyle = color;
+  let seed = 42;
+  for (let i = 0; i < 420; i++) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const x = seed % 140;
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const y = seed % 140;
+    octx.fillRect(x, y, (i % 3 === 0) ? 2 : 1, 1);
+  }
+  return (grainCache[color] = ctx.createPattern(off, 'repeat'));
+}
+
+function rrect(ctx, x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, rad);
+  else {
+    ctx.moveTo(x + rad, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rad);
+    ctx.arcTo(x + w, y + h, x, y + h, rad);
+    ctx.arcTo(x, y + h, x, y, rad);
+    ctx.arcTo(x, y, x + w, y, rad);
+    ctx.closePath();
+  }
+}
+
+function topCapsule(x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  return `M${x} ${y + h} V${y + rad} Q${x} ${y} ${x + rad} ${y} H${x + w - rad} Q${x + w} ${y} ${x + w} ${y + rad} V${y + h} Z`;
+}
+
+// 还原商城 10 款图标（5 大色系 × 经典/极简构图），同时用于主卡片插画与页脚圆角图标徽章
+function drawAppIconArt(ctx, cx, cy, size, themeKey, variant, withTile = false) {
+  const t = REPORT_THEMES[themeKey];
+  const s = size / 200;
+  ctx.save();
+  ctx.translate(cx - size / 2, cy - size / 2);
+  ctx.scale(s, s);
+
+  if (withTile) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+    rrect(ctx, 0, 0, 200, 200, 46);
+    ctx.fillStyle = t.iconBg;
+    ctx.fill();
+    ctx.restore();
+
+    rrect(ctx, 0, 0, 200, 200, 46);
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+  }
+
+  // 落日款：左上方柔光珊瑚落日圆晕
+  if (themeKey === 'sunset') {
+    const grad = ctx.createRadialGradient(60, 56, 4, 64, 60, 34);
+    grad.addColorStop(0, '#FF8575');
+    grad.addColorStop(0.62, '#FFB5A6');
+    grad.addColorStop(1, 'rgba(255,217,198,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(64, 60, 34, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 霓虹款圆角图标内上下灯条
+  if (themeKey === 'neon') {
+    if (withTile) {
+      ctx.lineWidth = 2.8;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#FA2C7E';
+      ctx.beginPath(); ctx.moveTo(58, 20); ctx.lineTo(142, 20); ctx.stroke();
+      ctx.strokeStyle = '#D9D443';
+      ctx.beginPath(); ctx.moveTo(58, 180); ctx.lineTo(142, 180); ctx.stroke();
+    }
+    if (variant === 'minimal') {
+      // 极简霓虹头顶粒子点缀
+      ctx.fillStyle = '#FA2C7E';
+      ctx.beginPath(); ctx.moveTo(50, 44); ctx.lineTo(56, 44); ctx.lineTo(53, 50); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#36BCC7';
+      ctx.beginPath(); ctx.moveTo(148, 44); ctx.lineTo(154, 48); ctx.lineTo(148, 50); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // 像素复古系列：8-bit 点阵墨团 + 像素双叶
+  if (themeKey === 'pixel') {
+    const p = 8;
+    const px = (gx, gy, gw, gh, col) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(gx * p, gy * p, gw * p, gh * p);
+    };
+    if (variant === 'minimal') {
+      // 极简像素芽与四角复古像素点
+      px(12, 4, 2, 1, '#49CC9A');
+      px(11, 5, 2, 1, '#35A67B');
+      px(6, 5, 1, 1, '#EA5A47');
+      px(18, 5, 1, 1, '#E6BF40');
+    } else {
+      px(12, 5, 2, 1, '#E6BF40');
+      px(11, 6, 2, 1, '#805C22');
+      px(10, 6, 1, 1, '#1E1C1A');
+    }
+    // 像素猫耳与头部
+    px(8, 7, 2, 2, '#1E1C1A');
+    px(15, 7, 2, 2, '#1E1C1A');
+    px(8, 8, 1, 1, '#E79A30');
+    px(16, 8, 1, 1, '#E79A30');
+    px(7, 9, 11, 6, '#1E1C1A');
+    // 像素胡须
+    px(5, 11, 2, 1, '#7D7568');
+    px(5, 13, 2, 1, '#7D7568');
+    px(18, 11, 2, 1, '#7D7568');
+    px(18, 13, 2, 1, '#7D7568');
+    // 像素方形眼与小嘴
+    px(9, 11, 2, 2, '#FFFFFF');
+    px(14, 11, 2, 2, '#FFFFFF');
+    px(10, 12, 1, 1, '#1E1C1A');
+    px(14, 12, 1, 1, '#1E1C1A');
+    px(12, 13, 1, 1, '#CAA076');
+    // 像素底部双叶
+    px(6, 16, 5, 2, '#1E1C1A');
+    px(8, 18, 4, 1, '#1E1C1A');
+    const rCol = variant === 'minimal' ? '#EE9D18' : '#2B2623';
+    px(13, 16, 6, 1, rCol);
+    px(13, 17, 1, 2, rCol);
+    px(18, 17, 1, 1, rCol);
+    px(14, 18, 4, 1, rCol);
+    px(14, 17, 4, 1, '#FCF1C3');
+    ctx.restore();
+    return;
+  }
+
+  // 矢量款（浅色 / 落日 / 暗金浮雕 / 霓虹幻彩）
+  const isGold = themeKey === 'gold';
+  const isNeon = themeKey === 'neon';
+  const bodyFill = isGold ? '#17161C' : isNeon ? '#121324' : '#1B1B1F';
+
+  // 极简款头顶卷芽与暗金星芒
+  if (variant === 'minimal') {
+    if (isGold) {
+      ctx.fillStyle = 'rgba(246,181,37,0.55)';
+      ctx.beginPath(); ctx.arc(100, 32, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(82, 42, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(118, 42, 1.6, 0, Math.PI * 2); ctx.fill();
+    }
+    const sprout = new Path2D('M100 57 C98 43, 113 36, 119 43 C119 51, 108 56, 100 57 Z');
+    if (isNeon) {
+      ctx.fillStyle = '#E89A25';
+      ctx.fill(sprout);
+    }
+    ctx.strokeStyle = isGold ? '#F6B525' : isNeon ? '#FA2C7E' : '#1B1B1F';
+    ctx.lineWidth = 3.0;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(sprout);
+    ctx.beginPath();
+    ctx.moveTo(100, 57);
+    ctx.bezierCurveTo(94, 49, 87, 48, 86, 53);
+    ctx.stroke();
+  }
+
+  const earL = new Path2D(variant === 'classic'
+    ? 'M68 89 C67 65, 73 47, 77 44 C81 42, 91 57, 97 72 Z'
+    : 'M69 89 C68 71, 73 55, 77 52 C81 50, 90 61, 96 74 Z');
+  const earR = new Path2D(variant === 'classic'
+    ? 'M132 89 C133 65, 127 47, 123 44 C119 42, 109 57, 103 72 Z'
+    : 'M131 89 C132 71, 127 55, 123 52 C119 50, 110 61, 104 74 Z');
+
+  ctx.fillStyle = bodyFill;
+  ctx.fill(earL);
+  ctx.fillStyle = isNeon ? '#B81D5E' : bodyFill;
+  ctx.fill(earR);
+
+  ctx.fillStyle = bodyFill;
+  ctx.beginPath();
+  ctx.ellipse(100, 99, 35, 31, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 暗金浮雕金边 / 霓虹双色发光边
+  if (isGold || isNeon) {
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = isGold ? '#DDA12C' : '#36BCC7';
+    ctx.stroke(earL);
+    ctx.strokeStyle = isGold ? '#DDA12C' : '#FA2C7E';
+    ctx.stroke(earR);
+    ctx.strokeStyle = isGold ? '#9A7125' : '#2C3159';
+    ctx.beginPath();
+    ctx.ellipse(100, 99, 35, 31, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 耳廓内折线
+  ctx.lineWidth = 2.1;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = isGold ? '#D69B2A' : isNeon ? '#36BCC7' : '#FFFFFF';
+  ctx.stroke(new Path2D(variant === 'classic' ? 'M76 74 L79 56 L88 69' : 'M77 75 L79 60 L87 70'));
+  ctx.strokeStyle = isGold ? '#D69B2A' : isNeon ? '#FFD6E7' : '#FFFFFF';
+  ctx.stroke(new Path2D(variant === 'classic' ? 'M124 74 L121 56 L112 69' : 'M123 75 L121 60 L113 70'));
+
+  // 胡须
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = isGold ? '#8C6D32' : isNeon ? '#36BCC7' : '#52525B';
+  ctx.beginPath();
+  ctx.moveTo(54, 99); ctx.lineTo(62, 100);
+  ctx.moveTo(55, 106); ctx.lineTo(62, 106);
+  ctx.stroke();
+  ctx.strokeStyle = isGold ? '#8C6D32' : isNeon ? '#FA2C7E' : '#52525B';
+  ctx.beginPath();
+  ctx.moveTo(146, 99); ctx.lineTo(138, 100);
+  ctx.moveTo(145, 106); ctx.lineTo(138, 106);
+  ctx.stroke();
+
+  // 双眼（霓虹异瞳 / 暗金暖眸 / 经典纯白）
+  ctx.fillStyle = isNeon ? '#36BCC7' : isGold ? '#F6D588' : '#FFFFFF';
+  ctx.beginPath(); ctx.arc(84, 102, 10.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = isNeon ? '#FA2C7E' : isGold ? '#F6D588' : '#FFFFFF';
+  ctx.beginPath(); ctx.arc(116, 102, 10.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#141417';
+  ctx.beginPath();
+  ctx.arc(85.5, 102, 5.0, 0, Math.PI * 2);
+  ctx.arc(114.5, 102, 5.0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(87.5, 99.5, 1.7, 0, Math.PI * 2);
+  ctx.arc(116.5, 99.5, 1.7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 小嘴
+  ctx.strokeStyle = isGold ? '#B88930' : isNeon ? '#8E92B2' : '#686870';
+  ctx.lineWidth = 2.1;
+  ctx.stroke(new Path2D('M95 113 Q97.5 116 100 113 Q102.5 116 105 113'));
+
+  // 底部一实一空托叶（空叶阅读核心符号）
+  const leafLeft = new Path2D('M99 154 C74 156, 52 143, 46 125 C67 124, 86 134, 99 154 Z');
+  const leafRight = new Path2D('M101 154 C126 156, 148 143, 154 125 C133 124, 114 134, 101 154 Z');
+
+  if (isGold) {
+    const gGrad = ctx.createLinearGradient(46, 125, 99, 155);
+    gGrad.addColorStop(0, '#FFD25A');
+    gGrad.addColorStop(1, '#C96D12');
+    ctx.fillStyle = gGrad;
+  } else if (isNeon) {
+    ctx.fillStyle = '#FA2C7E';
+  } else {
+    ctx.fillStyle = '#1B1B1F';
+  }
+  ctx.fill(leafLeft);
+
+  ctx.fillStyle = withTile ? t.iconBg : t.panel;
+  ctx.fill(leafRight);
+  ctx.lineWidth = 3.2;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = isGold ? '#F6B525' : isNeon ? '#36BCC7' : '#1B1B1F';
+  ctx.stroke(leafRight);
+
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.stroke(new Path2D('M105 150 C119 145, 133 138, 145 129'));
+
+  ctx.restore();
+}
+
+function drawSeal(ctx, x, y, size, t, chars) {
+  ctx.save();
+  rrect(ctx, x, y, size, size, reportTheme === 'pixel' ? 6 : 12);
+  ctx.fillStyle = t.sealSoft;
+  ctx.fill();
+  ctx.strokeStyle = t.sealColor;
+  ctx.globalAlpha = 0.84;
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  ctx.globalAlpha = 0.22;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x + size / 2, y + 9); ctx.lineTo(x + size / 2, y + size - 9);
+  ctx.moveTo(x + 9, y + size / 2); ctx.lineTo(x + size - 9, y + size / 2);
+  ctx.stroke();
+
+  ctx.globalAlpha = 0.94;
+  ctx.fillStyle = t.sealColor;
+  ctx.font = '600 21px "Songti SC","Noto Serif SC","SimSun",serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const q = size / 4;
+  ctx.fillText(chars[0], x + q * 3, y + q + 1);
+  ctx.fillText(chars[1], x + q * 3, y + q * 3 + 1);
+  ctx.fillText(chars[2], x + q, y + q + 1);
+  ctx.fillText(chars[3], x + q, y + q * 3 + 1);
+  ctx.restore();
+}
+
+// 用报告自己的装饰层提高动物辨识度，保留首页动物的原始形象。
+function drawHomeAnimalArtwork(ctx, image, x, y, size, theme) {
+  ctx.save();
+  if (theme === 'pixel') {
+    const low = document.createElement('canvas'); low.width = 48; low.height = 48;
+    const p = low.getContext('2d');
+    p.drawImage(image, 0, 0, 48, 48);
+    const pixels = p.getImageData(0, 0, 48, 48);
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      pixels.data[i + 3] = pixels.data[i + 3] < 32 ? 0 : 255;
+      for (let c = 0; c < 3; c++) pixels.data[i + c] = Math.min(255, Math.round(pixels.data[i + c] / 32) * 32);
+    }
+    p.putImageData(pixels, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(low, x, y, size, size);
+    const spark = (cx, cy, unit, color) => {
+      ctx.fillStyle = color;
+      for (const [dx, dy] of [[1,0],[0,1],[1,1],[2,1],[1,2]]) ctx.fillRect(cx + dx * unit, cy + dy * unit, unit, unit);
+    };
+    spark(717, 399, 4, '#E09224');
+    spark(910, 551, 3, '#C4A468');
+  } else {
+    if (theme === 'gold' || theme === 'neon') {
+      const pad = 9, outline = document.createElement('canvas');
+      outline.width = size + pad * 2; outline.height = size + pad * 2;
+      const p = outline.getContext('2d');
+      for (let i = 0; i < 12; i++) {
+        const a = i * Math.PI / 6;
+        p.drawImage(image, pad + Math.cos(a) * 2.3, pad + Math.sin(a) * 2.3, size, size);
+      }
+      p.globalCompositeOperation = 'source-in';
+      if (theme === 'gold') {
+        const color = p.createLinearGradient(0, 0, outline.width, outline.height);
+        color.addColorStop(0, '#F8D887'); color.addColorStop(1, '#D99A25');
+        p.fillStyle = color; p.fillRect(0, 0, outline.width, outline.height);
+        ctx.shadowColor = 'rgba(246,181,37,0.30)';
+        ctx.shadowBlur = 7;
+      } else {
+        // 纯青蓝底色，再把右上、左下轮廓分别染成纯玫红，边界不混色。
+        p.fillStyle = '#36BCC7'; p.fillRect(0, 0, outline.width, outline.height);
+        p.globalCompositeOperation = 'source-atop';
+        p.fillStyle = '#FA2C7E';
+        p.fillRect(outline.width * .52, 0, outline.width * .48, outline.height * .53);
+        p.fillRect(0, outline.height * .64, outline.width * .57, outline.height * .36);
+        ctx.shadowBlur = 0;
+      }
+      ctx.drawImage(outline, x - pad, y - pad);
+      ctx.shadowBlur = 0;
+    }
+    ctx.drawImage(image, x, y, size, size);
+  }
+  ctx.restore();
+}
+
+async function drawReport() {
+  const m = model, c = $('#report-canvas'), ctx = c.getContext('2d');
+  const show = $('#show-books').checked, t = REPORT_THEMES[reportTheme] || REPORT_THEMES.sunset;
+  const isPixel = reportTheme === 'pixel';
+  const W = 1080, H = 1620;
+  const fontStack = isPixel
+    ? 'ui-monospace,"SFMono-Regular","Cascadia Mono","Microsoft YaHei",sans-serif'
+    : 'system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+
+  function fitText(str, maxW) {
+    let v = String(str);
+    if (ctx.measureText(v).width <= maxW) return v;
+    while (v.length && ctx.measureText(v + '…').width > maxW) v = v.slice(0, -1);
+    return v + '…';
+  }
+  function text(val, x, y, size, color = t.ink, weight = 400, maxW = 900, align = 'left') {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = `${weight} ${size}px ${fontStack}`;
+    ctx.textAlign = align;
+    ctx.fillText(fitText(val, maxW), x, y);
+    ctx.restore();
+  }
+  function hairline(x1, y1, x2, y2, color = t.line, width = 1.2) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 1. 外衬底与主海报卡片
+  ctx.fillStyle = t.mat;
+  ctx.fillRect(0, 0, W, H);
+
+  const outerR = isPixel ? 18 : 40;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.10)';
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetY = 10;
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.fillStyle = t.card;
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.clip();
+  ctx.fillStyle = getGrainPattern(ctx, t.grain);
+  ctx.fillRect(38, 38, W - 76, H - 76);
+  ctx.restore();
+
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  rrect(ctx, 64, 64, W - 128, H - 128, isPixel ? 10 : 26);
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // 2. 眉题与闲章
+  ctx.fillStyle = t.sealColor;
+  rrect(ctx, 104, 107, 4, 20, 2);
+  ctx.fill();
+  text('空叶阅读  ·  READING JOURNAL', 120, 125, 22, t.muted, 600, 560);
+
+  const periodCode = { week: 'WEEKLY EDITION', month: 'MONTHLY EDITION', year: 'ANNUAL EDITION', all: 'ARCHIVE EDITION' }[period];
+  text(periodCode, 976, 125, 20, t.soft, 600, 280, 'right');
+
+  const title = { week: '我的阅读周报', month: '我的阅读月报', year: '我的阅读年报', all: '我的阅读足迹' }[period];
+  text(title, 104, 204, 58, t.ink, 750, 760);
+  text(`${m.label}  ·  共翻开书页 ${m.count} 次`, 106, 252, 25, t.muted, 400, 760);
+
+  const sealText = { week: '一叶知秋', month: '静享阅读', year: '岁阅成诗', all: '书页留痕' }[period];
+  drawSeal(ctx, 902, 162, 74, t, sealText);
+
+  // 3. 主视觉卡片：核心阅读时长 + 同款商城图标主视觉
+  rrect(ctx, 100, 290, 880, 396, isPixel ? 12 : 28);
+  ctx.fillStyle = t.panel;
+  ctx.fill();
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  text('留给阅读的时间', 142, 350, 25, t.muted, 500, 480);
+
+  const totalMin = Math.floor(m.total);
+  const hrs = Math.floor(totalMin / 60), mins = totalMin % 60;
+  const segs = hrs > 0
+    ? (mins > 0 ? [{ n: String(hrs), u: '小时' }, { n: String(mins), u: '分' }] : [{ n: String(hrs), u: '小时' }])
+    : [{ n: String(mins), u: '分钟' }];
+
+  let numSize = 90, unitSize = 27;
+  const rawW = segs.reduce((acc, s, idx) => {
+    ctx.font = `800 ${numSize}px ${fontStack}`;
+    const nw = ctx.measureText(s.n).width;
+    ctx.font = `500 ${unitSize}px ${fontStack}`;
+    const uw = ctx.measureText(s.u).width;
+    return acc + nw + 6 + uw + (idx < segs.length - 1 ? 14 : 0);
+  }, 0);
+  if (rawW > 495) {
+    const ratio = 495 / rawW;
+    numSize = Math.floor(numSize * ratio);
+    unitSize = Math.max(20, Math.floor(unitSize * ratio));
+  }
+  let curX = 140;
+  segs.forEach((s, idx) => {
+    ctx.fillStyle = t.ink;
+    ctx.font = `800 ${numSize}px ${fontStack}`;
+    ctx.fillText(s.n, curX, 458);
+    curX += ctx.measureText(s.n).width + 6;
+    ctx.fillStyle = t.muted;
+    ctx.font = `500 ${unitSize}px ${fontStack}`;
+    ctx.fillText(s.u, curX, 456);
+    curX += ctx.measureText(s.u).width + (idx < segs.length - 1 ? 14 : 0);
+  });
+
+  hairline(142, 508, 642, 508, t.line, 1);
+
+  const subMetrics = [
+    [String(m.days), '天', '阅读天数'],
+    [String(m.finished), '本', '读完书籍'],
+    [String(m.streak), '天', '连续阅读']
+  ];
+  subMetrics.forEach(([num, unit, lbl], idx) => {
+    const mx = 142 + idx * 172;
+    if (idx > 0) hairline(mx - 22, 540, mx - 22, 638, t.line, 1);
+    ctx.fillStyle = t.ink;
+    ctx.font = `750 40px ${fontStack}`;
+    ctx.fillText(num, mx, 586);
+    const nw = ctx.measureText(num).width;
+    ctx.fillStyle = t.muted;
+    ctx.font = `500 21px ${fontStack}`;
+    ctx.fillText(unit, mx + nw + 5, 584);
+    text(lbl, mx, 630, 22, t.muted, 400, 145);
+  });
+
+  // 右侧圆晕衬底 + 对应商城图标形象
+  ctx.save();
+  ctx.fillStyle = t.halo;
+  if (isPixel) {
+    rrect(ctx, 694, 366, 244, 244, 20);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(816, 488, 124, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(816, 488, 134, -Math.PI * 0.78, Math.PI * 0.25);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 落日固定在圆晕左上方，不随首页动物改变位置。
+  if (reportTheme === 'sunset') {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(816, 488, 124, 0, Math.PI * 2); ctx.clip();
+    const sun = ctx.createRadialGradient(764, 430, 3, 764, 430, 42);
+    sun.addColorStop(0, 'rgba(255,116,96,0.82)');
+    sun.addColorStop(0.48, 'rgba(255,127,108,0.50)');
+    sun.addColorStop(1, 'rgba(255,146,125,0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(720, 386, 88, 88);
+    ctx.restore();
+  }
+
+  drawHomeAnimalArtwork(ctx, homeAnimal, 700, 374, 232, reportTheme);
+
+  // 4. 阅读节奏趋势图
+  const bars = m.bars;
+  const peakVal = Math.max(0, ...bars.map(b => b.value));
+  const peakIdx = peakVal > 0 ? bars.findIndex(b => b.value === peakVal) : -1;
+  const avgLabel = `${period === 'year' ? '月均' : period === 'all' ? '年均' : '日均'} ${hm(m.avg)}`;
+
+  text('阅读的节奏', 104, 756, 30, t.ink, 700, 360);
+  text(peakVal > 0 ? `${avgLabel}  ·  最高 ${hm(peakVal)}` : avgLabel, 976, 754, 23, t.muted, 500, 500, 'right');
+
+  const chartX = 104, chartW = 872, baseY = 976, availH = 148;
+  const maxV = Math.max(1, peakVal, m.avg);
+  const slot = chartW / Math.max(1, bars.length);
+  const barW = Math.min(bars.length <= 5 ? 52 : 34, Math.max(10, slot * 0.56));
+
+  hairline(chartX, baseY - availH, chartX + chartW, baseY - availH, t.line, 0.8);
+  if (m.avg > 0) {
+    const avgY = baseY - (m.avg / maxV) * availH;
+    ctx.save();
+    ctx.strokeStyle = t.accentLine;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(chartX, avgY);
+    ctx.lineTo(chartX + chartW, avgY);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  let peakCenter = 0, peakTop = baseY;
+  bars.forEach((b, i) => {
+    const x = chartX + i * slot + (slot - barW) / 2;
+    if (b.future) {
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = t.barEmpty;
+      ctx.fill(new Path2D(topCapsule(x, baseY - 4, barW, 4, isPixel ? 0 : 2)));
+      ctx.restore();
+      return;
+    }
+    const h = b.value === 0 ? 5 : Math.max(8, (b.value / maxV) * availH);
+    const y = baseY - h;
+    if (i === peakIdx) {
+      peakCenter = x + barW / 2;
+      peakTop = y;
+      ctx.fillStyle = reportTheme === 'light' ? '#D6452E' : t.accent;
+    } else if (b.value === 0) {
+      ctx.fillStyle = t.barEmpty;
+    } else if (b.value < m.avg * 0.5) {
+      ctx.fillStyle = t.barLow;
+    } else {
+      ctx.fillStyle = reportTheme === 'neon' ? t.accent2 : t.ink;
+    }
+    ctx.fill(new Path2D(topCapsule(x, y, barW, h, isPixel ? 0 : Math.min(barW / 2, 10))));
+  });
+
+  hairline(chartX, baseY, chartX + chartW, baseY, t.line, 1.4);
+
+  bars.forEach((b, i) => {
+    if (!b.showLabel) return;
+    const cx = chartX + i * slot + slot / 2;
+    const lbl = period === 'month' ? `${b.label}日` : b.label;
+    text(lbl, cx, 1012, bars.length > 14 ? 20 : 22, b.current ? t.ink : t.muted, b.current ? 700 : 400, 80, 'center');
+  });
+
+  if (peakIdx >= 0 && peakVal > 0) {
+    const pText = hm(peakVal);
+    const pillColor = reportTheme === 'light' ? '#D6452E' : t.accent;
+    ctx.font = `700 20px ${fontStack}`;
+    const pw = ctx.measureText(pText).width + 24, ph = 32;
+    const px = Math.min(chartX + chartW - pw / 2, Math.max(chartX + pw / 2, peakCenter));
+    const py = Math.max(776, peakTop - ph - 8);
+    rrect(ctx, px - pw / 2, py, pw, ph, isPixel ? 4 : 10);
+    ctx.fillStyle = t.sealSoft;
+    ctx.fill();
+    ctx.strokeStyle = pillColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    text(pText, px, py + 23, 20, pillColor, 700, pw, 'center');
+  }
+
+  hairline(104, 1058, 976, 1058, t.line, 1.2);
+
+  // 5. 底部：在读书单 或 隐私寄语 + 近 28 日阅读印记
+  if (show) {
+    text('翻过的故事', 104, 1118, 30, t.ink, 700, 420);
+    text(`共涉猎 ${m.dist.length} 本书`, 976, 1116, 23, t.muted, 500, 320, 'right');
+
+    const topBooks = m.dist.slice(0, 3);
+    if (topBooks.length === 0) {
+      rrect(ctx, 100, 1150, 880, 256, isPixel ? 12 : 26);
+      ctx.fillStyle = t.panel;
+      ctx.fill();
+      ctx.strokeStyle = t.line;
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+      text('暂无在读书籍', 540, 1260, 32, t.ink, 600, 720, 'center');
+      text('这段时间还没有书籍阅读记录', 540, 1310, 24, t.muted, 400, 720, 'center');
+    }
+    topBooks.forEach(([id, value], i) => {
+      const ry = 1156 + i * 90;
+      const pct = Math.max(1, Math.round((value / Math.max(1, m.total)) * 100));
+      const topAccent = reportTheme === 'light' ? '#D6452E' : t.accent;
+      text(`0${i + 1}`, 104, ry + 32, 25, i === 0 ? topAccent : t.muted, 750, 50);
+      text(`《${titles[id]}》`, 156, ry + 32, 28, t.ink, 600, 580);
+
+      const durStr = hm(value), pctStr = `${pct}%`;
+      ctx.font = `500 22px ${fontStack}`;
+      const pctW = ctx.measureText(pctStr).width;
+      text(pctStr, 976, ry + 31, 22, t.muted, 500, 90, 'right');
+      text(durStr, 976 - pctW - 14, ry + 32, 26, t.ink, 700, 180, 'right');
+
+      const barX = 156, barY = ry + 50, barTotalW = 820;
+      rrect(ctx, barX, barY, barTotalW, 4, isPixel ? 0 : 2);
+      ctx.fillStyle = t.barEmpty;
+      ctx.fill();
+
+      const fillW = Math.max(12, barTotalW * (value / Math.max(1, m.total)));
+      rrect(ctx, barX, barY, fillW, 4, isPixel ? 0 : 2);
+      ctx.save();
+      if (i === 2) ctx.globalAlpha = 0.58;
+      ctx.fillStyle = i === 0 ? topAccent : (reportTheme === 'neon' ? t.accent2 : t.ink);
+      ctx.fill();
+      ctx.restore();
+    });
+    if (topBooks.length > 0 && topBooks.length < 3) {
+      const noteY = 1156 + topBooks.length * 90 + 44;
+      text('专注于少而精的阅读，每一页都更从容。', 104, noteY, 23, t.muted, 400, 760);
+    }
+  } else {
+    rrect(ctx, 100, 1094, 880, 312, isPixel ? 12 : 26);
+    ctx.fillStyle = t.panel;
+    ctx.fill();
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.fillStyle = t.sealColor;
+    ctx.globalAlpha = 0.35;
+    ctx.font = '700 72px Georgia,serif';
+    ctx.fillText('“', 138, 1178);
+    ctx.restore();
+
+    let q1 = '在属于自己的节奏里，', q2 = '安安静静读完一本书。';
+    if (m.total === 0) {
+      q1 = '故事还很长，不必匆忙赶路，';
+      q2 = '翻开第一页便是好时光。';
+    } else if (m.streak >= 5) {
+      q1 = '日复一日的安静翻阅，';
+      q2 = '让散落的时光有了沉静的回响。';
+    } else if (m.total >= 600) {
+      q1 = '读过的每一页都算数，';
+      q2 = '它们在沉默中拓宽生命的边界。';
+    }
+    text(q1, 144, 1222, 31, t.ink, 700, 515);
+    text(q2, 144, 1274, 31, t.ink, 700, 515);
+
+    const avgSession = m.count ? m.total / m.count : 0;
+    text(`${m.word}沉浸 ${m.count} 次  ·  单次平均 ${cn(avgSession)}`, 144, 1354, 23, t.muted, 400, 515);
+
+    hairline(684, 1136, 684, 1368, t.line, 1);
+
+    text('近 28 日阅读印记', 832, 1158, 21, t.muted, 500, 220, 'center');
+    const dayMap = new Map();
+    for (const r of records) dayMap.set(key(r.date), (dayMap.get(key(r.date)) || 0) + r.minutes);
+
+    const start28 = addDays(today, -27);
+    let active28 = 0;
+    const cellS = 22, gap = 7, gridX = 734, gridY = 1184;
+    for (let idx = 0; idx < 28; idx++) {
+      const d = addDays(start28, idx);
+      const val = dayMap.get(key(d)) || 0;
+      if (val > 0) active28++;
+      const lv = val <= 0 ? 0 : val < 15 ? 1 : val < 30 ? 2 : val < 60 ? 3 : 4;
+      const col = idx % 7, row = Math.floor(idx / 7);
+      rrect(ctx, gridX + col * (cellS + gap), gridY + row * (cellS + gap), cellS, cellS, isPixel ? 0 : 5);
+      ctx.fillStyle = key(d) === key(today) ? t.sealColor : t.heat[lv];
+      ctx.fill();
+    }
+    text(`活跃 ${active28} / 28 天`, 832, 1354, 21, t.muted, 500, 220, 'center');
+  }
+
+  // 6. 简洁页脚：左侧叶子寄语，右侧品牌署名。
+  hairline(104, 1442, 976, 1442, t.line, 1.2);
+  ctx.save();
+  ctx.translate(102, 1481);
+  ctx.strokeStyle = t.sealColor;
+  ctx.lineWidth = 1.7;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke(new Path2D('M4 19C4 10 11 4 20 4C20 13 14 20 5 20ZM5 19L15 9'));
+  ctx.restore();
+  text('一叶知秋 · 静享阅读', 140, 1502, 22, t.muted, 400, 500);
+  ctx.font = `500 20px ${fontStack}`;
+  const latinW = ctx.measureText('KONGYE').width;
+  text('KONGYE', 976, 1502, 20, t.soft, 500, 160, 'right');
+  text('/', 976 - latinW - 15, 1502, 20, t.soft, 400, 30, 'right');
+  text('空叶阅读', 976 - latinW - 40, 1502, 24, t.ink, 750, 220, 'right');
+}
+
+
+window.renderNative=async function(p){try{
+  model=p.model;period=p.period;titles=p.titles;
+  records=p.records.map(r=>({date:new Date(r.date+'T00:00:00'),minutes:r.minutes}));
+  today=new Date(p.today+'T00:00:00');reportTheme=p.theme;reportVariant=p.variant;
+  $('#show-books').checked=p.showBooks;
+  homeAnimal=new Image();await new Promise((resolve,reject)=>{homeAnimal.onload=resolve;homeAnimal.onerror=reject;homeAnimal.src=p.animal;});
+  await drawReport();ReportBridge.finished($('#report-canvas').toDataURL('image/png'));
+}catch(e){ReportBridge.failed(String(e));}};
+</script></body></html>

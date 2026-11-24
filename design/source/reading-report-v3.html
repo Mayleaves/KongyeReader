@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>空叶阅读 · 统计</title>
+<style>
+:root{--bg:#f5f5f6;--card:#fff;--chip:#f2f2f3;--ink:#1f1f1f;--muted:#8e8e93;--soft:#c4c4c8;--line:#ececee;--track:#e2e2e5;--accent:#f0492c;--on:#fff;--shadow:0 2px 12px #00000003}
+:root.dark{--bg:#101011;--card:#1c1c1e;--chip:#242426;--ink:#f2f2f2;--muted:#98989e;--soft:#636368;--line:#323235;--track:#3a3a3c;--on:#171719;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}html{font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);font-size:16px}body{margin:0}button,input{font:inherit}button{border:0;cursor:pointer;color:inherit;background:none;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.3;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:4px}button:active:not(:disabled){transform:scale(.97)}svg{display:block}button svg{pointer-events:none}h1,h2,p{margin:0}.app{max-width:600px;margin:0 auto;padding-bottom:calc(24px + env(safe-area-inset-bottom))}.topbar{height:72px;padding:8px 6px;display:grid;grid-template-columns:96px 1fr 96px;align-items:center;position:sticky;top:0;z-index:4;background:var(--bg)}h1{font-size:19px;font-weight:750;text-align:center;letter-spacing:.02em}.actions{display:flex;justify-content:flex-end}.icon-button{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;flex-shrink:0}.icon-button:hover{background:var(--chip)}.icon-button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.content{padding:0 16px}.segmented{display:grid;grid-template-columns:repeat(4,1fr);background:var(--chip);border-radius:18px;padding:4px;gap:3px}.segmented button{height:38px;border-radius:14px;color:var(--muted);font-size:15px}.segmented button[aria-selected=true]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}.period-nav{height:54px;display:flex;align-items:center;justify-content:space-between}.period-label{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--muted)}.now{font-size:11px;padding:5px 8px;border-radius:9px;background:var(--chip);color:var(--muted)}.card{background:var(--card);border-radius:25px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow)}h2{font-size:18px;font-weight:750}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:20px 12px;margin-top:20px}.metric-label{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:4px}.metric-value{font-size:29px;font-weight:800;letter-spacing:-.04em;line-height:1.25;font-variant-numeric:tabular-nums}.metric-value.large{font-size:42px}.metric-value small{font-size:.45em;letter-spacing:0;margin-left:1px}.subtitle{font-size:12px;color:var(--muted);margin-top:3px}.trend{width:100%;height:212px;margin-top:8px;overflow:visible}.trend text{font-family:inherit}.bar-hit{cursor:pointer;outline:none}.bar-hit:focus-visible rect:first-child{fill:var(--chip);opacity:1}.distribution{display:flex;gap:20px;align-items:center;margin-top:20px}.donut{width:136px;height:136px;flex-shrink:0}.legend{flex:1;min-width:0;display:grid;gap:10px}.legend-row{display:flex;gap:9px;align-items:center;min-width:0}.swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}.legend-number{font-size:15px;font-weight:750;line-height:1.2}.legend-name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:235px;line-height:1.4}.heat-title{display:flex;align-items:baseline;justify-content:space-between}.heat-total{font-size:12px;color:var(--muted)}.heatmap{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:4px;margin-top:16px;height:118px}.heatcell{border-radius:4px;background:var(--chip);min-width:0;padding:0}.heatcell:focus-visible{outline-offset:1px}.heat-legend{display:flex;align-items:center;font-size:11px;color:var(--muted);gap:5px;margin-top:10px}.heat-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}.heat-legend .today-key{margin-left:auto;display:flex;align-items:center;gap:5px}.footer{display:flex;justify-content:space-between;align-items:center;padding:12px 8px 0;color:var(--muted);font-size:11px;gap:10px}.theme-button{background:var(--card);border-radius:12px;padding:9px 12px;color:var(--muted);white-space:nowrap}dialog{border:0;border-radius:28px 28px 0 0;background:var(--card);color:var(--ink);padding:18px 22px 22px;margin:auto auto 0;width:min(100%,560px);max-height:94dvh;overflow:auto;box-shadow:0 -12px 70px #0002}dialog::backdrop{background:#0006}.handle{height:4px;background:var(--line);border-radius:8px;width:36px;margin:0 auto 14px}.dialog-title{display:flex;align-items:center;justify-content:space-between;gap:12px}.dialog-title h2{font-size:21px}.report-stage{background:var(--bg);border-radius:20px;padding:14px;margin:14px 0 12px;display:grid;place-items:center;border:1px solid var(--line)}.report-preview{display:block;max-width:100%;width:auto;height:min(46dvh,440px);object-fit:contain;border-radius:12px;box-shadow:0 8px 28px #00000014}.report-options{background:var(--chip);border-radius:18px;padding:6px 14px;margin-bottom:4px}.report-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;font-size:14px}.report-row.stack{flex-direction:column;align-items:stretch;gap:8px}.report-row+.report-row{border-top:1px solid var(--line)}.row-head{display:flex;align-items:center;justify-content:space-between;font-size:13.5px}.row-head small{font-size:12px;color:var(--muted)}.icon-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.theme-pill{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px 4px;border-radius:13px;font-size:11.5px;color:var(--muted);background:transparent;border:1px solid transparent;transition:all .15s;white-space:nowrap}.theme-pill i{width:20px;height:20px;border-radius:6px;display:block;border:1px solid #00000018;flex-shrink:0}.theme-pill[aria-checked=true]{background:var(--card);color:var(--ink);font-weight:700;border-color:var(--line);box-shadow:0 2px 8px #0000000c}.variant-seg{display:inline-grid;grid-template-columns:1fr 1fr;background:var(--bg);padding:3px;border-radius:11px;gap:3px}.variant-btn{height:28px;padding:0 12px;border-radius:8px;font-size:12.5px;color:var(--muted);transition:all .15s}.variant-btn[aria-checked=true]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 4px #0000000c}.privacy{display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:14px;cursor:pointer}.switch{appearance:none;width:46px;height:27px;position:relative;background:var(--track);border-radius:30px;cursor:pointer;transition:background .15s;margin:0}.switch:before{content:"";position:absolute;left:3px;top:3px;width:21px;height:21px;background:white;border-radius:50%;transition:transform .15s}.switch:checked{background:var(--ink)}.switch:checked:before{transform:translateX(19px);background:var(--on)}.dialog-buttons{display:flex;gap:12px;margin-top:12px}.button{height:50px;border-radius:19px;flex:1;background:var(--ink);color:var(--on);font-weight:700;font-size:16px}.button.secondary{background:var(--chip);color:var(--ink)}.timeline-list{margin-top:18px;display:grid;gap:12px}.timeline-entry{background:var(--chip);border-radius:17px;padding:15px}.timeline-entry b{font-size:14px}.timeline-entry p{margin-top:7px;font-size:13px;color:var(--muted)}.toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:var(--ink);color:var(--on);padding:12px 20px;border-radius:18px;font-size:13px;z-index:20;box-shadow:0 3px 24px #0002;pointer-events:none;width:max-content;max-width:90vw;text-align:center}.toast:empty{display:none}.empty-dist{font-size:13px;color:var(--muted);padding:24px 0;text-align:center;width:100%}@media(min-width:700px){.app{padding-top:12px}.topbar{height:76px}.content{padding:0 24px}.card{padding:24px}.trend{height:230px}.metrics{gap:24px 20px}}@media(max-width:350px){.card{padding:17px}.distribution{gap:13px}.donut{width:112px;height:112px}.metric-value.large{font-size:36px}.topbar{grid-template-columns:88px 1fr 88px}.content{padding:0 12px}.legend-name{max-width:135px}.theme-pill{padding:6px 2px;font-size:10.5px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute;overflow:hidden"><defs>
+<symbol id="back" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+<symbol id="left" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
+<symbol id="right" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></symbol>
+<symbol id="share" viewBox="0 0 24 24"><path d="m8 11 8-5M8 13l8 5"/><circle cx="5.5" cy="12" r="2.5"/><circle cx="18.5" cy="5.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+<symbol id="timeline" viewBox="0 0 24 24"><path d="M5 3v18M10 6h11M10 12h8M10 18h11"/></symbol>
+<symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+</defs></svg>
+<main class="app">
+  <header class="topbar"><button class="icon-button" id="back-button" aria-label="返回"><svg><use href="#back"/></svg></button><h1>统计</h1><div class="actions"><button class="icon-button" id="open-report" aria-label="分享阅读报告"><svg><use href="#share"/></svg></button><button class="icon-button" id="open-timeline" aria-label="阅读时间轴"><svg><use href="#timeline"/></svg></button></div></header>
+  <div class="content">
+    <nav class="segmented" role="tablist" aria-label="统计范围"><button role="tab" data-period="week" aria-selected="false">周</button><button role="tab" data-period="month" aria-selected="true">月</button><button role="tab" data-period="year" aria-selected="false">年</button><button role="tab" data-period="all" aria-selected="false">总</button></nav>
+    <div class="period-nav"><button id="previous" class="icon-button" aria-label="上一时段"><svg><use href="#left"/></svg></button><div class="period-label"><span id="period-label"></span><button class="now" id="return-now" hidden>回到当前</button></div><button id="next" class="icon-button" aria-label="下一时段"><svg><use href="#right"/></svg></button></div>
+    <section class="card" aria-labelledby="overview-title"><h2 id="overview-title">月概览</h2><div class="metrics" id="metrics"></div></section>
+    <section class="card" aria-labelledby="trend-title"><h2 id="trend-title">趋势</h2><p class="subtitle" id="average"></p><svg class="trend" id="trend" viewBox="0 0 480 212" role="img" aria-label="阅读时长趋势图"></svg></section>
+    <section class="card" aria-labelledby="distribution-title"><h2 id="distribution-title">分布</h2><div class="distribution" id="distribution"></div></section>
+    <section class="card" aria-labelledby="heat-title"><div class="heat-title"><h2 id="heat-title">热力图</h2><span class="heat-total" id="heat-total"></span></div><div class="heatmap" id="heatmap" aria-label="每日阅读热力图"></div><div class="heat-legend" id="heat-legend"></div></section>
+    <footer class="footer"><span>交互演示 · 示例阅读数据</span><button class="theme-button" id="theme-toggle">切换深色</button></footer>
+  </div>
+</main>
+<dialog id="report-dialog" aria-labelledby="report-heading">
+  <div class="handle"></div>
+  <div class="dialog-title">
+    <div>
+      <h2 id="report-heading">分享阅读报告</h2>
+      <p class="subtitle" id="report-range"></p>
+    </div>
+    <button class="icon-button" data-close aria-label="关闭分享预览"><svg><use href="#close"/></svg></button>
+  </div>
+  <div class="report-stage">
+    <canvas id="report-canvas" class="report-preview" width="1080" height="1620" aria-label="阅读报告预览"></canvas>
+  </div>
+  <div class="report-options">
+    <div class="report-row stack" role="radiogroup" aria-label="商城图标同款色系">
+      <div class="row-head"><span>图标同款主题</span><small id="active-icon-name">落日·经典</small></div>
+      <div class="icon-strip">
+        <button type="button" class="theme-pill" role="radio" data-rtheme="light" aria-checked="false"><i style="background:linear-gradient(135deg,#ffffff 52%,#1e1e22 52%)"></i><span>浅色</span></button>
+        <button type="button" class="theme-pill" role="radio" data-rtheme="sunset" aria-checked="true"><i style="background:radial-gradient(circle at 32% 32%,#ff8a7a,#f9f8f4 68%)"></i><span>落日</span></button>
+        <button type="button" class="theme-pill" role="radio" data-rtheme="gold" aria-checked="false"><i style="background:linear-gradient(135deg,#131217 50%,#f6b525 50%)"></i><span>暗金浮雕</span></button>
+        <button type="button" class="theme-pill" role="radio" data-rtheme="neon" aria-checked="false"><i style="background:linear-gradient(135deg,#121020 30%,#36bcc7 65%,#fa2c7e 100%)"></i><span>霓虹幻彩</span></button>
+        <button type="button" class="theme-pill" role="radio" data-rtheme="pixel" aria-checked="false"><i style="background:linear-gradient(135deg,#f3efe6 52%,#e09224 52%)"></i><span>像素复古</span></button>
+      </div>
+    </div>
+    <div class="report-row" role="radiogroup" aria-label="图标构图款式">
+      <span>图标款式</span>
+      <div class="variant-seg">
+        <button type="button" class="variant-btn" role="radio" data-rvariant="classic" aria-checked="true">经典</button>
+        <button type="button" class="variant-btn" role="radio" data-rvariant="minimal" aria-checked="false">极简</button>
+      </div>
+    </div>
+    <label class="privacy report-row"><span>显示在读书名</span><input id="show-books" class="switch" type="checkbox" role="switch" checked></label>
+  </div>
+  <div class="dialog-buttons">
+    <button id="save-report" class="button secondary">保存图片</button>
+    <button id="share-report" class="button">分享海报</button>
+  </div>
+</dialog>
+<dialog id="timeline-dialog" aria-labelledby="timeline-heading"><div class="handle"></div><div class="dialog-title"><h2 id="timeline-heading">阅读时间轴</h2><button class="icon-button" data-close aria-label="关闭时间轴"><svg><use href="#close"/></svg></button></div><p class="subtitle">当前统计范围 · 示例记录</p><div id="timeline-list" class="timeline-list"></div></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+// 文件内所有记录均为生成的演示数据；无联网请求，无用户信息读取。
+const CAT_PATHS = {"153": "M21.36 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z", "154": "M24.37 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z", "155": "M35.19 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z", "156": "M63.23 65.26a12.29 12.29 0 1 0 24.58 0a12.29 12.29 0 1 0 -24.58 0Z", "157": "M66.24 65.26a9.28 9.28 0 1 0 18.56 0a9.28 9.28 0 1 0 -18.56 0Z", "158": "M77.06 62.07a1.64 2.55 0 1 0 3.28 0a1.64 2.55 0 1 0 -3.28 0Z", "159": "M50.67 66.94a3.91 2.2 0 1 0 7.82 0a3.91 2.2 0 1 0 -7.82 0Z", "160": "M54.58,73.01v7.34M54.58,80.35l-3.67,3.06M54.58,80.35l3.67,3.06", "161": "M51.5,37.36c-3-13.5,4-25.5,19-27.5-1,15-9,25-19,27.5Z", "162": "M51.5,37.36c4.67-9,10-17.17,16-24.5", "163": "M53.5,21.86l3.8,5.2,5.7.3", "164": "M59,15.86l3,4.2,4.5.3", "165": "M52.46 67.74a3.98 2.24 0 1 0 7.96 0a3.98 2.24 0 1 0 -7.96 0Z", "166": "M56.44,73.92v7.47M56.44,81.4l-3.74,3.11M56.44,81.4l3.74,3.11", "167": "M87.45,62.21c-6.89-.75-12.98.89-18.28,4.94", "168": "M43.71,67.15c-5.3-4.05-11.39-5.69-18.28-4.94"};
+const $ = selector => document.querySelector(selector);
+const today = new Date(); today.setHours(0,0,0,0);
+const date = (y,m,d) => new Date(y,m,d);
+const addDays = (d,n) => date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const md = d => `${d.getMonth()+1}月${d.getDate()}日`;
+const monday = d => addDays(d,-(d.getDay()+6)%7);
+const hm = v => { const m=Math.floor(v),h=Math.floor(m/60);return h ? `${h}h${m%60 ? m%60+'m':''}` : `${m}m`; };
+const duration = v => {const m=Math.floor(v),h=Math.floor(m/60);return h?`${h}<small>时</small>${m%60?m%60+'<small>分</small>':''}`:`${m}<small>分钟</small>`;};
+const cn = v => {const m=Math.floor(v),h=Math.floor(m/60);return h?`${h}时${m%60?m%60+'分':''}`:`${m}分钟`;};
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const titles=['小王子','月亮与六便士','山茶文具店','在书页间散步','一间自己的房间'];
+const records=[];
+for(let d=date(today.getFullYear()-2,0,1);d<=today;d=addDays(d,1)){
+  const code=d.getFullYear()*370+(d.getMonth()+1)*31+d.getDate();
+  if(code%7===0 || code%11===0) continue;
+  const min=8+(code*17)%76,book=(Math.floor(code/9))%titles.length;
+  records.push({date:new Date(d),book,minutes:min,finished:code%83===0});
+  if(code%4===0)records.push({date:new Date(d),book:(book+1)%titles.length,minutes:4+code%19,finished:false});
+}
+let period='month', anchor=new Date(today), selected=-1, model=null;
+let toastTimer;
+function toast(message){$('#toast').textContent=message;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').textContent='',2600);}
+function rangeFor(p,a){
+  if(p==='week'){const from=monday(a);return[from,addDays(from,6)];}
+  if(p==='month')return[date(a.getFullYear(),a.getMonth(),1),date(a.getFullYear(),a.getMonth()+1,0)];
+  if(p==='year')return[date(a.getFullYear(),0,1),date(a.getFullYear(),11,31)];
+  return[records[0]?.date || today,today];
+}
+function samePeriod(a,b){if(period==='all')return true;return key(rangeFor(period,a)[0])===key(rangeFor(period,b)[0]);}
+function shifted(n){if(period==='week')return addDays(anchor,n*7);if(period==='month')return date(anchor.getFullYear(),anchor.getMonth()+n,1);return date(anchor.getFullYear()+n,0,1);}
+function compute(){
+  const [from,to]=rangeFor(period,anchor), list=records.filter(r=>r.date>=from&&r.date<=to),days=new Map(),dist=new Map();
+  for(const r of list){days.set(key(r.date),(days.get(key(r.date))||0)+r.minutes);dist.set(r.book,(dist.get(r.book)||0)+r.minutes);}
+  let bars=[];
+  if(period==='week'||period==='month')for(let d=new Date(from);d<=to;d=addDays(d,1))bars.push({label:period==='week'?['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]:String(d.getDate()),value:days.get(key(d))||0,future:d>today,current:key(d)===key(today),showLabel:period==='week'||d.getDate()===1||d.getDate()%5===0});
+  else if(period==='year')for(let m=0;m<12;m++)bars.push({label:`${m+1}月`,value:list.filter(r=>r.date.getMonth()===m).reduce((s,r)=>s+r.minutes,0),future:date(anchor.getFullYear(),m,1)>today,current:anchor.getFullYear()===today.getFullYear()&&m===today.getMonth(),showLabel:true});
+  else for(let y=from.getFullYear();y<=today.getFullYear();y++)bars.push({label:String(y),value:list.filter(r=>r.date.getFullYear()===y).reduce((s,r)=>s+r.minutes,0),future:false,current:y===today.getFullYear(),showLabel:true});
+  const total=list.reduce((s,r)=>s+r.minutes,0), now=samePeriod(anchor,today);
+  const word=period==='week'?(now?'本周':'当周'):period==='month'?(now?'本月':'当月'):period==='year'?(now?'今年':'当年'):'累计';
+  const label=period==='week'?`${md(from)} - ${md(to)}`:period==='month'?`${anchor.getFullYear()}年${anchor.getMonth()+1}月`:period==='year'?`${anchor.getFullYear()}年`:'全部记录';
+  const allDays=new Set(records.map(r=>key(r.date))); let streak=0,d=new Date(today);if(!allDays.has(key(d)))d=addDays(d,-1);while(allDays.has(key(d))){streak++;d=addDays(d,-1);}
+  return{from,to,list,bars,total,word,label,days:days.size,count:list.length,finished:new Set(list.filter(r=>r.finished).map(r=>r.book)).size,streak,avg:total/Math.max(1,bars.filter(b=>!b.future).length),dist:[...dist].sort((a,b)=>b[1]-a[1])};
+}
+function render(){
+  model=compute();const m=model;
+  document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.period===period)));
+  $('#period-label').textContent=m.label;$('#previous').disabled=period==='all';$('#next').disabled=period==='all'||rangeFor(period,shifted(1))[0]>today;$('#return-now').hidden=samePeriod(anchor,today);
+  $('#overview-title').textContent={week:'周概览',month:'月概览',year:'年概览',all:'总概览'}[period];
+  const metrics=[[`${m.word}阅读时长`,duration(m.total),true],[`${m.word}阅读天数`,m.days,true],['阅读次数',m.count,false],['平均每次时长',duration(m.count?m.total/m.count:0),false],['读完的书',m.finished,false],['连续阅读',`${m.streak}<small>天</small>`,false]];
+  $('#metrics').innerHTML=metrics.map(([label,value,large])=>`<div><p class="metric-label">${label}</p><p class="metric-value ${large?'large':''}">${value}</p></div>`).join('');
+  $('#average').textContent=`${period==='year'?'月均':period==='all'?'年均':'日均'} ${hm(m.avg)}`;
+  const current=m.bars.findIndex(b=>b.current&&b.value>0),peak=Math.max(0,...m.bars.map(b=>b.value));
+  selected=current>=0?current:peak>0?m.bars.findIndex(b=>b.value===peak):-1;
+  renderTrend();renderDistribution();renderHeatmap();
+}
+function catBar(x,top,base,w,gray,leaf,earY){
+  const tip=14.58456;
+  const s=gray&&earY!=null?Math.min(w/112.89,Math.max(0,base-earY)/(94-tip)):w/112.89;
+  if(s<=0)return '';
+  const height=gray&&earY!=null?(base-earY)/s+tip:Math.max((base-top)/s,94);
+  const body=`M4 ${height} L13.35 18.47 c.64-5 4.46-5 7.65-1 l15.3 20 h35.69 l15.3-20 c3.19-4 7.01-4 7.65 1 L108.9 ${height} H4Z`;
+  const path=(n,fill,stroke='',width=1)=>`<path d="${CAT_PATHS[n]}" fill="${fill}" ${stroke?`stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"`:''}/>`;
+  let art=leaf?path(161,'#ee4326')+path(162,'none','#b8230c',1.8)+path(163,'none','#b8230c',1.4)+path(164,'none','#b8230c',1.4):'';
+  art+=`<path d="${body}" fill="${gray?'#d6d8dc':'#0a0a0a'}"/>`;
+  art+=gray?path(165,'#787878')+path(166,'none','#787878')+path(167,'none','white',3)+path(168,'none','white',3):path(153,'white')+path(154,'#0a0a0a')+path(155,'white')+path(156,'white')+path(157,'#0a0a0a')+path(158,'white')+path(159,'#787878')+path(160,'none','#787878');
+  return `<g transform="translate(${x+(w-112.89*s)/2} ${base-height*s}) scale(${s})">${art}</g>`;
+}
+function roundedBar(x,y,w,h,r){r=Math.min(r,h/2,w/2);return `M${x} ${y+h} V${y+r} Q${x} ${y} ${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${y+h} Z`;}
+function renderTrend(){
+  const m=model,svg=$('#trend'),W=Math.max(260,svg.clientWidth||480),H=212,base=188,avail=130,slot=W/m.bars.length,heads=m.bars.length<=12,w=heads?Math.min(slot*.62,30):slot*.56;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const peak=Math.max(...m.bars.map(b=>b.value),0),maxV=Math.max(1,peak,m.avg),avgY=base-m.avg/maxV*avail,tops=[];
+  let art='';
+  m.bars.forEach((b,i)=>{const x=i*slot+(slot-w)/2,gray=b.value===0||b.value<m.avg*.5;
+    const h=heads?Math.max(w*.9,b.value/maxV*avail):Math.max(3,b.value/maxV*avail),earY=gray&&m.avg>0?avgY:null;tops[i]=heads&&earY!=null?earY:base-h;
+    if(!b.future){art+=`<g class="bar-hit" tabindex="0" role="button" data-index="${i}" aria-label="${esc(b.label)}，阅读${cn(b.value)}"><rect x="${i*slot}" y="0" width="${slot}" height="${base}" fill="transparent"/>`;
+      art+=heads?catBar(x,base-h,base,w,gray,b.value===peak&&b.value>0,earY):`<path d="${roundedBar(x,base-h,w,h,w/2)}" fill="${b.current?'var(--accent)':gray?'var(--track)':'var(--ink)'}"/>`;art+='</g>';}
+  });
+  art+=`<path d="M0 ${base}H${W}" stroke="var(--ink)" stroke-width="1.2"/>`;
+  if(m.avg>0)art+=`<path d="M0 ${avgY}H${W}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="5 4"/>`;
+  m.bars.forEach((b,i)=>{if(b.showLabel)art+=`<text x="${i*slot+slot/2}" y="207" text-anchor="middle" font-size="${m.bars.length>7?10:12}" fill="${b.current?'var(--ink)':'var(--muted)'}" font-weight="${b.current?700:500}">${b.label}</text>`;});
+  if(selected>=0&&m.bars[selected].value>0){const label=hm(m.bars[selected].value),pw=label.length*7+14,ph=23,cx=Math.min(W-pw/2,Math.max(pw/2,selected*slot+slot/2)),bottom=tops[selected]-6;art+=`<g pointer-events="none"><rect x="${cx-pw/2}" y="${bottom-ph}" width="${pw}" height="${ph}" rx="8" fill="var(--ink)"/><text x="${cx}" y="${bottom-7}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--on)">${label}</text></g>`;}
+  svg.innerHTML=art;
+}
+function shades(){return document.documentElement.classList.contains('dark')?['#f2f2f2','#b0b0b4','#8e8e93','#5c5c60','#3a3a3c']:['#1f1f1f','#5c5c5c','#8e8e93','#c4c4c8','#e2e2e5'];}
+function renderDistribution(){
+  const m=model,colors=shades();if(!m.dist.length){$('#distribution').innerHTML='<p class="empty-dist">这段时间还没有阅读记录</p>';return;}
+  const parts=m.dist.length<=5?m.dist:m.dist.slice(0,4).concat([[-1,m.dist.slice(4).reduce((s,v)=>s+v[1],0)]]),r=55,circ=2*Math.PI*r;let off=0;
+  const arcs=parts.map(([id,value],i)=>{const len=value/m.total*circ;const s=`<circle cx="68" cy="68" r="55" fill="none" stroke="${colors[i]}" stroke-width="22" stroke-dasharray="${Math.max(.2,len-1.8)} ${circ}" stroke-dashoffset="${-off}" transform="rotate(-90 68 68)"/>`;off+=len;return s;}).join('');
+  $('#distribution').innerHTML=`<svg class="donut" viewBox="0 0 136 136" role="img" aria-label="阅读时长分布，合计${cn(m.total)}">${arcs}<text x="68" y="68" text-anchor="middle" fill="var(--ink)" font-size="${hm(m.total).length>7?13:hm(m.total).length>5?17:21}" font-weight="800">${hm(m.total)}</text><text x="68" y="85" text-anchor="middle" fill="var(--muted)" font-size="11">合计</text></svg><div class="legend">${parts.map(([id,value],i)=>`<div class="legend-row"><i class="swatch" style="background:${colors[i]}"></i><div style="min-width:0"><p class="legend-number">${hm(value)}</p><p class="legend-name" title="${esc(id===-1?'其他':titles[id])}">${esc(id===-1?'其他':titles[id])}</p></div></div>`).join('')}</div>`;
+}
+function renderHeatmap(){
+  const el=$('#heatmap'),dark=document.documentElement.classList.contains('dark'),colors=dark?['#2a2a2c','#3a3a3c','#5c5c60','#8e8e93','#f2f2f2']:['#efeff1','#d3d3d6','#a3a3a8','#6b6b70','#1f1f1f'];
+  const cols=Math.max(8,Math.floor(((el.clientWidth||330)+4)/18)),start=addDays(monday(today),-(cols-1)*7),days=new Map();for(const r of records)days.set(key(r.date),(days.get(key(r.date))||0)+r.minutes);
+  $('#heat-total').textContent=`${[...days].filter(([k])=>Number(k.slice(0,4))===today.getFullYear()).length} / ${Math.round((today-date(today.getFullYear(),0,1))/86400000)+1}`;
+  el.style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;let cells='';
+  for(let col=0;col<cols;col++)for(let row=0;row<7;row++){const d=addDays(start,col*7+row),v=days.get(key(d))||0,level=v<=0?0:v<15?1:v<30?2:v<60?3:4,isToday=key(d)===key(today);cells+=d>today?'<span></span>':`<button class="heatcell" title="${key(d)} · ${cn(v)}" aria-label="${key(d)}，阅读${cn(v)}" style="background:${isToday?'var(--accent)':colors[level]}" data-minutes="${v}" data-date="${key(d)}"></button>`;}
+  el.innerHTML=cells;$('#heat-legend').innerHTML=`少 ${colors.map(c=>`<i style="background:${c}"></i>`).join('')} 多 <span class="today-key"><i style="background:var(--accent)"></i>今天</span>`;
+}
+document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.period;anchor=new Date(today);render();}));
+$('#previous').onclick=()=>{anchor=shifted(-1);render();};$('#next').onclick=()=>{anchor=shifted(1);render();};$('#return-now').onclick=()=>{anchor=new Date(today);render();};
+$('#trend').addEventListener('click',e=>{const target=e.target.closest('[data-index]');if(target){selected=Number(target.dataset.index);renderTrend();}});
+$('#trend').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const target=e.target.closest('[data-index]');if(target){e.preventDefault();selected=Number(target.dataset.index);renderTrend();$('#trend').querySelector(`[data-index="${selected}"]`)?.focus();}}});
+$('#heatmap').onclick=e=>{const cell=e.target.closest('[data-date]');if(cell)toast(`${cell.dataset.date} · 阅读 ${cn(Number(cell.dataset.minutes))}`);};
+$('#theme-toggle').onclick=()=>{const dark=document.documentElement.classList.toggle('dark');$('#theme-toggle').textContent=dark?'切换浅色':'切换深色';renderDistribution();renderHeatmap();};
+$('#back-button').onclick=()=>{const open=document.querySelector('dialog[open]');if(open)open.close();else toast('这是独立的统计页演示');};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))dialog.close();}));
+$('#open-timeline').onclick=()=>{const items=model.list.slice().reverse().slice(0,40);$('#timeline-list').innerHTML=items.length?items.map(r=>`<article class="timeline-entry"><b>${esc(titles[r.book])}</b><p>${key(r.date)} · ${cn(r.minutes)}${r.finished?' · 已读完':''}</p></article>`).join(''):'<p class="empty-dist">这段时间还没有阅读记录</p>';$('#timeline-dialog').showModal();};
+const REPORT_THEMES = {
+  light: {
+    name: '浅色',
+    iconBg: '#FFFFFF',
+    mat: '#ECECEF',
+    card: '#FFFFFF',
+    panel: '#F6F6F8',
+    line: '#E5E5EA',
+    ink: '#18181B',
+    muted: '#74747D',
+    soft: '#AEAEB7',
+    barEmpty: '#EAEAEF',
+    barLow: '#9A9AA3',
+    accent: '#1E1E22',
+    accent2: '#52525B',
+    sealColor: '#D6452E',
+    sealSoft: 'rgba(214,69,46,0.09)',
+    accentSoft: 'rgba(24,24,27,0.07)',
+    accentLine: 'rgba(24,24,27,0.32)',
+    halo: '#EFEFF3',
+    heat: ['#ECECF0', '#D4D4DA', '#A6A6B0', '#686872', '#18181B'],
+    grain: 'rgba(0,0,0,0.01)'
+  },
+  sunset: {
+    name: '落日',
+    iconBg: '#F9F8F4',
+    mat: '#EAE3D7',
+    card: '#FAF7F0',
+    panel: '#F3EDE2',
+    line: '#E0D7C8',
+    ink: '#221F1D',
+    muted: '#857C72',
+    soft: '#B5ABA0',
+    barEmpty: '#E6DFD2',
+    barLow: '#A3998E',
+    accent: '#E86852',
+    accent2: '#FFB19E',
+    sealColor: '#E86852',
+    sealSoft: 'rgba(232,104,82,0.11)',
+    accentSoft: 'rgba(232,104,82,0.11)',
+    accentLine: 'rgba(232,104,82,0.42)',
+    halo: '#EFE6DA',
+    heat: ['#E8E0D4', '#F2C6B9', '#F08F7C', '#E86852', '#221F1D'],
+    grain: 'rgba(34,30,24,0.02)'
+  },
+  gold: {
+    name: '暗金浮雕',
+    iconBg: '#111015',
+    mat: '#09090B',
+    card: '#131217',
+    panel: '#1B1A20',
+    line: '#302A20',
+    ink: '#F5EFE2',
+    muted: '#9C907E',
+    soft: '#665D4F',
+    barEmpty: '#26242B',
+    barLow: '#73654E',
+    accent: '#F6B525',
+    accent2: '#D97F1F',
+    sealColor: '#F6B525',
+    sealSoft: 'rgba(246,181,37,0.13)',
+    accentSoft: 'rgba(246,181,37,0.14)',
+    accentLine: 'rgba(246,181,37,0.45)',
+    halo: '#231F1A',
+    heat: ['#242228', '#3D3423', '#7C5E28', '#D97F1F', '#FDC043'],
+    grain: 'rgba(255,235,190,0.018)'
+  },
+  neon: {
+    name: '霓虹幻彩',
+    iconBg: '#0E0A18',
+    mat: '#07060D',
+    card: '#0F0C1B',
+    panel: '#171328',
+    line: '#2B2445',
+    ink: '#F2F4FA',
+    muted: '#8E92B2',
+    soft: '#5A5E80',
+    barEmpty: '#221D38',
+    barLow: '#3B6F8C',
+    accent: '#FA2C7E',
+    accent2: '#36BCC7',
+    sealColor: '#FA2C7E',
+    sealSoft: 'rgba(250,44,126,0.14)',
+    accentSoft: 'rgba(250,44,126,0.15)',
+    accentLine: 'rgba(54,188,199,0.50)',
+    halo: '#1E1735',
+    heat: ['#1E1933', '#243B55', '#2B9AA3', '#36BCC7', '#FA2C7E'],
+    grain: 'rgba(54,188,199,0.016)'
+  },
+  pixel: {
+    name: '像素复古',
+    iconBg: '#F3EFE6',
+    mat: '#E4DDD0',
+    card: '#F5F0E6',
+    panel: '#EBE4D6',
+    line: '#D6CCB8',
+    ink: '#1E1C1A',
+    muted: '#7D7568',
+    soft: '#ACA393',
+    barEmpty: '#DFD7C7',
+    barLow: '#9E937E',
+    accent: '#E09224',
+    accent2: '#805C22',
+    sealColor: '#D46A28',
+    sealSoft: 'rgba(212,106,40,0.12)',
+    accentSoft: 'rgba(224,146,36,0.14)',
+    accentLine: 'rgba(224,146,36,0.45)',
+    halo: '#E4DCC8',
+    heat: ['#DFD7C7', '#D7C397', '#E6BF40', '#E09224', '#1E1C1A'],
+    grain: 'rgba(30,28,26,0.022)'
+  }
+};
+
+let reportTheme = 'sunset', reportVariant = 'classic', userPickedReportTheme = false, grainCache = {};
+
+function getGrainPattern(ctx, color) {
+  if (grainCache[color]) return grainCache[color];
+  const off = document.createElement('canvas');
+  off.width = 140; off.height = 140;
+  const octx = off.getContext('2d');
+  octx.fillStyle = color;
+  let seed = 42;
+  for (let i = 0; i < 420; i++) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const x = seed % 140;
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const y = seed % 140;
+    octx.fillRect(x, y, (i % 3 === 0) ? 2 : 1, 1);
+  }
+  return (grainCache[color] = ctx.createPattern(off, 'repeat'));
+}
+
+function rrect(ctx, x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, rad);
+  else {
+    ctx.moveTo(x + rad, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rad);
+    ctx.arcTo(x + w, y + h, x, y + h, rad);
+    ctx.arcTo(x, y + h, x, y, rad);
+    ctx.arcTo(x, y, x + w, y, rad);
+    ctx.closePath();
+  }
+}
+
+function topCapsule(x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  return `M${x} ${y + h} V${y + rad} Q${x} ${y} ${x + rad} ${y} H${x + w - rad} Q${x + w} ${y} ${x + w} ${y + rad} V${y + h} Z`;
+}
+
+// 还原商城 10 款图标（5 大色系 × 经典/极简构图），同时用于主卡片插画与页脚圆角图标徽章
+function drawAppIconArt(ctx, cx, cy, size, themeKey, variant, withTile = false) {
+  const t = REPORT_THEMES[themeKey];
+  const s = size / 200;
+  ctx.save();
+  ctx.translate(cx - size / 2, cy - size / 2);
+  ctx.scale(s, s);
+
+  if (withTile) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+    rrect(ctx, 0, 0, 200, 200, 46);
+    ctx.fillStyle = t.iconBg;
+    ctx.fill();
+    ctx.restore();
+
+    rrect(ctx, 0, 0, 200, 200, 46);
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+  }
+
+  // 落日款：左上方柔光珊瑚落日圆晕
+  if (themeKey === 'sunset') {
+    const grad = ctx.createRadialGradient(60, 56, 4, 64, 60, 34);
+    grad.addColorStop(0, '#FF8575');
+    grad.addColorStop(0.62, '#FFB5A6');
+    grad.addColorStop(1, 'rgba(255,217,198,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(64, 60, 34, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 霓虹款圆角图标内上下灯条
+  if (themeKey === 'neon') {
+    if (withTile) {
+      ctx.lineWidth = 2.8;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#FA2C7E';
+      ctx.beginPath(); ctx.moveTo(58, 20); ctx.lineTo(142, 20); ctx.stroke();
+      ctx.strokeStyle = '#D9D443';
+      ctx.beginPath(); ctx.moveTo(58, 180); ctx.lineTo(142, 180); ctx.stroke();
+    }
+    if (variant === 'minimal') {
+      // 极简霓虹头顶粒子点缀
+      ctx.fillStyle = '#FA2C7E';
+      ctx.beginPath(); ctx.moveTo(50, 44); ctx.lineTo(56, 44); ctx.lineTo(53, 50); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#36BCC7';
+      ctx.beginPath(); ctx.moveTo(148, 44); ctx.lineTo(154, 48); ctx.lineTo(148, 50); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // 像素复古系列：8-bit 点阵墨团 + 像素双叶
+  if (themeKey === 'pixel') {
+    const p = 8;
+    const px = (gx, gy, gw, gh, col) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(gx * p, gy * p, gw * p, gh * p);
+    };
+    if (variant === 'minimal') {
+      // 极简像素芽与四角复古像素点
+      px(12, 4, 2, 1, '#49CC9A');
+      px(11, 5, 2, 1, '#35A67B');
+      px(6, 5, 1, 1, '#EA5A47');
+      px(18, 5, 1, 1, '#E6BF40');
+    } else {
+      px(12, 5, 2, 1, '#E6BF40');
+      px(11, 6, 2, 1, '#805C22');
+      px(10, 6, 1, 1, '#1E1C1A');
+    }
+    // 像素猫耳与头部
+    px(8, 7, 2, 2, '#1E1C1A');
+    px(15, 7, 2, 2, '#1E1C1A');
+    px(8, 8, 1, 1, '#E79A30');
+    px(16, 8, 1, 1, '#E79A30');
+    px(7, 9, 11, 6, '#1E1C1A');
+    // 像素胡须
+    px(5, 11, 2, 1, '#7D7568');
+    px(5, 13, 2, 1, '#7D7568');
+    px(18, 11, 2, 1, '#7D7568');
+    px(18, 13, 2, 1, '#7D7568');
+    // 像素方形眼与小嘴
+    px(9, 11, 2, 2, '#FFFFFF');
+    px(14, 11, 2, 2, '#FFFFFF');
+    px(10, 12, 1, 1, '#1E1C1A');
+    px(14, 12, 1, 1, '#1E1C1A');
+    px(12, 13, 1, 1, '#CAA076');
+    // 像素底部双叶
+    px(6, 16, 5, 2, '#1E1C1A');
+    px(8, 18, 4, 1, '#1E1C1A');
+    const rCol = variant === 'minimal' ? '#EE9D18' : '#2B2623';
+    px(13, 16, 6, 1, rCol);
+    px(13, 17, 1, 2, rCol);
+    px(18, 17, 1, 1, rCol);
+    px(14, 18, 4, 1, rCol);
+    px(14, 17, 4, 1, '#FCF1C3');
+    ctx.restore();
+    return;
+  }
+
+  // 矢量款（浅色 / 落日 / 暗金浮雕 / 霓虹幻彩）
+  const isGold = themeKey === 'gold';
+  const isNeon = themeKey === 'neon';
+  const bodyFill = isGold ? '#17161C' : isNeon ? '#121324' : '#1B1B1F';
+
+  // 极简款头顶卷芽与暗金星芒
+  if (variant === 'minimal') {
+    if (isGold) {
+      ctx.fillStyle = 'rgba(246,181,37,0.55)';
+      ctx.beginPath(); ctx.arc(100, 32, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(82, 42, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(118, 42, 1.6, 0, Math.PI * 2); ctx.fill();
+    }
+    const sprout = new Path2D('M100 57 C98 43, 113 36, 119 43 C119 51, 108 56, 100 57 Z');
+    if (isNeon) {
+      ctx.fillStyle = '#E89A25';
+      ctx.fill(sprout);
+    }
+    ctx.strokeStyle = isGold ? '#F6B525' : isNeon ? '#FA2C7E' : '#1B1B1F';
+    ctx.lineWidth = 3.0;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(sprout);
+    ctx.beginPath();
+    ctx.moveTo(100, 57);
+    ctx.bezierCurveTo(94, 49, 87, 48, 86, 53);
+    ctx.stroke();
+  }
+
+  const earL = new Path2D(variant === 'classic'
+    ? 'M68 89 C67 65, 73 47, 77 44 C81 42, 91 57, 97 72 Z'
+    : 'M69 89 C68 71, 73 55, 77 52 C81 50, 90 61, 96 74 Z');
+  const earR = new Path2D(variant === 'classic'
+    ? 'M132 89 C133 65, 127 47, 123 44 C119 42, 109 57, 103 72 Z'
+    : 'M131 89 C132 71, 127 55, 123 52 C119 50, 110 61, 104 74 Z');
+
+  ctx.fillStyle = bodyFill;
+  ctx.fill(earL);
+  ctx.fillStyle = isNeon ? '#B81D5E' : bodyFill;
+  ctx.fill(earR);
+
+  ctx.fillStyle = bodyFill;
+  ctx.beginPath();
+  ctx.ellipse(100, 99, 35, 31, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 暗金浮雕金边 / 霓虹双色发光边
+  if (isGold || isNeon) {
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = isGold ? '#DDA12C' : '#36BCC7';
+    ctx.stroke(earL);
+    ctx.strokeStyle = isGold ? '#DDA12C' : '#FA2C7E';
+    ctx.stroke(earR);
+    ctx.strokeStyle = isGold ? '#9A7125' : '#2C3159';
+    ctx.beginPath();
+    ctx.ellipse(100, 99, 35, 31, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 耳廓内折线
+  ctx.lineWidth = 2.1;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = isGold ? '#D69B2A' : isNeon ? '#36BCC7' : '#FFFFFF';
+  ctx.stroke(new Path2D(variant === 'classic' ? 'M76 74 L79 56 L88 69' : 'M77 75 L79 60 L87 70'));
+  ctx.strokeStyle = isGold ? '#D69B2A' : isNeon ? '#FFD6E7' : '#FFFFFF';
+  ctx.stroke(new Path2D(variant === 'classic' ? 'M124 74 L121 56 L112 69' : 'M123 75 L121 60 L113 70'));
+
+  // 胡须
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = isGold ? '#8C6D32' : isNeon ? '#36BCC7' : '#52525B';
+  ctx.beginPath();
+  ctx.moveTo(54, 99); ctx.lineTo(62, 100);
+  ctx.moveTo(55, 106); ctx.lineTo(62, 106);
+  ctx.stroke();
+  ctx.strokeStyle = isGold ? '#8C6D32' : isNeon ? '#FA2C7E' : '#52525B';
+  ctx.beginPath();
+  ctx.moveTo(146, 99); ctx.lineTo(138, 100);
+  ctx.moveTo(145, 106); ctx.lineTo(138, 106);
+  ctx.stroke();
+
+  // 双眼（霓虹异瞳 / 暗金暖眸 / 经典纯白）
+  ctx.fillStyle = isNeon ? '#36BCC7' : isGold ? '#F6D588' : '#FFFFFF';
+  ctx.beginPath(); ctx.arc(84, 102, 10.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = isNeon ? '#FA2C7E' : isGold ? '#F6D588' : '#FFFFFF';
+  ctx.beginPath(); ctx.arc(116, 102, 10.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#141417';
+  ctx.beginPath();
+  ctx.arc(85.5, 102, 5.0, 0, Math.PI * 2);
+  ctx.arc(114.5, 102, 5.0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(87.5, 99.5, 1.7, 0, Math.PI * 2);
+  ctx.arc(116.5, 99.5, 1.7, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 小嘴
+  ctx.strokeStyle = isGold ? '#B88930' : isNeon ? '#8E92B2' : '#686870';
+  ctx.lineWidth = 2.1;
+  ctx.stroke(new Path2D('M95 113 Q97.5 116 100 113 Q102.5 116 105 113'));
+
+  // 底部一实一空托叶（空叶阅读核心符号）
+  const leafLeft = new Path2D('M99 154 C74 156, 52 143, 46 125 C67 124, 86 134, 99 154 Z');
+  const leafRight = new Path2D('M101 154 C126 156, 148 143, 154 125 C133 124, 114 134, 101 154 Z');
+
+  if (isGold) {
+    const gGrad = ctx.createLinearGradient(46, 125, 99, 155);
+    gGrad.addColorStop(0, '#FFD25A');
+    gGrad.addColorStop(1, '#C96D12');
+    ctx.fillStyle = gGrad;
+  } else if (isNeon) {
+    ctx.fillStyle = '#FA2C7E';
+  } else {
+    ctx.fillStyle = '#1B1B1F';
+  }
+  ctx.fill(leafLeft);
+
+  ctx.fillStyle = withTile ? t.iconBg : t.panel;
+  ctx.fill(leafRight);
+  ctx.lineWidth = 3.2;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = isGold ? '#F6B525' : isNeon ? '#36BCC7' : '#1B1B1F';
+  ctx.stroke(leafRight);
+
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.stroke(new Path2D('M105 150 C119 145, 133 138, 145 129'));
+
+  ctx.restore();
+}
+
+function drawSeal(ctx, x, y, size, t, chars) {
+  ctx.save();
+  rrect(ctx, x, y, size, size, reportTheme === 'pixel' ? 6 : 12);
+  ctx.fillStyle = t.sealSoft;
+  ctx.fill();
+  ctx.strokeStyle = t.sealColor;
+  ctx.globalAlpha = 0.84;
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+
+  ctx.globalAlpha = 0.22;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x + size / 2, y + 9); ctx.lineTo(x + size / 2, y + size - 9);
+  ctx.moveTo(x + 9, y + size / 2); ctx.lineTo(x + size - 9, y + size / 2);
+  ctx.stroke();
+
+  ctx.globalAlpha = 0.94;
+  ctx.fillStyle = t.sealColor;
+  ctx.font = '600 21px "Songti SC","Noto Serif SC","SimSun",serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const q = size / 4;
+  ctx.fillText(chars[0], x + q * 3, y + q + 1);
+  ctx.fillText(chars[1], x + q * 3, y + q * 3 + 1);
+  ctx.fillText(chars[2], x + q, y + q + 1);
+  ctx.fillText(chars[3], x + q, y + q * 3 + 1);
+  ctx.restore();
+}
+
+async function drawReport() {
+  const m = model, c = $('#report-canvas'), ctx = c.getContext('2d');
+  const show = $('#show-books').checked, t = REPORT_THEMES[reportTheme] || REPORT_THEMES.sunset;
+  const isPixel = reportTheme === 'pixel';
+  const W = 1080, H = 1620;
+  const fontStack = isPixel
+    ? 'ui-monospace,"SFMono-Regular","Cascadia Mono","Microsoft YaHei",sans-serif'
+    : 'system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+
+  function fitText(str, maxW) {
+    let v = String(str);
+    if (ctx.measureText(v).width <= maxW) return v;
+    while (v.length && ctx.measureText(v + '…').width > maxW) v = v.slice(0, -1);
+    return v + '…';
+  }
+  function text(val, x, y, size, color = t.ink, weight = 400, maxW = 900, align = 'left') {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = `${weight} ${size}px ${fontStack}`;
+    ctx.textAlign = align;
+    ctx.fillText(fitText(val, maxW), x, y);
+    ctx.restore();
+  }
+  function hairline(x1, y1, x2, y2, color = t.line, width = 1.2) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 1. 外衬底与主海报卡片
+  ctx.fillStyle = t.mat;
+  ctx.fillRect(0, 0, W, H);
+
+  const outerR = isPixel ? 18 : 40;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.10)';
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetY = 10;
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.fillStyle = t.card;
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.clip();
+  ctx.fillStyle = getGrainPattern(ctx, t.grain);
+  ctx.fillRect(38, 38, W - 76, H - 76);
+  ctx.restore();
+
+  rrect(ctx, 38, 38, W - 76, H - 76, outerR);
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  rrect(ctx, 64, 64, W - 128, H - 128, isPixel ? 10 : 26);
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // 2. 眉题与闲章
+  ctx.fillStyle = t.sealColor;
+  rrect(ctx, 104, 107, 4, 20, 2);
+  ctx.fill();
+  text('空叶阅读  ·  READING JOURNAL', 120, 125, 22, t.muted, 600, 560);
+
+  const periodCode = { week: 'WEEKLY EDITION', month: 'MONTHLY EDITION', year: 'ANNUAL EDITION', all: 'ARCHIVE EDITION' }[period];
+  text(periodCode, 976, 125, 20, t.soft, 600, 280, 'right');
+
+  const title = { week: '我的阅读周报', month: '我的阅读月报', year: '我的阅读年报', all: '我的阅读足迹' }[period];
+  text(title, 104, 204, 58, t.ink, 750, 760);
+  text(`${m.label}  ·  共翻开书页 ${m.count} 次`, 106, 252, 25, t.muted, 400, 760);
+
+  const sealText = { week: '一叶知秋', month: '静享阅读', year: '岁阅成诗', all: '书页留痕' }[period];
+  drawSeal(ctx, 902, 162, 74, t, sealText);
+
+  // 3. 主视觉卡片：核心阅读时长 + 同款商城图标主视觉
+  rrect(ctx, 100, 290, 880, 396, isPixel ? 12 : 28);
+  ctx.fillStyle = t.panel;
+  ctx.fill();
+  ctx.strokeStyle = t.line;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  text('留给阅读的时间', 142, 350, 25, t.muted, 500, 480);
+
+  const totalMin = Math.floor(m.total);
+  const hrs = Math.floor(totalMin / 60), mins = totalMin % 60;
+  const segs = hrs > 0
+    ? (mins > 0 ? [{ n: String(hrs), u: '小时' }, { n: String(mins), u: '分' }] : [{ n: String(hrs), u: '小时' }])
+    : [{ n: String(mins), u: '分钟' }];
+
+  let numSize = 90, unitSize = 27;
+  const rawW = segs.reduce((acc, s, idx) => {
+    ctx.font = `800 ${numSize}px ${fontStack}`;
+    const nw = ctx.measureText(s.n).width;
+    ctx.font = `500 ${unitSize}px ${fontStack}`;
+    const uw = ctx.measureText(s.u).width;
+    return acc + nw + 6 + uw + (idx < segs.length - 1 ? 14 : 0);
+  }, 0);
+  if (rawW > 495) {
+    const ratio = 495 / rawW;
+    numSize = Math.floor(numSize * ratio);
+    unitSize = Math.max(20, Math.floor(unitSize * ratio));
+  }
+  let curX = 140;
+  segs.forEach((s, idx) => {
+    ctx.fillStyle = t.ink;
+    ctx.font = `800 ${numSize}px ${fontStack}`;
+    ctx.fillText(s.n, curX, 458);
+    curX += ctx.measureText(s.n).width + 6;
+    ctx.fillStyle = t.muted;
+    ctx.font = `500 ${unitSize}px ${fontStack}`;
+    ctx.fillText(s.u, curX, 456);
+    curX += ctx.measureText(s.u).width + (idx < segs.length - 1 ? 14 : 0);
+  });
+
+  hairline(142, 508, 642, 508, t.line, 1);
+
+  const subMetrics = [
+    [String(m.days), '天', '阅读天数'],
+    [String(m.finished), '本', '读完书籍'],
+    [String(m.streak), '天', '连续阅读']
+  ];
+  subMetrics.forEach(([num, unit, lbl], idx) => {
+    const mx = 142 + idx * 172;
+    if (idx > 0) hairline(mx - 22, 540, mx - 22, 638, t.line, 1);
+    ctx.fillStyle = t.ink;
+    ctx.font = `750 40px ${fontStack}`;
+    ctx.fillText(num, mx, 586);
+    const nw = ctx.measureText(num).width;
+    ctx.fillStyle = t.muted;
+    ctx.font = `500 21px ${fontStack}`;
+    ctx.fillText(unit, mx + nw + 5, 584);
+    text(lbl, mx, 630, 22, t.muted, 400, 145);
+  });
+
+  // 右侧圆晕衬底 + 对应商城图标形象
+  ctx.save();
+  ctx.fillStyle = t.halo;
+  if (isPixel) {
+    rrect(ctx, 694, 366, 244, 244, 20);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(816, 488, 124, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(816, 488, 134, -Math.PI * 0.78, Math.PI * 0.25);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 落日固定在圆晕左上方，不随首页动物改变位置。
+  if (reportTheme === 'sunset') {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(816, 488, 124, 0, Math.PI * 2); ctx.clip();
+    const sun = ctx.createRadialGradient(764, 430, 3, 764, 430, 42);
+    sun.addColorStop(0, 'rgba(255,116,96,0.82)');
+    sun.addColorStop(0.48, 'rgba(255,127,108,0.50)');
+    sun.addColorStop(1, 'rgba(255,146,125,0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(720, 386, 88, 88);
+    ctx.restore();
+  }
+
+  drawAppIconArt(ctx, 816, 490, 232, reportTheme, reportVariant, false);
+
+  // 4. 阅读节奏趋势图
+  const bars = m.bars;
+  const peakVal = Math.max(0, ...bars.map(b => b.value));
+  const peakIdx = peakVal > 0 ? bars.findIndex(b => b.value === peakVal) : -1;
+  const avgLabel = `${period === 'year' ? '月均' : period === 'all' ? '年均' : '日均'} ${hm(m.avg)}`;
+
+  text('阅读的节奏', 104, 756, 30, t.ink, 700, 360);
+  text(peakVal > 0 ? `${avgLabel}  ·  最高 ${hm(peakVal)}` : avgLabel, 976, 754, 23, t.muted, 500, 500, 'right');
+
+  const chartX = 104, chartW = 872, baseY = 976, availH = 148;
+  const maxV = Math.max(1, peakVal, m.avg);
+  const slot = chartW / Math.max(1, bars.length);
+  const barW = Math.min(bars.length <= 5 ? 52 : 34, Math.max(10, slot * 0.56));
+
+  hairline(chartX, baseY - availH, chartX + chartW, baseY - availH, t.line, 0.8);
+  if (m.avg > 0) {
+    const avgY = baseY - (m.avg / maxV) * availH;
+    ctx.save();
+    ctx.strokeStyle = t.accentLine;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(chartX, avgY);
+    ctx.lineTo(chartX + chartW, avgY);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  let peakCenter = 0, peakTop = baseY;
+  bars.forEach((b, i) => {
+    const x = chartX + i * slot + (slot - barW) / 2;
+    if (b.future) {
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = t.barEmpty;
+      ctx.fill(new Path2D(topCapsule(x, baseY - 4, barW, 4, isPixel ? 0 : 2)));
+      ctx.restore();
+      return;
+    }
+    const h = b.value === 0 ? 5 : Math.max(8, (b.value / maxV) * availH);
+    const y = baseY - h;
+    if (i === peakIdx) {
+      peakCenter = x + barW / 2;
+      peakTop = y;
+      ctx.fillStyle = reportTheme === 'light' ? '#D6452E' : t.accent;
+    } else if (b.value === 0) {
+      ctx.fillStyle = t.barEmpty;
+    } else if (b.value < m.avg * 0.5) {
+      ctx.fillStyle = t.barLow;
+    } else {
+      ctx.fillStyle = reportTheme === 'neon' ? t.accent2 : t.ink;
+    }
+    ctx.fill(new Path2D(topCapsule(x, y, barW, h, isPixel ? 0 : Math.min(barW / 2, 10))));
+  });
+
+  hairline(chartX, baseY, chartX + chartW, baseY, t.line, 1.4);
+
+  bars.forEach((b, i) => {
+    if (!b.showLabel) return;
+    const cx = chartX + i * slot + slot / 2;
+    const lbl = period === 'month' ? `${b.label}日` : b.label;
+    text(lbl, cx, 1012, bars.length > 14 ? 20 : 22, b.current ? t.ink : t.muted, b.current ? 700 : 400, 80, 'center');
+  });
+
+  if (peakIdx >= 0 && peakVal > 0) {
+    const pText = hm(peakVal);
+    const pillColor = reportTheme === 'light' ? '#D6452E' : t.accent;
+    ctx.font = `700 20px ${fontStack}`;
+    const pw = ctx.measureText(pText).width + 24, ph = 32;
+    const px = Math.min(chartX + chartW - pw / 2, Math.max(chartX + pw / 2, peakCenter));
+    const py = Math.max(776, peakTop - ph - 8);
+    rrect(ctx, px - pw / 2, py, pw, ph, isPixel ? 4 : 10);
+    ctx.fillStyle = t.sealSoft;
+    ctx.fill();
+    ctx.strokeStyle = pillColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    text(pText, px, py + 23, 20, pillColor, 700, pw, 'center');
+  }
+
+  hairline(104, 1058, 976, 1058, t.line, 1.2);
+
+  // 5. 底部：在读书单 或 隐私寄语 + 近 28 日阅读印记
+  if (show && m.dist.length > 0) {
+    text('翻过的故事', 104, 1118, 30, t.ink, 700, 420);
+    text(`共涉猎 ${m.dist.length} 本书`, 976, 1116, 23, t.muted, 500, 320, 'right');
+
+    const topBooks = m.dist.slice(0, 3);
+    topBooks.forEach(([id, value], i) => {
+      const ry = 1156 + i * 90;
+      const pct = Math.max(1, Math.round((value / Math.max(1, m.total)) * 100));
+      const topAccent = reportTheme === 'light' ? '#D6452E' : t.accent;
+      text(`0${i + 1}`, 104, ry + 32, 25, i === 0 ? topAccent : t.muted, 750, 50);
+      text(`《${titles[id]}》`, 156, ry + 32, 28, t.ink, 600, 580);
+
+      const durStr = hm(value), pctStr = `${pct}%`;
+      ctx.font = `500 22px ${fontStack}`;
+      const pctW = ctx.measureText(pctStr).width;
+      text(pctStr, 976, ry + 31, 22, t.muted, 500, 90, 'right');
+      text(durStr, 976 - pctW - 14, ry + 32, 26, t.ink, 700, 180, 'right');
+
+      const barX = 156, barY = ry + 50, barTotalW = 820;
+      rrect(ctx, barX, barY, barTotalW, 4, isPixel ? 0 : 2);
+      ctx.fillStyle = t.barEmpty;
+      ctx.fill();
+
+      const fillW = Math.max(12, barTotalW * (value / Math.max(1, m.total)));
+      rrect(ctx, barX, barY, fillW, 4, isPixel ? 0 : 2);
+      ctx.save();
+      if (i === 2) ctx.globalAlpha = 0.58;
+      ctx.fillStyle = i === 0 ? topAccent : (reportTheme === 'neon' ? t.accent2 : t.ink);
+      ctx.fill();
+      ctx.restore();
+    });
+    if (topBooks.length < 3) {
+      const noteY = 1156 + topBooks.length * 90 + 44;
+      text('专注于少而精的阅读，每一页都更从容。', 104, noteY, 23, t.muted, 400, 760);
+    }
+  } else {
+    rrect(ctx, 100, 1094, 880, 312, isPixel ? 12 : 26);
+    ctx.fillStyle = t.panel;
+    ctx.fill();
+    ctx.strokeStyle = t.line;
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.fillStyle = t.sealColor;
+    ctx.globalAlpha = 0.35;
+    ctx.font = '700 72px Georgia,serif';
+    ctx.fillText('“', 138, 1178);
+    ctx.restore();
+
+    let q1 = '在属于自己的节奏里，', q2 = '安安静静读完一本书。';
+    if (m.total === 0) {
+      q1 = '故事还很长，不必匆忙赶路，';
+      q2 = '翻开第一页便是好时光。';
+    } else if (m.streak >= 5) {
+      q1 = '日复一日的安静翻阅，';
+      q2 = '让散落的时光有了沉静的回响。';
+    } else if (m.total >= 600) {
+      q1 = '读过的每一页都算数，';
+      q2 = '它们在沉默中拓宽生命的边界。';
+    }
+    text(q1, 144, 1222, 31, t.ink, 700, 515);
+    text(q2, 144, 1274, 31, t.ink, 700, 515);
+
+    const avgSession = m.count ? m.total / m.count : 0;
+    text(`${m.word}沉浸 ${m.count} 次  ·  单次平均 ${cn(avgSession)}`, 144, 1354, 23, t.muted, 400, 515);
+
+    hairline(684, 1136, 684, 1368, t.line, 1);
+
+    text('近 28 日阅读印记', 832, 1158, 21, t.muted, 500, 220, 'center');
+    const dayMap = new Map();
+    for (const r of records) dayMap.set(key(r.date), (dayMap.get(key(r.date)) || 0) + r.minutes);
+
+    const start28 = addDays(today, -27);
+    let active28 = 0;
+    const cellS = 22, gap = 7, gridX = 734, gridY = 1184;
+    for (let idx = 0; idx < 28; idx++) {
+      const d = addDays(start28, idx);
+      const val = dayMap.get(key(d)) || 0;
+      if (val > 0) active28++;
+      const lv = val <= 0 ? 0 : val < 15 ? 1 : val < 30 ? 2 : val < 60 ? 3 : 4;
+      const col = idx % 7, row = Math.floor(idx / 7);
+      rrect(ctx, gridX + col * (cellS + gap), gridY + row * (cellS + gap), cellS, cellS, isPixel ? 0 : 5);
+      ctx.fillStyle = key(d) === key(today) ? t.sealColor : t.heat[lv];
+      ctx.fill();
+    }
+    text(`活跃 ${active28} / 28 天`, 832, 1354, 21, t.muted, 500, 220, 'center');
+  }
+
+  // 6. 简洁页脚：左侧叶子寄语，右侧品牌署名。
+  hairline(104, 1442, 976, 1442, t.line, 1.2);
+  ctx.save();
+  ctx.translate(102, 1481);
+  ctx.strokeStyle = t.sealColor;
+  ctx.lineWidth = 1.7;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke(new Path2D('M4 19C4 10 11 4 20 4C20 13 14 20 5 20ZM5 19L15 9'));
+  ctx.restore();
+  text('一叶知秋 · 静享阅读', 140, 1502, 22, t.muted, 400, 500);
+  ctx.font = `500 20px ${fontStack}`;
+  const latinW = ctx.measureText('KONGYE').width;
+  text('KONGYE', 976, 1502, 20, t.soft, 500, 160, 'right');
+  text('/', 976 - latinW - 15, 1502, 20, t.soft, 400, 30, 'right');
+  text('空叶阅读', 976 - latinW - 40, 1502, 24, t.ink, 750, 220, 'right');
+}
+
+function syncReportControls() {
+  document.querySelectorAll('[data-rtheme]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.rtheme === reportTheme)));
+  document.querySelectorAll('[data-rvariant]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.rvariant === reportVariant)));
+  const fullName = `${REPORT_THEMES[reportTheme].name}·${reportVariant === 'classic' ? '经典' : '极简'}`;
+  $('#active-icon-name').textContent = fullName;
+  $('#report-range').textContent = `${model.label} · ${fullName}`;
+}
+
+document.querySelectorAll('[data-rtheme]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    reportTheme = btn.dataset.rtheme;
+    userPickedReportTheme = true;
+    syncReportControls();
+    drawReport();
+  });
+});
+
+document.querySelectorAll('[data-rvariant]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    reportVariant = btn.dataset.rvariant;
+    syncReportControls();
+    drawReport();
+  });
+});
+
+$('#open-report').onclick = () => {
+  if (!userPickedReportTheme) {
+    reportTheme = document.documentElement.classList.contains('dark') ? 'gold' : 'sunset';
+  }
+  syncReportControls();
+  $('#report-dialog').showModal();
+  drawReport().catch(() => toast('图片生成失败，请重试'));
+};
+
+$('#show-books').onchange = () => drawReport();
+function png() { return new Promise(resolve => $('#report-canvas').toBlob(resolve, 'image/png')); }
+function download(blob) {
+  const url = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = url;
+  const vName = reportVariant === 'classic' ? '经典' : '极简';
+  link.download = `空叶阅读-${model.label.replace(/\s/g, '')}-${REPORT_THEMES[reportTheme].name}${vName}.png`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+$('#save-report').onclick = async () => {
+  try { await drawReport(); const blob = await png(); if (!blob) throw Error(); download(blob); toast('阅读报告海报已保存'); }
+  catch { toast('保存失败，请重试'); }
+};
+$('#share-report').onclick = async () => {
+  try {
+    await drawReport(); const blob = await png(); if (!blob) throw Error();
+    const file = new File([blob], '空叶阅读报告.png', { type: 'image/png' });
+    if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: '空叶阅读 · 阅读报告' });
+    else { download(blob); toast('浏览器不支持直接分享，已保存海报'); }
+  } catch (e) { if (e.name !== 'AbortError') toast('分享未完成，可以尝试保存图片'); }
+};
+new ResizeObserver(()=>{renderTrend();renderHeatmap();}).observe($('.content'));
+render();
+</script>
+</body>
+</html>

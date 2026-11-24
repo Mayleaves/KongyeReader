@@ -28,6 +28,8 @@ data class Profile(
     val outfits: Map<String, Map<String, String>> = emptyMap(),
     /** 桌面图标：default / sunset / minimal */
     val icon: String = "default",
+    /** 分享阅读报告的主题，与桌面图标共用解锁；不随图标切换而改变。 */
+    val reportStyle: String = "light",
     /** 成就编号 → 解锁时间 */
     val achievements: Map<String, Long> = emptyMap(),
     /** 仅保存点亮后尚未查看详情的徽章；升级前已有徽章默认视为已查看。 */
@@ -44,6 +46,7 @@ data class Profile(
 ) {
     /** 能不能用：彩蛋开着、买到了、免费的；成就奖励要点亮对应成就 */
     fun has(id: String): Boolean {
+        ReportStyles.item(id)?.let { return ReportStyles.available(this, it.id) }
         if (egg == true || id == Shop.MASCOT || id in owned) return true
         val lock = Shop.lockOf(id)
         return if (lock != null) lock in achievements else Shop.priceOf(id) == 0
@@ -269,7 +272,8 @@ object Profiles {
             if (p.has(id) || p.leaves < price) p
             else {
                 ok = true
-                p.copy(leaves = p.leaves - price, owned = p.owned + id)
+                val ownedId = ReportStyles.item(id)?.let { "icon_${it.icon}" } ?: id
+                p.copy(leaves = p.leaves - price, owned = p.owned + ownedId)
             }
         }
         return ok
@@ -298,6 +302,7 @@ object Profiles {
             outfits = q.outfits.mapValues { (_, o) -> o.filterValues { q.has(it) } }.filter { it.value.isNotEmpty() },
             scene = q.scene.filterValues { q.has(it) },
             icon = q.icon.takeIf { q.has("icon_$it") } ?: "default",
+            reportStyle = ReportStyles.selected(q),
         )
     }
 

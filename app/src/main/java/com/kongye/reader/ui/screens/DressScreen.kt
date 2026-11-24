@@ -81,17 +81,17 @@ import com.kongye.reader.ui.theme.K
 import com.kongye.reader.ui.theme.scrollContentWidth
 import kotlinx.coroutines.launch
 
-private val tabs = listOf("首页", "猫园", "饰品", "图标")
+private val tabs = listOf("首页", "猫园", "饰品", "风格")
 
-/** 装扮：分四页——首页放谁和路牌、猫园的背景和来客、动物戴什么、桌面图标 */
+/** 装扮：分四页——首页放谁和路牌、猫园的背景和来客、动物戴什么、桌面图标和阅读报告 */
 @Composable
 fun DressScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
     val animals = Shop.catalog.animals.filter { profile.has(it.id) }
-    val pager = rememberPagerState(initialPage = Nav.dressTab, pageCount = { tabs.size })
+    val pager = rememberPagerState(initialPage = Nav.dressTab.coerceIn(tabs.indices), pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
-    LaunchedEffect(Nav.dressRequest) { pager.scrollToPage(Nav.dressTab) }
+    LaunchedEffect(Nav.dressRequest) { pager.scrollToPage(Nav.dressTab.coerceIn(tabs.indices)) }
     LaunchedEffect(pager) { snapshotFlow { pager.currentPage }.collect { Nav.dressTab = it } }
 
     Column(Modifier.fillMaxSize().background(c.bg2), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -115,9 +115,36 @@ fun DressScreen() {
                     0 -> HomeTab(profile, animals)
                     1 -> GardenTab(profile, animals)
                     2 -> OutfitTab(profile, animals)
-                    else -> IconTab(profile)
+                    else -> StyleTab(profile)
                 }
                 Spacer(Modifier.height(36.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReportTab(profile: Profile) {
+    val selected = com.kongye.reader.data.ReportStyles.selected(profile)
+    val styles = com.kongye.reader.data.ReportStyles.all.filter { profile.has(it.item) }
+    val focus = Nav.dressItem
+    Group("阅读报告") {
+        Pad {
+            Grid(styles, cols = 3, collapsedRows = 9, selected = { it.id == selected }) { style, modifier ->
+                val requester = remember(style.id) { BringIntoViewRequester() }
+                LaunchedEffect(Nav.dressRequest, focus) {
+                    if (style.item == focus) {
+                        androidx.compose.runtime.withFrameNanos { }
+                        requester.bringIntoView()
+                    }
+                }
+                Pick(
+                    on = style.id == selected,
+                    label = style.name,
+                    modifier = modifier.bringIntoViewRequester(requester).semantics { contentDescription = "报告主题：${style.name}" },
+                    ratio = 2f / 3f,
+                    onClick = { Profiles.update { it.copy(reportStyle = style.id) } },
+                ) { ReportStylePreview(style.id, Modifier.fillMaxSize()) }
             }
         }
     }
@@ -193,9 +220,7 @@ private fun SceneGroup(profile: Profile) {
                 }
             }
         }
-        if (Shop.catalog.ornaments.none { profile.has(it.id) }) {
-            // 无挂件时只保留猫园预览
-        } else for ((slot, spot) in Shop.catalog.ornamentSlots) {
+        for ((slot, spot) in Shop.catalog.ornamentSlots) {
             val owned = Shop.catalog.ornaments.filter { it.slot == slot && profile.has(it.id) }
             Pad(vertical = 8.dp) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -204,17 +229,13 @@ private fun SceneGroup(profile: Profile) {
                     scene[slot]?.let { T(Shop.nameOf(it), 12.sp, c.text2, maxLines = 1) }
                 }
                 Spacer(Modifier.height(6.dp))
-                if (owned.isEmpty()) {
-                    T("商城的「挂件」里能换到", 12.sp, c.text3)
-                } else {
-                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Pick(scene[slot] == null, "不挂", modifier = Modifier.width(56.dp), onClick = { Profiles.hang(slot, null) }) {
-                            T("—", 18.sp, c.text3)
-                        }
-                        for (o in owned) {
-                            Pick(scene[slot] == o.id, o.name, modifier = Modifier.width(56.dp), onClick = { Profiles.hang(slot, o.id) }) {
-                                OrnamentArt(o, Modifier.fillMaxSize().padding(7.dp))
-                            }
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Pick(scene[slot] == null, "不挂", modifier = Modifier.width(56.dp), onClick = { Profiles.hang(slot, null) }) {
+                        T("—", 18.sp, c.text3)
+                    }
+                    for (o in owned) {
+                        Pick(scene[slot] == o.id, o.name, modifier = Modifier.width(56.dp), onClick = { Profiles.hang(slot, o.id) }) {
+                            OrnamentArt(o, Modifier.fillMaxSize().padding(7.dp))
                         }
                     }
                 }
@@ -260,8 +281,8 @@ private fun OutfitTab(profile: Profile, animals: List<ShopAnimal>) {
                 Spacer(Modifier.height(6.dp))
                 run {
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Pick(wear[slot] == null, "无", modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, null) }) {
-                            com.kongye.reader.ui.components.Icon(Ico.BAN, size = 28.dp, color = androidx.compose.ui.graphics.Color(0xFFC5C5C5))
+                        Pick(wear[slot] == null, "不戴", modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, null) }) {
+                            T("—", 18.sp, androidx.compose.ui.graphics.Color(0xFFC5C5C5))
                         }
                         for (acc in owned) {
                             Pick(wear[slot] == acc.id, acc.name, modifier = Modifier.width(56.dp), onClick = { Profiles.equip(who.id, slot, acc.id) }) {
@@ -277,7 +298,7 @@ private fun OutfitTab(profile: Profile, animals: List<ShopAnimal>) {
 }
 
 @Composable
-private fun IconTab(profile: Profile) {
+private fun StyleTab(profile: Profile) {
     val c = K.c
     Group("桌面图标") {
         Pad {
@@ -309,6 +330,8 @@ private fun IconTab(profile: Profile) {
             }
         }
     }
+    Spacer(Modifier.height(20.dp))
+    ReportTab(profile)
 }
 
 @Composable

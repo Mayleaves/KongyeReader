@@ -58,6 +58,7 @@ import com.kongye.reader.data.Profile
 import com.kongye.reader.data.Profiles
 import com.kongye.reader.data.Shop
 import com.kongye.reader.data.ShopBlurbs
+import com.kongye.reader.data.ReportStyles
 import com.kongye.reader.ui.Nav
 import com.kongye.reader.ui.Screen
 import com.kongye.reader.ui.components.AccessoryArt
@@ -79,7 +80,7 @@ import com.kongye.reader.ui.theme.K
 import com.kongye.reader.ui.theme.windowSize
 import kotlinx.coroutines.launch
 
-private val tabs = listOf("动物", "背景", "饰品", "挂件", "图标")
+private val tabs = listOf("动物", "背景", "饰品", "挂件", "风格")
 
 /** 离开商城时保留分类和滚动位置，所有入口共用。 */
 private object ShopResume {
@@ -98,12 +99,15 @@ private val slotHint = mapOf(
     "H" to "脚下的垫子和法阵",
 )
 
-/** 商城：读书攒叶子，换动物、猫园背景、饰品和桌面图标 */
+/** 商城：读书攒叶子，换动物、猫园背景、饰品和桌面图标和阅读报告 */
 @Composable
 fun ShopScreen() {
     val c = K.c
     val profile by Profiles.state.collectAsState()
-    val resume = remember { ShopResume.state }
+    val resume = remember {
+        Nav.takeShopTab()?.let { Triple(it.coerceIn(tabs.indices), 0, 0) }
+            ?: ShopResume.state?.let { Triple(it.first.coerceIn(tabs.indices), it.second, it.third) }
+    }
     val pager = rememberPagerState(initialPage = resume?.first ?: 0, pageCount = { tabs.size })
     val tab = pager.currentPage
     val scope = rememberCoroutineScope()
@@ -112,6 +116,12 @@ fun ShopScreen() {
         rememberLazyGridState(if (page == resume?.first) resume.second else 0, if (page == resume?.first) resume.third else 0)
     }
     val grid = grids[tab]
+    LaunchedEffect(Nav.shopRequest) {
+        Nav.takeShopTab()?.coerceIn(tabs.indices)?.let { page ->
+            pager.scrollToPage(page)
+            grids[page].scrollToItem(0)
+        }
+    }
     LaunchedEffect(pager) {
         snapshotFlow { grids[pager.currentPage].let { Triple(pager.currentPage, it.firstVisibleItemIndex, it.firstVisibleItemScrollOffset) } }
             .collect { ShopResume.state = it }
@@ -193,9 +203,18 @@ fun ShopScreen() {
                                 }
                             }
                         }
-                        else -> items(cat.icons, key = { it.id }) { i ->
-                            ItemCard(i.name, "icon_${i.id}", i.price, profile, onClick = { picked = "icon_${i.id}" }) {
-                                IconPreview(i.id, Modifier.fillMaxSize().padding(12.dp))
+                        else -> {
+                            item(key = "desktop-icons", span = { GridItemSpan(maxLineSpan) }) { GroupTitle("桌面图标", "") }
+                            items(cat.icons, key = { "icon_${it.id}" }) { i ->
+                                ItemCard(i.name, "icon_${i.id}", i.price, profile, onClick = { picked = "icon_${i.id}" }) {
+                                    IconPreview(i.id, Modifier.fillMaxSize().padding(12.dp))
+                                }
+                            }
+                            item(key = "reading-reports", span = { GridItemSpan(maxLineSpan) }) { GroupTitle("阅读报告", "") }
+                            items(ReportStyles.all, key = { it.item }) { style ->
+                                ItemCard(style.name, style.item, Shop.priceOf(style.item) ?: 0, profile, ratio = 2f / 3f, onClick = { picked = style.item }) {
+                                    ReportStylePreview(style.id, Modifier.fillMaxSize())
+                                }
                             }
                         }
                     }
@@ -318,15 +337,17 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         val bg = Shop.background(item)
         val acc = Shop.accessory(item)
         val orn = Shop.ornament(item)
+        val reportStyle = ReportStyles.item(item)
         BoxWithConstraints(
             Modifier
                 .fillMaxWidth()
-                .height(previewHeight)
+                .then(if (reportStyle != null) Modifier.aspectRatio(880f / 396f) else Modifier.height(previewHeight))
                 .clip(SmoothShape(22.dp))
                 .background(c.chip),
             contentAlignment = Alignment.Center,
         ) {
             when {
+                reportStyle != null -> ReportSummaryPreview(reportStyle.id, profile, Modifier.fillMaxSize())
                 item == Shop.MASCOT -> Creature(Shop.MASCOT, size = 190.dp, leaf = true, animate = true)
                 animal != null -> Creature(animal.id, size = 190.dp, faceLeft = true, leaf = animal.id in Shop.kongyeCats, animate = true)
                 bg != null -> Image(painterResource(Shop.drawable(bg.res)), bg.name, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
@@ -358,6 +379,7 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         // 只显示它自己的一句介绍（ShopBlurbs）；没有介绍的才用下面的用法说明
         val blurb = ShopBlurbs.of(item)
         val usage = when {
+            reportStyle != null -> "与同色桌面图标共用解锁，在装扮里选择报告主题"
             item == Shop.TREASURE -> "带回家就点亮成就「镇店之宝」，送 8 件所有动物都能戴的神装"
             lock != null -> "成就「${lock.title}」的奖励" +
                 (if (animal != null) "，可以放到首页，也能请它来猫园" else if (item.startsWith("icon_")) "，随时可以换" else "")
@@ -395,6 +417,10 @@ private fun ItemSheet(id: String?, profile: Profile, tryOn: (String) -> Unit, on
         Spacer(Modifier.height(4.dp))
         Row(Modifier.align(Alignment.CenterHorizontally)) {
             if (bg != null || orn != null) GhostButton("在猫园里试看", Ico.EYE) { tryOn(item) }
+            if (reportStyle != null) GhostButton("试看阅读报告", Ico.EYE) {
+                onDismiss()
+                Nav.push(Screen.ReportPreview(reportStyle.id))
+            }
             GhostButton("关闭") { onDismiss() }
         }
     }

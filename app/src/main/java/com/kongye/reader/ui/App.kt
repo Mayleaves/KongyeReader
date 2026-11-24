@@ -165,6 +165,7 @@ fun App(showSplash: Boolean = false) {
                         Screen.Shelf -> ShelfScreen()
                         is Screen.Reader -> ReaderScreen(s.bookId)
                         Screen.Stats -> StatsScreen()
+                        is Screen.ReportPreview -> StatsScreen(reportTheme = s.theme)
                         Screen.Timeline -> TimelineScreen()
                         Screen.Garden -> GardenScreen()
                         is Screen.GardenPreview -> GardenScreen(preview = s.item)

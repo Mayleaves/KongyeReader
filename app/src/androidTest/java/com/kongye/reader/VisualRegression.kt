@@ -41,6 +41,7 @@ import kotlin.math.PI
 class VisualRegression : Instrumentation() {
     private lateinit var output: File
     private var signTypographyOnly = false
+    private var readingReportOnly = false
     private var splashArtOnly = false
     private var cloudUiOnly = false
     private var cloudBackupOnly = false
@@ -59,6 +60,7 @@ class VisualRegression : Instrumentation() {
     override fun onCreate(arguments: Bundle?) {
         super.onCreate(arguments)
         signTypographyOnly = arguments?.getString("check") == "sign-typography"
+        readingReportOnly = arguments?.getString("check") == "reading-report"
         splashArtOnly = arguments?.getString("check") == "splash-art"
         cloudUiOnly = arguments?.getString("check") == "cloud-backup-ui"
         cloudBackupOnly = arguments?.getString("check") == "cloud-backups" || cloudUiOnly
@@ -79,6 +81,11 @@ class VisualRegression : Instrumentation() {
     override fun onStart() {
         output = File(targetContext.filesDir, "visual-regression").apply { mkdirs() }
         try {
+            if (readingReportOnly) {
+                ReadingReportChecks(this).run()
+                finish(0, Bundle().apply { putString("result", "PASS: report rendering, book-title privacy, PNG export, scoped sharing URI and flat chart baselines") })
+                return
+            }
             if (splashArtOnly) {
                 for (dark in listOf(false, true)) for (time in listOf(0.7f, 1.3f, 1.75f, 2.4f)) {
                     val bitmap = render(750, 1624) {

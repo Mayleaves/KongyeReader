@@ -150,7 +150,8 @@ object Shop {
 
     /** 成就奖励对应的成就编号；不是奖励就是 null */
     fun lockOf(id: String): String? =
-        animal(id)?.lock ?: background(id)?.lock ?: accessory(id)?.lock ?: ornament(id)?.lock
+        ReportStyles.item(id)?.let { style -> catalog.icons.firstOrNull { it.id == style.icon }?.lock }
+            ?: animal(id)?.lock ?: background(id)?.lock ?: accessory(id)?.lock ?: ornament(id)?.lock
             ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.lock
 
     /** 成就的奖励是商城里的哪件（lock 是这个成就编号的那件），图标加 icon_ 前缀 */
@@ -175,14 +176,16 @@ object Shop {
     /** 所有可以买的东西的编号：动物、背景、饰品按自己的编号，图标加前缀 */
     fun allItemIds(): List<String> =
         catalog.animals.map { it.id } + catalog.backgrounds.map { it.id } + catalog.accessories.map { it.id } +
-            catalog.ornaments.map { it.id } + catalog.icons.map { "icon_${it.id}" } + styles.map { "style_$it" }
+            catalog.ornaments.map { it.id } + catalog.icons.map { "icon_${it.id}" } + styles.map { "style_$it" } + ReportStyles.all.map { it.item }
 
     fun priceOf(id: String): Int? =
-        animal(id)?.price ?: background(id)?.price ?: accessory(id)?.price ?: ornament(id)?.price
+        ReportStyles.item(id)?.let { style -> catalog.icons.firstOrNull { it.id == style.icon }?.price }
+            ?: animal(id)?.price ?: background(id)?.price ?: accessory(id)?.price ?: ornament(id)?.price
             ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.price
             ?: id.removePrefix("style_").takeIf { id.startsWith("style_") && it in styles }?.let { if (it == styles.first()) 0 else STYLE_PRICE }
 
     fun nameOf(id: String): String = if (id == MASCOT) "看板猫" else
-        animal(id)?.name ?: background(id)?.name ?: accessory(id)?.name ?: ornament(id)?.name
+        ReportStyles.item(id)?.let { "${it.name} · 阅读报告" }
+            ?: animal(id)?.name ?: background(id)?.name ?: accessory(id)?.name ?: ornament(id)?.name
             ?: catalog.icons.firstOrNull { "icon_${it.id}" == id }?.name?.let { "$it 图标" } ?: id
 }

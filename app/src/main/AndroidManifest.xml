@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 检查更新下好的安装包（cache/update）交给系统安装器 -->
+        <!-- 按需授权更新安装包和用户主动分享的阅读报告 -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

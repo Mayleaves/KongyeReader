@@ -186,7 +186,7 @@ internal class ReaderUpdateChecks(private val test: Instrumentation) {
         test.runOnMainSync { Nav.pop() }
         SystemClock.sleep(700)
         check(Nav.top == Screen.Shop) { "Dress discarded the shop entry" }
-        for ((index, tab) in listOf("动物", "背景", "饰品", "挂件", "图标").withIndex()) {
+        for ((index, tab) in listOf("动物", "背景", "饰品", "挂件", "风格").withIndex()) {
             val scroll = semantics().last { it.config.getOrNull(SemanticsActions.ScrollBy) != null }
             test.runOnMainSync { scroll.config[SemanticsActions.ScrollBy].action!!.invoke(0f,-100000f) }
             SystemClock.sleep(350)
@@ -321,7 +321,7 @@ internal class ReaderUpdateChecks(private val test: Instrumentation) {
         test.runOnMainSync { Nav.push(Screen.Shop) }
         SystemClock.sleep(1100)
         screenshot("shop-before-icons")
-        click("图标")
+        click("风格")
         screenshot("shop-icons")
         click(neon.name)
         click("去装扮")

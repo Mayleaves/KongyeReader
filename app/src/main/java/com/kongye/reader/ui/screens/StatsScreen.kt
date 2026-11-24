@@ -31,11 +31,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -139,7 +144,7 @@ private fun compute(list: List<Session>, p: Period, anchor: LocalDate): StatsDat
         total = total,
         days = byDay.count { it.value > 0 },
         count = inRange.size,
-        finished = inRange.count { it.finished },
+        finished = inRange.filter { it.finished }.distinctBy { it.bookId }.size,
         bars = bars,
         avg = total / elapsed,
         avgLabel = when (p) { Period.WEEK, Period.MONTH -> "日均"; Period.YEAR -> "月均"; Period.ALL -> "年均" },
@@ -148,7 +153,7 @@ private fun compute(list: List<Session>, p: Period, anchor: LocalDate): StatsDat
 }
 
 @Composable
-fun StatsScreen() {
+fun StatsScreen(reportTheme: String? = null) {
     val c = K.c
     val sessions by Stats.sessions.collectAsState()
     var period by rememberSaveable { mutableIntStateOf(0) }
@@ -157,6 +162,7 @@ fun StatsScreen() {
     val p = Period.entries[period]
     val data = remember(sessions, period, anchor) { compute(sessions, p, anchor) }
     val streak = remember(sessions) { Stats.streak(sessions) }
+    var sharing by remember { mutableStateOf(reportTheme != null) }
 
     fun shifted(dir: Long): LocalDate = when (p) {
         Period.WEEK -> anchor.plusWeeks(dir)
@@ -170,48 +176,73 @@ fun StatsScreen() {
         else -> shifted(1).withDayOfYear(1) <= today
     }
 
-    Column(Modifier.fillMaxSize().background(c.bg2)) {
-        TopBar("统计", onBack = { Nav.pop() }) {
-            IconBtn(Ico.TIMELINE) { Nav.push(Screen.Timeline) }
-        }
-        Column(
-            Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(max = scrollContentWidth)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp),
-        ) {
-            Segmented(Period.entries.map { it.label }, period, Modifier.fillMaxWidth()) {
-                period = it
-                anchor = today
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().background(c.bg2)) {
+            TopBar("统计", onBack = { Nav.pop() }) {
+                IconBtn(Ico.SHARE, Modifier.semantics { contentDescription = "分享阅读报告" }) { sharing = true }
+                IconBtn(Ico.TIMELINE) { Nav.push(Screen.Timeline) }
             }
-            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconBtn(Ico.CHEVRON_LEFT, color = if (p == Period.ALL) c.text3 else c.text2, size = 20.dp) { if (p != Period.ALL) anchor = shifted(-1) }
-                Spacer(Modifier.weight(1f))
-                T(data.label, 14.sp, c.text2, FontWeight.Medium)
-                if (p != Period.ALL && anchor != today) {
-                    IconBtn(Ico.TARGET, color = c.text2, size = 18.dp) { anchor = today }
+            Column(
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(max = scrollContentWidth)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp),
+            ) {
+                Segmented(Period.entries.map { it.label }, period, Modifier.fillMaxWidth()) {
+                    period = it
+                    anchor = today
                 }
-                Spacer(Modifier.weight(1f))
-                IconBtn(Ico.CHEVRON_RIGHT, color = if (canForward) c.text2 else c.text3, size = 20.dp) { if (canForward) anchor = shifted(1) }
+                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconBtn(Ico.CHEVRON_LEFT, color = if (p == Period.ALL) c.text3 else c.text2, size = 20.dp) { if (p != Period.ALL) anchor = shifted(-1) }
+                    Spacer(Modifier.weight(1f))
+                    T(data.label, 14.sp, c.text2, FontWeight.Medium)
+                    if (p != Period.ALL && anchor != today) {
+                        IconBtn(Ico.TARGET, color = c.text2, size = 18.dp) { anchor = today }
+                    }
+                    Spacer(Modifier.weight(1f))
+                    IconBtn(Ico.CHEVRON_RIGHT, color = if (canForward) c.text2 else c.text3, size = 20.dp) { if (canForward) anchor = shifted(1) }
+                }
+                Overview(data, streak)
+                Spacer(Modifier.height(12.dp))
+                Card {
+                    T("趋势", 17.sp, c.ink, FontWeight.Bold)
+                    Spacer(Modifier.height(2.dp))
+                    T("${data.avgLabel} ${Fmt.hm(data.avg)}", 12.sp, c.text2)
+                    Spacer(Modifier.height(8.dp))
+                    TrendChart(data.bars, data.avg, Modifier.fillMaxWidth().height(210.dp))
+                }
+                Spacer(Modifier.height(12.dp))
+                Distribution(data)
+                Spacer(Modifier.height(12.dp))
+                HeatmapCard(sessions)
+                Spacer(Modifier.height(28.dp))
             }
-            Overview(data, streak)
-            Spacer(Modifier.height(12.dp))
-            Card {
-                T("趋势", 17.sp, c.ink, FontWeight.Bold)
-                Spacer(Modifier.height(2.dp))
-                T("${data.avgLabel} ${Fmt.hm(data.avg)}", 12.sp, c.text2)
-                Spacer(Modifier.height(8.dp))
-                TrendChart(data.bars, data.avg, Modifier.fillMaxWidth().height(210.dp))
-            }
-            Spacer(Modifier.height(12.dp))
-            Distribution(data)
-            Spacer(Modifier.height(12.dp))
-            HeatmapCard(sessions)
-            Spacer(Modifier.height(28.dp))
         }
+        if (sharing) ReadingReportSheet(
+            report = ReadingReportData(
+                title = when (p) { Period.WEEK -> "我的阅读周报"; Period.MONTH -> "我的阅读月报"; Period.YEAR -> "我的阅读年报"; Period.ALL -> "我的阅读足迹" },
+                period = data.label,
+                millis = data.total,
+                days = data.days,
+                finished = data.finished,
+                books = data.dist,
+                values = data.bars.map { it.value },
+                periodType = when (p) { Period.WEEK -> "week"; Period.MONTH -> "month"; Period.YEAR -> "year"; Period.ALL -> "all" },
+                count = data.count,
+                streak = streak,
+                word = data.word,
+                labels = data.bars.map { it.label },
+                visibleLabels = data.bars.indices.filter { data.bars[it].showLabel }.toSet(),
+                current = data.bars.indexOfFirst { it.current },
+                future = data.bars.indices.filter { data.bars[it].future }.toSet(),
+                recentDays = Stats.byDay(sessions).filterKeys { it >= today.minusDays(27) && it <= today }.mapKeys { it.key.toString() },
+            ),
+            initialTheme = reportTheme,
+            onDismiss = { if (reportTheme != null) Nav.pop() else sharing = false },
+        )
     }
 }
 
@@ -295,7 +326,7 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
             } else {
                 val h = max(3.dp.toPx(), b.value / maxV * avail)
                 tops[i] = base - h
-                if (!b.future) drawRoundRect(if (b.current) c.accent else col, Offset(x, base - h), Size(w, h), CornerRadius(w / 2))
+                if (!b.future) drawTrendColumn(x, base - h, base, w, if (b.current) c.accent else col)
             }
         }
         drawLine(c.ink, Offset(0f, base), Offset(size.width, base), 1.2.dp.toPx())
@@ -317,6 +348,15 @@ private fun TrendChart(bars: List<Bar>, avg: Long, modifier: Modifier) {
             drawText(lay, topLeft = Offset(cx - lay.size.width / 2, bottom - ph + 4.dp.toPx()))
         }
     }
+}
+
+/** 保留柱顶圆角，柱底用平边贴住同一条基线，避免胶囊底部两侧看起来悬空。 */
+internal fun DrawScope.drawTrendColumn(x: Float, top: Float, base: Float, width: Float, color: Color) {
+    if (width <= 0f || base <= top) return
+    val radius = CornerRadius(min(width / 2f, (base - top) / 2f))
+    drawPath(Path().apply {
+        addRoundRect(RoundRect(x, top, x + width, base, radius, radius, CornerRadius.Zero, CornerRadius.Zero))
+    }, color)
 }
 
 @Composable
